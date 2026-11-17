@@ -1,0 +1,39 @@
+{
+  "name": "@cardbara/renderer",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "全息卡牌 WebGL 渲染器（three.js）。",
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": {
+    "./v1": {
+      "types": "./dist/v1/index.d.ts",
+      "import": "./dist/v1/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "vite --config dev/vite.config.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "three": ">=0.160.0"
+  },
+  "dependencies": {
+    "@cardbara/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "three": "^0.169.0",
+    "@types/three": "^0.169.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.6.3",
+    "vite": "^8.0.16",
+    "vitest": "^2.1.8"
+  }
+}

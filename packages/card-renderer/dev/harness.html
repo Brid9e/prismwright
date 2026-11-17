@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>Card Renderer — 视觉验收</title>
+    <style>
+      body {
+        margin: 0;
+        display: flex;
+        font-family: system-ui, sans-serif;
+        background: #14161c;
+        color: #dce3f0;
+      }
+      #stage {
+        flex: 1;
+        height: 100vh;
+      }
+      #panel {
+        width: 300px;
+        padding: 16px;
+        overflow: auto;
+        border-left: 1px solid #2a3040;
+      }
+      label {
+        display: block;
+        margin: 10px 0;
+        font-size: 13px;
+      }
+      input[type="range"] {
+        width: 100%;
+      }
+      select {
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stage"></div>
+    <aside id="panel">
+      <h3>图层 1</h3>
+      <label
+        >蒙版模式
+        <select id="maskMode">
+          <option value="line">line</option>
+          <option value="fill">fill</option>
+        </select></label
+      >
+      <label
+        >混合
+        <select id="blend">
+          <option>add</option>
+          <option>normal</option>
+          <option>screen</option>
+          <option>multiply</option>
+        </select></label
+      >
+      <label
+        >holoMix <input id="holoMix" type="range" min="0" max="1" step="0.01" value="0.9"
+      /></label>
+      <label
+        >holoAlpha <input id="holoAlpha" type="range" min="0" max="1" step="0.01" value="1"
+      /></label>
+      <label
+        >opacity <input id="opacity" type="range" min="0" max="1" step="0.01" value="1"
+      /></label>
+      <label
+        >distortion <input id="distortion" type="range" min="0" max="60" step="1" value="5"
+      /></label>
+      <label
+        >phaseSpeed <input id="phaseSpeed" type="range" min="0" max="5" step="0.05" value="1"
+      /></label>
+      <label
+        >noiseStrength <input id="noiseStrength" type="range" min="0" max="1" step="0.01" value="1"
+      /></label>
+      <label
+        >offsetX <input id="offsetX" type="range" min="-1" max="1" step="0.01" value="0"
+      /></label>
+      <label
+        >offsetY <input id="offsetY" type="range" min="-1" max="1" step="0.01" value="0"
+      /></label>
+      <label><input id="invert" type="checkbox" /> invert</label>
+      <h3>卡面材质</h3>
+      <label><input id="glossEnabled" type="checkbox" checked /> gloss</label>
+      <label
+        >gloss mode
+        <select id="glossMode">
+          <option value="parallel">parallel</option>
+          <option value="radial">halo</option>
+          <option value="rays">rays</option>
+        </select></label
+      >
+      <label
+        >gloss count <input id="glossCount" type="range" min="1" max="16" step="1" value="1"
+      /></label>
+      <label
+        >gloss spacing
+        <input id="glossSpacing" type="range" min="0.02" max="2" step="0.01" value="0.5"
+      /></label>
+      <label
+        >gloss width
+        <input id="glossWidth" type="range" min="0.005" max="0.5" step="0.005" value="0.12"
+      /></label>
+      <label
+        >gloss angle <input id="glossAngle" type="range" min="0" max="360" step="1" value="26.6"
+      /></label>
+      <label
+        >gloss twist <input id="glossTwist" type="range" min="-1" max="1" step="0.01" value="0"
+      /></label>
+      <label
+        >gloss intensity
+        <input id="glossIntensity" type="range" min="0" max="1" step="0.01" value="0.5"
+      /></label>
+      <label><input id="moireEnabled" type="checkbox" /> moiré</label>
+      <label
+        >moire mode
+        <select id="moireMode">
+          <option value="parallel">lines</option>
+          <option value="radial">rings</option>
+          <option value="rays">rays</option>
+        </select></label
+      >
+      <label
+        >moire density <input id="moireDensity" type="range" min="1" max="64" step="1" value="12"
+      /></label>
+      <label
+        >moire depth <input id="moireDepth" type="range" min="0" max="1" step="0.01" value="0.25"
+      /></label>
+      <label
+        >moire angle <input id="moireAngle" type="range" min="0" max="360" step="1" value="26.6"
+      /></label>
+      <label
+        >moire twist <input id="moireTwist" type="range" min="-1" max="1" step="0.01" value="0"
+      /></label>
+      <label
+        >moire face relief
+        <input id="moireFaceStrength" type="range" min="0" max="1" step="0.01" value="0"
+      /></label>
+      <h3>内置蒙版</h3>
+      <label
+        >preset
+        <select id="maskPresetId">
+          <option value="">（关）</option>
+          <option value="polygon">polygon</option>
+          <option value="stars">stars</option>
+          <option value="dots">dots</option>
+        </select></label
+      >
+      <label
+        >sides <input id="maskPresetSides" type="range" min="3" max="64" step="1" value="4"
+      /></label>
+      <label
+        >irregular
+        <input id="maskPresetIrregular" type="range" min="0" max="1" step="0.01" value="0"
+      /></label>
+      <label><input id="maskPresetEquilateral" type="checkbox" /> equilateral</label>
+      <label
+        >arrangement
+        <select id="maskPresetArrangement">
+          <option value="random">random</option>
+          <option value="regular">regular</option>
+        </select></label
+      >
+      <label
+        >mask density
+        <input id="maskPresetDensity" type="range" min="1" max="64" step="1" value="14"
+      /></label>
+      <label
+        >mask offsetX
+        <input id="maskPresetOffsetX" type="range" min="-1" max="1" step="0.01" value="0"
+      /></label>
+      <label
+        >mask offsetY
+        <input id="maskPresetOffsetY" type="range" min="-1" max="1" step="0.01" value="0"
+      /></label>
+      <label><input id="maskPresetFlipX" type="checkbox" /> flip X</label>
+      <label><input id="maskPresetFlipY" type="checkbox" /> flip Y</label>
+      <label
+        >mask rotation
+        <input id="maskPresetRotation" type="range" min="0" max="360" step="1" value="0"
+      /></label>
+      <label
+        >mask seed <input id="maskPresetSeed" type="range" min="0" max="1000" step="1" value="1"
+      /></label>
+      <h3>图层渐变空间</h3>
+      <label
+        >gradient mode
+        <select id="gradientMode">
+          <option value="parallel">parallel</option>
+          <option value="radial">halo</option>
+          <option value="rays">rays</option>
+        </select></label
+      >
+      <label
+        >gradient count <input id="gradientCount" type="range" min="1" max="64" step="1" value="31"
+      /></label>
+      <label
+        >gradient angle
+        <input id="gradientAngle" type="range" min="0" max="360" step="1" value="38.4"
+      /></label>
+      <label
+        >gradient twist
+        <input id="gradientTwist" type="range" min="-1" max="1" step="0.01" value="0"
+      /></label>
+      <label><input id="nest" type="checkbox" /> nest child</label>
+    </aside>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

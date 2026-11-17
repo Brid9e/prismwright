@@ -1,0 +1,29 @@
+{
+  "name": "cardbara-editor",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Cardbara 卡牌系列编辑器（本地优先，开源版）",
+  "license": "MIT",
+  "packageManager": "pnpm@11.9.0",
+  "scripts": {
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "fetch:ffmpeg": "node scripts/fetch-ffmpeg.mjs",
+    "verify:renderer": "pnpm -F @cardbara/renderer test && pnpm -F @cardbara/renderer typecheck && pnpm -F @cardbara/renderer build",
+    "verify:editor": "pnpm -F cardbara test && pnpm -F cardbara typecheck && pnpm -F cardbara build",
+    "dev": "pnpm -F cardbara tauri dev",
+    "dev:web": "pnpm -F cardbara dev",
+    "build": "pnpm -r build"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.13.0",
+    "eslint": "^9.13.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.11.0"
+  },
+  "type": "module"
+}

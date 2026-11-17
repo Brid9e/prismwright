@@ -1,0 +1,74 @@
+{
+  "app": {
+    "name": "卡皮巴拉牌"
+  },
+  "action": {
+    "new": "新建",
+    "open": "打开",
+    "save": "保存",
+    "cancel": "取消",
+    "confirm": "确定",
+    "delete": "删除",
+    "rename": "重命名",
+    "duplicate": "复制",
+    "retry": "重试"
+  },
+  "context": {
+    "menuLabel": "上下文菜单",
+    "cut": "剪切",
+    "copy": "复制",
+    "paste": "粘贴",
+    "selectAll": "全选"
+  },
+  "menu": {
+    "file": "文件",
+    "edit": "编辑",
+    "view": "视图",
+    "about": "关于",
+    "settings": "设置…",
+    "quit": "退出",
+    "newPack": "新建系列…",
+    "openPack": "打开系列…",
+    "importBundle": "导入工程文件…",
+    "recent": "最近打开",
+    "recentEmpty": "无",
+    "clearRecent": "清除菜单",
+    "save": "保存",
+    "renamePack": "重命名系列…",
+    "covers": "系列封面…",
+    "probabilities": "抽卡概率…",
+    "album": "卡册排版…",
+    "closePack": "关闭系列",
+    "undo": "撤销",
+    "redo": "重做",
+    "newCard": "新建卡片",
+    "deleteCard": "删除卡片",
+    "showLeft": "显示系列栏",
+    "showRight": "显示属性栏",
+    "hideLeft": "隐藏系列栏",
+    "hideRight": "隐藏属性栏",
+    "checker": "棋盘底",
+    "export": "导出",
+    "exportSeries": "导出系列工程…",
+    "exportGif": "GIF…",
+    "exportPng": "PNG…",
+    "exportWebm": "WebM…"
+  },
+  "window": {
+    "minimize": "最小化",
+    "maximize": "最大化",
+    "restore": "向下还原",
+    "close": "关闭"
+  },
+  "colorAlpha": "{{label}}透明度",
+  "defaultBack": {
+    "banner": "正在编辑全系列默认卡背：没有单独卡背的系列都用这一份。",
+    "done": "完成"
+  },
+  "tree": {
+    "drag": "拖拽排序",
+    "missing": "资源缺失",
+    "expand": "展开",
+    "collapse": "折叠"
+  }
+}

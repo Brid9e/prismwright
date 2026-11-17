@@ -1,0 +1,155 @@
+{
+  "panel": {
+    "pack": "Series",
+    "preview": "Preview",
+    "inspector": "Inspector"
+  },
+  "pack": {
+    "emptyHint": "Create a new series, or open an existing one to start editing.",
+    "nameLabel": "Series name",
+    "renameTitle": "Rename Series",
+    "renameHint": "Only the display name changes; the folder on disk stays the same.",
+    "openFailed": "Open failed: the selected folder is not a valid series.",
+    "exists": "A folder named \"{{name}}\" already exists — pick another name.",
+    "invalidName": "Name can't be empty or contain / \\ : * ? \" < > |",
+    "noDefaultDir": "No default folder for new series yet — pick one in Settings.",
+    "location": "Location",
+    "coverTitle": "Series Covers & Pack Art",
+    "cover": {
+      "large": "Large cover",
+      "small": "Small cover",
+      "largeHint": "5:2 (2.5:1). Pick an image and crop it; GIFs animate",
+      "smallHint": "1:1. PNG with transparency is fine; GIFs animate",
+      "packArt": "Pack artwork",
+      "packArtHint": "Fills the whole pack on the draw screen; anything outside is cropped. Any ratio, GIFs animate",
+      "frame": "Avatar frame",
+      "frameHint": "1:1. Unlocked by completing this series; crop and it is compressed to WebP",
+      "seriesAvatar": "Series avatar",
+      "seriesAvatarHint": "1:1. Unlocked by completing this series and usable as an avatar; compressed to 128×128 WebP",
+      "achievement": "Achievement icon",
+      "achievementHint": "1:1 icon for the series-complete achievement; falls back to the series cover",
+      "pick": "Choose image",
+      "replace": "Replace",
+      "clear": "Clear",
+      "empty": "Not set",
+      "aspectError": "{{label}} must be {{ratio}}; this one is {{width}}×{{height}} ({{aspect}})",
+      "cropHint": "Drag to reposition, slider to zoom; the frame is the final image",
+      "cropZoom": "Zoom",
+      "cropApply": "Apply crop",
+      "ratioLarge": "5:2",
+      "ratioSmall": "1:1",
+      "formatError": "Only png / jpg / jpeg / webp / gif are supported",
+      "importFailed": "Import failed — try another image",
+      "oversize": "This image is large and may slow down the home page",
+      "style": {
+        "title": "Pack blending",
+        "resetAll": "Reset all",
+        "reset": "Reset",
+        "needArt": "These settings only show once pack artwork is set.",
+        "blend": "Blend mode",
+        "opacity": "Pack opacity",
+        "packBrightness": "Pack brightness",
+        "packContrast": "Pack contrast",
+        "packInvert": "Invert pack",
+        "fit": "Artwork fit",
+        "x": "Artwork X",
+        "y": "Artwork Y",
+        "artBrightness": "Artwork brightness",
+        "artSaturate": "Artwork saturation",
+        "blendValue": {
+          "screen": "Screen",
+          "soft-light": "Soft light",
+          "overlay": "Overlay",
+          "hard-light": "Hard light",
+          "multiply": "Multiply",
+          "normal": "Normal",
+          "lighten": "Lighten",
+          "color-dodge": "Color dodge",
+          "difference": "Difference"
+        },
+        "fitValue": {
+          "cover": "Cover (crop)",
+          "fill": "Stretch",
+          "contain": "Contain"
+        }
+      }
+    }
+  },
+  "probability": {
+    "title": "Draw Probability",
+    "hint": "Values are relative weights, normalised into percentages by their sum. With every value at 0, draws are uniform over all cards.",
+    "tier": {
+      "common": "Common",
+      "rare": "Rare",
+      "epic": "Epic",
+      "legendary": "Legendary",
+      "hidden": "Hidden"
+    },
+    "cardCount": "{{cards}} cards",
+    "unweighted": "Draws are currently uniform over all cards, so hidden cards never appear. Give any tier a weight to switch to rarity-based draws.",
+    "tierEmpty": "\"{{name}}\" has no cards. A draw landing here falls back to a uniform pick over all cards — this weight does not apply.",
+    "hiddenUnreachable": "This series has {{cards}} hidden cards, but the Hidden weight is 0 — they will never be drawn.",
+    "hiddenHint": "Hidden cards only appear when their weight is above 0."
+  },
+  "album": {
+    "title": "Album Layout",
+    "hint": "3×3 per page. Drag cards into slots and the layout saves immediately. Cards left unplaced are appended to the last page in the mini program.",
+    "page": "Page {{page}}",
+    "addPage": "Add page",
+    "removePage": "Remove page",
+    "unplaced": "Unplaced ({{cards}})",
+    "unplacedHint": "Drag into a slot to place; cards left here are appended to the last page automatically.",
+    "emptySlot": "Empty slot",
+    "removeCard": "Return to unplaced",
+    "hidden": "Hidden",
+    "noCards": "This series has no cards yet."
+  },
+  "status": {
+    "idle": "Not saved to disk",
+    "dirty": "Unsaved",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "error": "Save failed"
+  },
+  "preview": {
+    "front": "Front",
+    "back": "Back",
+    "resetView": "Reset view",
+    "toggleChecker": "Checkerboard",
+    "zoom": "Zoom",
+    "noCard": "No card selected",
+    "backNotSet": "Back is not set yet; editing any field creates it.",
+    "usingDefaultBack": "This series has no back of its own; it uses the shared default card back.",
+    "editDefaultBack": "Edit default back",
+    "customizeBack": "Customize for this series",
+    "deleteBack": "Delete back"
+  },
+  "previewToggle": {
+    "idleSway": "Idle sway"
+  },
+  "start": {
+    "empty": "No series opened yet",
+    "missing": "Not found",
+    "remove": "Remove from list",
+    "newPack": "New Series",
+    "openPack": "Open Series",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "daysAgo": "{{days}} days ago"
+  },
+  "closing": {
+    "title": "Generating previews",
+    "body": "Generating preview assets for changed cards ({{done}} / {{total}}). The app will close automatically when done.",
+    "force": "Force close"
+  },
+  "confirm": {
+    "deleteCardTitle": "Delete card",
+    "deleteCardBody": "Deletes \"{{name}}\" and its assets (undoable via trash).",
+    "deleteLayerTitle": "Delete layer",
+    "deleteLayerBody": "Deletes \"{{name}}\".",
+    "deleteLayerBodyWithChildren": "Delete \"{{name}}\" and its {{count}} sub-layer(s).",
+    "deleteBackTitle": "Delete back",
+    "deleteBackBodyDefault": "This series will use the shared default back. Asset files are kept; undoable.",
+    "deleteBackBodyEmpty": "This series' back will become blank. Asset files are kept; undoable."
+  }
+}

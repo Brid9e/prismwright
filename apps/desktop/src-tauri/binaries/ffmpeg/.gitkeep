@@ -1,0 +1,2 @@
+# 占位文件：让这个目录在仓库里始终存在（见 .gitignore 的说明）。
+# 真正的 ffmpeg.exe 与 DLL 由 `pnpm fetch:ffmpeg` 下载到这里，不入库。

@@ -1,0 +1,72 @@
+/* 全站颜色唯一事实来源。
+ *
+ * 两层结构：`--palette-*` 是原始色板，仅供定义语义 token 使用；
+ * `--color-*` 是语义 token，是组件与 Tailwind 唯一允许消费的颜色。
+ * 值一律以 `R G B` 通道三元组存储（不带 rgb() 包裹），这样 Tailwind 能用
+ * `rgb(var(--token) / <alpha-value>)` 映射，透明修饰符 `bg-panel/60` 才会生效。
+ *
+ * 主题机制：:root 即默认深色主题；用户在设置里切换的主题由 JS 把同名 --color-* token
+ * 内联写入 documentElement（见 src/themes/apply.ts），未覆盖的 token 回落到这里的 :root。
+ * 目前只提供深色主题。
+ */
+:root {
+  /* ── 原始色板（仅内部引用，组件不得直接用） ───────────────── */
+  --palette-neutral-1000: 18 18 18; /* #121212 */
+  --palette-neutral-950: 30 30 30; /* #1e1e1e */
+  --palette-neutral-900: 36 36 36; /* #242424 */
+  --palette-neutral-850: 43 43 43; /* #2b2b2b */
+  --palette-neutral-800: 51 51 51; /* #333333 */
+  --palette-neutral-700: 60 60 60; /* #3c3c3c */
+  --palette-neutral-600: 74 74 74; /* #4a4a4a */
+  --palette-neutral-500: 110 110 110; /* #6e6e6e */
+  --palette-neutral-400: 154 154 154; /* #9a9a9a */
+  --palette-neutral-200: 214 214 214; /* #d6d6d6 */
+  --palette-neutral-0: 255 255 255; /* #ffffff */
+
+  --palette-accent-400: 92 159 224; /* #5c9fe0 */
+  --palette-accent-500: 74 144 217; /* #4a90d9 */
+  --palette-accent-600: 50 115 184; /* #3273b8 */
+
+  --palette-success: 76 175 80; /* #4caf50 */
+  --palette-warning: 224 160 48; /* #e0a030 */
+  --palette-danger: 217 83 79; /* #d9534f */
+
+  /* 稀有度识别色：与小程序 rarity-config.js / rarity-*.png 同一套，不随主题变化。 */
+  --palette-rarity-common: 161 161 166; /* #a1a1a6 */
+  --palette-rarity-rare: 90 200 250; /* #5ac8fa */
+  --palette-rarity-epic: 191 90 242; /* #bf5af2 */
+  --palette-rarity-legendary: 255 215 0; /* #ffd700 */
+
+  /* ── 语义 token（组件与 Tailwind 的接口） ─────────────────── */
+  --color-surface-app: var(--palette-neutral-850);
+  --color-surface-panel: var(--palette-neutral-800);
+  --color-surface-elevated: var(--palette-neutral-700);
+  --color-surface-sunken: var(--palette-neutral-950);
+
+  --color-border: var(--palette-neutral-950);
+  --color-border-strong: var(--palette-neutral-1000);
+  --color-border-subtle: var(--palette-neutral-700);
+
+  --color-text: var(--palette-neutral-200);
+  --color-text-muted: var(--palette-neutral-400);
+  --color-text-disabled: var(--palette-neutral-500);
+  --color-text-on-accent: var(--palette-neutral-0);
+
+  --color-accent: var(--palette-accent-500);
+  --color-accent-hover: var(--palette-accent-400);
+  --color-accent-active: var(--palette-accent-600);
+  --color-focus: var(--palette-accent-500);
+
+  --color-success: var(--palette-success);
+  --color-warning: var(--palette-warning);
+  --color-danger: var(--palette-danger);
+
+  --color-rarity-common: var(--palette-rarity-common);
+  --color-rarity-rare: var(--palette-rarity-rare);
+  --color-rarity-epic: var(--palette-rarity-epic);
+  --color-rarity-legendary: var(--palette-rarity-legendary);
+
+  --color-scrim: 0 0 0;
+  --color-checker-a: var(--palette-neutral-700);
+  --color-checker-b: var(--palette-neutral-600);
+}

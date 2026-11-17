@@ -1,0 +1,50 @@
+{
+  "unnamed": "Card {{num}}",
+  "section": {
+    "normal": "Cards",
+    "hidden": "Hidden"
+  },
+  "field": {
+    "name": "Name",
+    "notes": "Notes",
+    "rarity": "Rarity",
+    "front": "Front image",
+    "notSet": "Not set",
+    "upload": "Upload image",
+    "replace": "Replace image",
+    "remove": "Remove image",
+    "frontFit": "Fill mode",
+    "frontOffsetX": "Offset X",
+    "frontOffsetY": "Offset Y",
+    "frontScale": "Scale",
+    "frontRotation": "Rotation",
+    "frontNormalPath": "Normal map",
+    "frontNormalUpload": "Upload normal map",
+    "frontNormalReplace": "Replace normal map",
+    "frontNormalRemove": "Remove normal map",
+    "frontNormalFlipY": "Flip green channel",
+    "frontBumpStrength": "Bump",
+    "frontBumpDetail": "Bump detail",
+    "frontBumpFlow": "Bump flow",
+    "frontBumpLight": "Bump light",
+    "frontBumpLightAngle": "Light angle",
+    "frontBumpLightColor": "Light color",
+    "frontBumpInvert": "Invert bump",
+    "aspect": "Aspect (series)",
+    "cornerRadius": "Corner radius",
+    "resetShape": "Reset",
+    "resetOffset": "Reset"
+  },
+  "rarity": {
+    "common": "Common",
+    "rare": "Rare",
+    "epic": "Epic",
+    "legendary": "Legendary"
+  },
+  "missingAsset": "Front image missing",
+  "frontFit": {
+    "cover": "Cover",
+    "contain": "Contain",
+    "stretch": "Stretch"
+  }
+}

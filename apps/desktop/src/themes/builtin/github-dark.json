@@ -1,0 +1,27 @@
+{
+  "id": "github-dark",
+  "name": { "zh-CN": "GitHub 深色", "en": "GitHub Dark" },
+  "colors": {
+    "--color-surface-app": "13 17 23",
+    "--color-surface-panel": "22 27 34",
+    "--color-surface-elevated": "33 38 45",
+    "--color-surface-sunken": "1 4 9",
+    "--color-border": "48 54 61",
+    "--color-border-strong": "1 4 9",
+    "--color-border-subtle": "33 38 45",
+    "--color-text": "201 209 217",
+    "--color-text-muted": "139 148 158",
+    "--color-text-disabled": "110 118 129",
+    "--color-text-on-accent": "255 255 255",
+    "--color-accent": "88 166 255",
+    "--color-accent-hover": "121 192 255",
+    "--color-accent-active": "56 139 253",
+    "--color-focus": "88 166 255",
+    "--color-success": "63 185 80",
+    "--color-warning": "210 153 34",
+    "--color-danger": "248 81 73",
+    "--color-scrim": "0 0 0",
+    "--color-checker-a": "33 38 45",
+    "--color-checker-b": "48 54 61"
+  }
+}

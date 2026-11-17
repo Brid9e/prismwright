@@ -1,0 +1,74 @@
+{
+  "app": {
+    "name": "Cardbara"
+  },
+  "action": {
+    "new": "New",
+    "open": "Open",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "OK",
+    "delete": "Delete",
+    "rename": "Rename",
+    "duplicate": "Duplicate",
+    "retry": "Retry"
+  },
+  "context": {
+    "menuLabel": "Context menu",
+    "cut": "Cut",
+    "copy": "Copy",
+    "paste": "Paste",
+    "selectAll": "Select All"
+  },
+  "menu": {
+    "file": "File",
+    "edit": "Edit",
+    "view": "View",
+    "about": "About",
+    "settings": "Settings…",
+    "quit": "Quit",
+    "newPack": "New Series…",
+    "openPack": "Open Series…",
+    "importBundle": "Import Project…",
+    "recent": "Open Recent",
+    "recentEmpty": "None",
+    "clearRecent": "Clear Menu",
+    "save": "Save",
+    "renamePack": "Rename Series…",
+    "covers": "Series covers…",
+    "probabilities": "Draw Probability…",
+    "album": "Album Layout…",
+    "closePack": "Close Series",
+    "undo": "Undo",
+    "redo": "Redo",
+    "newCard": "New Card",
+    "deleteCard": "Delete Card",
+    "showLeft": "Show Series Panel",
+    "showRight": "Show Inspector",
+    "hideLeft": "Hide Series Panel",
+    "hideRight": "Hide Inspector",
+    "checker": "Checkerboard",
+    "export": "Export",
+    "exportSeries": "Export Series Project…",
+    "exportGif": "GIF…",
+    "exportPng": "PNG…",
+    "exportWebm": "WebM…"
+  },
+  "window": {
+    "minimize": "Minimize",
+    "maximize": "Maximize",
+    "restore": "Restore",
+    "close": "Close"
+  },
+  "colorAlpha": "{{label}} opacity",
+  "defaultBack": {
+    "banner": "Editing the shared default card back — every series without its own back uses it.",
+    "done": "Done"
+  },
+  "tree": {
+    "drag": "Reorder",
+    "missing": "Missing asset",
+    "expand": "Expand",
+    "collapse": "Collapse"
+  }
+}

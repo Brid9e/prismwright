@@ -1,0 +1,11 @@
+{
+  "unsupportedImage": "Unsupported image format: PNG / JPG / WebP only.",
+  "noPack": "No series is open.",
+  "noTarget": "No import target selected.",
+  "copyFailed": "Failed to import image: {{message}}",
+  "readFailed": "Read failed: {{message}}",
+  "loadFailed": "Open failed: {{message}}",
+  "themeInvalid": "Invalid theme file: {{message}}",
+  "themeConflict": "Theme id conflicts with a built-in theme: {{message}}",
+  "themeImportFailed": "Failed to import theme: {{message}}"
+}

@@ -1,0 +1,34 @@
+{
+  "title": "设置",
+  "back": "返回编辑器",
+  "category": {
+    "general": "通用",
+    "appearance": "外观"
+  },
+  "appearance": {
+    "title": "主题",
+    "import": "导入主题…",
+    "default": "Cardbara 深色"
+  },
+  "language": {
+    "label": "语言",
+    "zh-CN": "中文",
+    "en": "English"
+  },
+  "editorVersion": {
+    "label": "版本",
+    "v1": "v1",
+    "hint": "编辑器与渲染器按版本成套发布；当前仅提供 v1。"
+  },
+  "newPackDir": {
+    "label": "默认新建目录",
+    "choose": "选择目录"
+  },
+  "defaultBack": {
+    "label": "默认卡背",
+    "edit": "编辑",
+    "hint": "全系列共用一份。没有单独做卡背的系列，在预览与导出时都用它。",
+    "name": "默认卡背",
+    "unavailable": "当前环境没有应用数据目录，无法保存默认卡背。"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "filterName": "Cardbara 工程",
+  "export": {
+    "titleSeries": "导出系列工程",
+    "titleCard": "导出卡片",
+    "hintSeries": "把系列清单与全部素材打包成 .cards 文件。",
+    "hintCard": "把这张卡与它用到的素材打包成 .card 文件。",
+    "action": "导出",
+    "done": "已导出（{{size}}）：{{path}}",
+    "failed": "导出失败：{{message}}"
+  },
+  "import": {
+    "title": "导入工程",
+    "seriesDetail": "系列「{{name}}」，{{cards}} 张卡",
+    "cardDetail": "卡片「{{name}}」，来自系列「{{series}}」",
+    "size": "文件大小：{{size}}",
+    "hintSeries": "将导入为一个新系列，不会覆盖已有系列。",
+    "hintCard": "将导入到当前系列。",
+    "hintCardNewPack": "当前没有打开的系列，将按卡名新建一个系列再导入。",
+    "action": "导入",
+    "invalid": "文件已损坏或不是 Cardbara 工程文件",
+    "failed": "导入失败：{{message}}",
+    "defaultPackName": "导入的卡片"
+  }
+}

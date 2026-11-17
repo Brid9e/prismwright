@@ -1,0 +1,91 @@
+{
+  "unnamed": "Layer {{num}}",
+  "unnamedText": "Text {{num}}",
+  "unnamedLayer": "Unnamed layer",
+  "section": { "layers": "Layers", "detail": "Layer detail", "composite": "Composite" },
+  "action": {
+    "add": "Add layer",
+    "addText": "Add text",
+    "addImage": "Add image",
+    "duplicate": "Duplicate layer",
+    "delete": "Delete layer",
+    "toggle": "Enable/disable"
+  },
+  "maskPreset": {
+    "preset": {
+      "polygon": "Polygon",
+      "stars": "Stars",
+      "dots": "Dots"
+    }
+  },
+  "colors": {
+    "add": "Add color",
+    "remove": "Remove color",
+    "max": "Up to 8 colors",
+    "preview": "Palette preview",
+    "drag": "Drag color {{index}} to reorder",
+    "color": "Color {{index}}",
+    "pick": "Pick color {{index}} from the preview",
+    "alpha": "Opacity of color {{index}}",
+    "percent": "Position of color {{index}} (percent)"
+  },
+  "field": {
+    "name": "Layer name",
+    "holoMix": "Mix",
+    "holoAlpha": "Alpha",
+    "opacity": "Layer opacity"
+  },
+  "blend": {
+    "label": "Blend",
+    "add": "Add",
+    "normal": "Normal",
+    "screen": "Screen",
+    "multiply": "Multiply"
+  },
+  "reset": "Reset to default",
+  "nest": { "tooDeep": "Too deeply nested: at most {{max}} ancestor levels." },
+  "text": {
+    "defaultContent": "Text",
+    "section": {
+      "content": "Content",
+      "font": "Font",
+      "appearance": "Appearance",
+      "stroke": "Stroke",
+      "shadow": "Shadow",
+      "layout": "Layout",
+      "position": "Position"
+    },
+    "field": {
+      "content": "Text",
+      "fontFamily": "Font",
+      "customFont": "Custom font family",
+      "fontHint": "Fonts must exist on the device; the system falls back otherwise",
+      "fontSize": "Size",
+      "fontWeight": "Weight",
+      "italic": "Italic",
+      "color": "Color",
+      "letterSpacing": "Letter spacing",
+      "lineHeight": "Line height",
+      "align": "Align",
+      "alignLeft": "Left",
+      "alignCenter": "Center",
+      "alignRight": "Right",
+      "x": "Horizontal position",
+      "y": "Vertical position",
+      "scale": "Scale",
+      "rotation": "Rotation",
+      "strokeOn": "Stroke",
+      "strokeColor": "Stroke color",
+      "strokeWidth": "Stroke width",
+      "shadowOn": "Shadow",
+      "shadowColor": "Shadow color",
+      "shadowOpacity": "Shadow opacity",
+      "shadowOffsetX": "Horizontal offset",
+      "shadowOffsetY": "Vertical offset",
+      "shadowBlur": "Blur"
+    },
+    "weight": { "light": "Light", "regular": "Regular", "bold": "Bold", "black": "Black" },
+    "mask": { "label": "Use as mask", "hint": "This layer draws nothing; child layers are clipped by the glyphs" }
+  },
+  "empty": "No layer selected"
+}

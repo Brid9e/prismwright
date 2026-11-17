@@ -1,0 +1,21 @@
+{
+  "title": "导出",
+  "format": "格式",
+  "formatGif": "GIF（摆动动图）",
+  "formatPng": "PNG（静帧）",
+  "formatWebm": "WebM（高清摆动）",
+  "size": "尺寸",
+  "sizeCustom": "自定义",
+  "fps": "帧率",
+  "gifColors": "调色板色数",
+  "gifDither": "抖动",
+  "webmCrf": "CRF（越小越清晰）",
+  "background": "背景",
+  "transparent": "透明",
+  "transparentHint": "GIF 的透明只有 1 位，圆角边缘会有锯齿；纯色背景更干净。",
+  "export": "导出…",
+  "progress": "正在导出（{{done}} / {{total}}）",
+  "done": "已导出：{{path}}",
+  "noCard": "未选中卡片。",
+  "failed": "导出失败：{{message}}"
+}

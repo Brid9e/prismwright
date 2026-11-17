@@ -1,0 +1,155 @@
+{
+  "panel": {
+    "pack": "系列",
+    "preview": "预览",
+    "inspector": "属性"
+  },
+  "pack": {
+    "emptyHint": "新建一个系列，或打开已有的系列开始编辑。",
+    "nameLabel": "系列名称",
+    "renameTitle": "重命名系列",
+    "renameHint": "只改显示名，磁盘上的文件夹名不变。",
+    "openFailed": "打开失败：所选目录不是有效的系列目录。",
+    "exists": "已存在同名目录「{{name}}」，换个名字。",
+    "invalidName": "名字不能为空，也不能含 / \\ : * ? \" < > | 这些字符。",
+    "noDefaultDir": "尚未设置默认新建目录，请到设置里选一个。",
+    "location": "位置",
+    "coverTitle": "系列封面与卡包图",
+    "cover": {
+      "large": "大封面",
+      "small": "小封面",
+      "largeHint": "5:2（2.5:1），选图后拖动裁剪；GIF 会动",
+      "smallHint": "1:1，带透明通道的 PNG 也可以，GIF 会动",
+      "packArt": "卡包图",
+      "packArtHint": "整张铺到袋面上，超出袋子的部分会被裁掉；比例不限，GIF 会动",
+      "frame": "头像框",
+      "frameHint": "1:1，集齐本系列后解锁；选图后拖动裁剪，自动压成 WebP",
+      "seriesAvatar": "系列头像",
+      "seriesAvatarHint": "1:1，集齐本系列后解锁，可当头像使用；压成 128×128 WebP",
+      "achievement": "成就图标",
+      "achievementHint": "1:1，系列集齐成就的图标；不配则用系列封面兜底",
+      "pick": "选择图片",
+      "replace": "更换",
+      "clear": "清除",
+      "empty": "还没有配",
+      "aspectError": "{{label}}必须是 {{ratio}}，这张是 {{width}}×{{height}}（{{aspect}}）",
+      "cropHint": "拖动图片调整位置，滑杆缩放；框内就是最终画面",
+      "cropZoom": "缩放",
+      "cropApply": "应用裁剪",
+      "ratioLarge": "5:2",
+      "ratioSmall": "1:1",
+      "formatError": "只支持 png / jpg / jpeg / webp / gif",
+      "importFailed": "导入失败，请换一张图试试",
+      "oversize": "这张图较大，首页加载会慢",
+      "style": {
+        "title": "袋面合成",
+        "resetAll": "恢复默认",
+        "reset": "恢复默认",
+        "needArt": "配好卡包图后，这里的调节才看得出来。",
+        "blend": "混合方式",
+        "opacity": "原卡包不透明度",
+        "packBrightness": "原卡包亮度",
+        "packContrast": "原卡包对比度",
+        "packInvert": "原卡包反相",
+        "fit": "底图填充",
+        "x": "底图横向位置",
+        "y": "底图纵向位置",
+        "artBrightness": "底图亮度",
+        "artSaturate": "底图饱和度",
+        "blendValue": {
+          "screen": "滤色",
+          "soft-light": "柔光",
+          "overlay": "叠加",
+          "hard-light": "强光",
+          "multiply": "正片叠底",
+          "normal": "正常",
+          "lighten": "变亮",
+          "color-dodge": "颜色减淡",
+          "difference": "差值"
+        },
+        "fitValue": {
+          "cover": "铺满（裁切）",
+          "fill": "拉伸铺满",
+          "contain": "完整显示"
+        }
+      }
+    }
+  },
+  "probability": {
+    "title": "抽卡概率",
+    "hint": "填的是相对权重，按总和折算成百分比；全部为 0 时按卡片数量均匀抽取。",
+    "tier": {
+      "common": "普通",
+      "rare": "稀有",
+      "epic": "史诗",
+      "legendary": "传说",
+      "hidden": "隐藏"
+    },
+    "cardCount": "{{cards}} 张",
+    "unweighted": "当前按卡片数量均匀抽取：隐藏款不会出现。给任意一档填上权重，即可改成按稀有度抽。",
+    "tierEmpty": "「{{name}}」这一档没有卡片，抽中后会落到全部卡片里均匀抽——这部分权重并不落在这里。",
+    "hiddenUnreachable": "系列里有 {{cards}} 张隐藏卡，但「隐藏」权重是 0——它们永远不会被抽中。",
+    "hiddenHint": "隐藏款只在权重大于 0 时才会出现。"
+  },
+  "album": {
+    "title": "卡册排版",
+    "hint": "每页 3×3，把卡牌拖进格子即可保存；没排进格子的卡会在小程序里自动补到最后一页。",
+    "page": "第 {{page}} 页",
+    "addPage": "添加一页",
+    "removePage": "删除本页",
+    "unplaced": "未归档（{{cards}} 张）",
+    "unplacedHint": "拖到格子里安排位置；留在这里的卡会自动排到最后一页。",
+    "emptySlot": "空格",
+    "removeCard": "放回未归档",
+    "hidden": "隐藏",
+    "noCards": "这个系列还没有卡片。"
+  },
+  "status": {
+    "idle": "未保存到磁盘",
+    "dirty": "未保存",
+    "saving": "保存中…",
+    "saved": "已保存",
+    "error": "保存失败"
+  },
+  "preview": {
+    "front": "正面",
+    "back": "背面",
+    "resetView": "重置视角",
+    "toggleChecker": "棋盘底",
+    "zoom": "缩放",
+    "noCard": "未选中卡片",
+    "backNotSet": "背面尚未设置，编辑任一字段即会创建。",
+    "usingDefaultBack": "本系列没有自己的卡背，正在使用全系列共用的默认卡背。",
+    "editDefaultBack": "编辑默认卡背",
+    "customizeBack": "为本系列单独定制",
+    "deleteBack": "删除卡背"
+  },
+  "previewToggle": {
+    "idleSway": "空闲摆动"
+  },
+  "start": {
+    "empty": "还没有打开过系列",
+    "missing": "找不到",
+    "remove": "从列表移除",
+    "newPack": "新建系列",
+    "openPack": "打开系列",
+    "today": "今天",
+    "yesterday": "昨天",
+    "daysAgo": "{{days}} 天前"
+  },
+  "closing": {
+    "title": "正在生成预览",
+    "body": "正在为变更过的卡片生成预览资产（{{done}} / {{total}}），完成后即自动关闭。",
+    "force": "强制关闭"
+  },
+  "confirm": {
+    "deleteCardTitle": "删除卡片",
+    "deleteCardBody": "将删除「{{name}}」及其资源（可从回收站撤销）。",
+    "deleteLayerTitle": "删除图层",
+    "deleteLayerBody": "将删除「{{name}}」。",
+    "deleteLayerBodyWithChildren": "将删除「{{name}}」及其 {{count}} 个子层。",
+    "deleteBackTitle": "删除卡背",
+    "deleteBackBodyDefault": "删除后本系列将改用全系列共用的默认卡背；素材文件保留，可撤销。",
+    "deleteBackBodyEmpty": "删除后本系列的背面将变为空白；素材文件保留，可撤销。"
+  }
+}

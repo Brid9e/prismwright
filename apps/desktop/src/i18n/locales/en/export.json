@@ -1,0 +1,21 @@
+{
+  "title": "Export",
+  "format": "Format",
+  "formatGif": "GIF (sway animation)",
+  "formatPng": "PNG (still)",
+  "formatWebm": "WebM (hi-res sway)",
+  "size": "Size",
+  "sizeCustom": "Custom",
+  "fps": "Frame rate",
+  "gifColors": "Palette colors",
+  "gifDither": "Dither",
+  "webmCrf": "CRF (lower is sharper)",
+  "background": "Background",
+  "transparent": "Transparent",
+  "transparentHint": "GIF transparency is 1-bit, so rounded corners get jagged; a solid background looks cleaner.",
+  "export": "Export…",
+  "progress": "Exporting ({{done}} / {{total}})",
+  "done": "Exported to {{path}}",
+  "noCard": "No card selected.",
+  "failed": "Export failed: {{message}}"
+}

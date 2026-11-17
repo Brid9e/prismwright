@@ -1,0 +1,11 @@
+{
+  "unsupportedImage": "不支持的图片格式：仅接受 PNG / JPG / WebP。",
+  "noPack": "尚未打开系列。",
+  "noTarget": "未选择导入目标",
+  "copyFailed": "图片导入失败：{{message}}",
+  "readFailed": "读取失败：{{message}}",
+  "loadFailed": "打开失败：{{message}}",
+  "themeInvalid": "主题文件无效：{{message}}",
+  "themeConflict": "主题 id 与内置主题冲突：{{message}}",
+  "themeImportFailed": "导入主题失败：{{message}}"
+}

@@ -1,0 +1,34 @@
+{
+  "title": "Settings",
+  "back": "Back to editor",
+  "category": {
+    "general": "General",
+    "appearance": "Appearance"
+  },
+  "appearance": {
+    "title": "Theme",
+    "import": "Import Theme…",
+    "default": "Cardbara Dark"
+  },
+  "language": {
+    "label": "Language",
+    "zh-CN": "中文",
+    "en": "English"
+  },
+  "editorVersion": {
+    "label": "Version",
+    "v1": "v1",
+    "hint": "The editor and renderer ship together as one versioned pair; v1 is the only version available."
+  },
+  "newPackDir": {
+    "label": "Default new-series folder",
+    "choose": "Choose folder"
+  },
+  "defaultBack": {
+    "label": "Default card back",
+    "edit": "Edit",
+    "hint": "One shared design for every series. Series without their own back use it in preview and export.",
+    "name": "Default card back",
+    "unavailable": "No app data folder in this environment, so the default card back cannot be saved."
+  }
+}

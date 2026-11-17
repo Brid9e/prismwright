@@ -1,0 +1,54 @@
+@import "./tokens.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 编辑器专属基样式：深色滚动条、紧凑密度、不撑布局的覆盖式滚动条。
+ * 颜色一律走 var(--color-*)，不写死色值。 */
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+  }
+
+  body {
+    @apply bg-app text-foreground font-sans text-[13px] antialiased;
+    overflow: hidden;
+  }
+
+  ::selection {
+    background-color: rgb(var(--color-accent) / 0.3);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--color-border-subtle)) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--color-border-subtle));
+    border-radius: 5px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+/* 预览画布的棋盘底：透明区域用棋盘格表示「这里是空的」。
+ * 写在样式表而非内联样式，因为色值守卫禁止 TSX 里出现 rgb(...) 字面量。 */
+.checkerboard {
+  background-image: repeating-conic-gradient(
+    rgb(var(--color-checker-a)) 0% 25%,
+    rgb(var(--color-checker-b)) 0% 50%
+  );
+  background-size: 20px 20px;
+}
