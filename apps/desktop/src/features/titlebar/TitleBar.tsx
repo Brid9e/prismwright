@@ -40,7 +40,7 @@ const TRAFFIC_LIGHT_GAP = 76
  * 无系列时标题栏显示的**品牌字标**（与下方的 `CardbaraLogoSmall` 并排成锁形）。
  *
  * 固定为拉丁文、任何语言下都不变，故不进 i18n——要翻译的是应用名（`common:app.name`），
- * 字标不是。改了要一起改的只有 StartScreen 那套锁形，二者是同一套品牌。
+ * 字标不是。StartScreen 现在只放 logo，不再配字标。
  */
 const APP_BRAND = "Cardbara"
 
