@@ -17,12 +17,11 @@ export function StartScreen() {
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-5 bg-app px-6">
       {/* logo + 字标组成一套品牌锁形：两者贴紧（gap-2.5）成一整体，再与下方「最近打开」拉开
-          （外层 gap-5）。颜色同用 text-disabled（淡淡的一层，不抢戏）——SVG 内部是
-          fill="currentColor"，于是 logo 始终跟着主题的语义色，换主题、调 token 都不用改图。 */}
+          （外层 gap-5）。logo 用品牌绿 + 纸色的双色标；字标仍用 text-disabled，跟着主题走。 */}
       <div className="flex flex-col select-none items-center gap-2.5">
-        {/* aria-label 取本地化的应用名：图里的 aria-label 是写死的中文。 */}
+        {/* aria-label 取本地化的应用名（SVG 文件本身不带 aria-label）。 */}
         <CardbaraLogo
-          className="h-16 w-auto text-disabled"
+          className="h-16 w-auto"
           role="img"
           aria-label={tc("app.name")}
         />

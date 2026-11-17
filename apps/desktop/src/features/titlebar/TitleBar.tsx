@@ -22,7 +22,7 @@
  * 既拖不动、又关不掉。
  */
 import { useTranslation } from "react-i18next"
-import CardbaraLogo from "../../assets/cardbara-logo.svg?react"
+import CardbaraLogoSmall from "../../assets/cardbara-logo-small.svg?react"
 import { findCard, usePackStore } from "../../store/packStore"
 import { useUiStore } from "../../store/uiStore"
 import { hasTauriEnv, type Platform } from "../../app/platform"
@@ -37,7 +37,7 @@ import { titlebarText } from "./titleText"
 const TRAFFIC_LIGHT_GAP = 76
 
 /**
- * 无系列时标题栏显示的**品牌字标**（与下方的 `CardbaraLogo` 并排成锁形）。
+ * 无系列时标题栏显示的**品牌字标**（与下方的 `CardbaraLogoSmall` 并排成锁形）。
  *
  * 固定为拉丁文、任何语言下都不变，故不进 i18n——要翻译的是应用名（`common:app.name`），
  * 字标不是。改了要一起改的只有 StartScreen 那套锁形，二者是同一套品牌。
@@ -122,7 +122,7 @@ export function TitleBar({
             // 微调——系统字体的竖直度量因平台而异，写死的偏移会在别的机器上偏掉。
             // 字标尾部的 `-mr` 抵消 tracking 留在末字之后的空隙，否则整行进位会偏左一点。
             <>
-              <CardbaraLogo
+              <CardbaraLogoSmall
                 className="h-4 w-auto shrink-0"
                 role="img"
                 aria-label={tc("app.name")}
