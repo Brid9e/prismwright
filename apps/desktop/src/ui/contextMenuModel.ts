@@ -52,7 +52,6 @@ export function editorContextItems(params: {
   undo: () => void
   redo: () => void
   exportSeries: () => void
-  covers: () => void
 }): ContextMenuItem[] {
   return [
     item(params.t("common:menu.newCard"), params.newCard, { accelerator: ACCEL.newCard }),
@@ -61,7 +60,6 @@ export function editorContextItems(params: {
     item(params.t("common:menu.redo"), params.redo, { accelerator: ACCEL.redo }),
     SEPARATOR,
     item(params.t("common:menu.exportSeries"), params.exportSeries),
-    item(params.t("common:menu.covers"), params.covers),
   ]
 }
 

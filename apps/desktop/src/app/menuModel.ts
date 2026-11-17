@@ -183,11 +183,6 @@ export function buildMenuModel(ctx: MenuContext, surface: MenuSurface = "native"
         },
         {
           kind: "item",
-          id: "file.covers",
-          text: { key: "common:menu.covers" },
-        },
-        {
-          kind: "item",
           id: "file.probabilities",
           text: { key: "common:menu.probabilities" },
         },

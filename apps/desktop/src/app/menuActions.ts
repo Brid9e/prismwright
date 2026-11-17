@@ -59,10 +59,6 @@ export function dispatch(id: string): void {
       // 没有打开系列时没有可改的名字；菜单项在起始屏本就不可见，这里按同一语义空操作。
       if (usePackStore.getState().pack) ui.requestRenamePack()
       return
-    case "file.covers":
-      // 同「重命名系列」：没有打开系列就没有封面可配。
-      if (usePackStore.getState().pack) ui.setCoverOpen(true)
-      return
     case "file.probabilities":
       // 同「重命名系列」：没有打开系列就没有可配置的权重。
       if (usePackStore.getState().pack) ui.requestProbabilities()

@@ -90,17 +90,6 @@ describe("dispatch", () => {
     expect(useUiStore.getState().albumOpen).toBe(false)
   })
 
-  it("file.covers 在已打开系列时打开封面对话框", () => {
-    usePackStore.setState({ pack: createEmptyPack("P") })
-    dispatch("file.covers")
-    expect(useUiStore.getState().coverOpen).toBe(true)
-  })
-
-  it("file.covers 无系列时什么都不做", () => {
-    dispatch("file.covers")
-    expect(useUiStore.getState().coverOpen).toBe(false)
-  })
-
   it("edit.delete-card 有选中卡时发起删除确认", () => {
     usePackStore.setState({ selectedCardId: "c1" })
     dispatch("edit.delete-card")

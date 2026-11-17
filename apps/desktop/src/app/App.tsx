@@ -32,7 +32,6 @@ import { InspectorPanel } from "../features/cards/InspectorPanel"
 import { SettingsView } from "../features/settings/SettingsView"
 import { NewPackDialog } from "../features/pack/NewPackDialog"
 import { AlbumDialog } from "../features/pack/AlbumDialog"
-import { CoverDialog } from "../features/pack/CoverDialog"
 import { ProbabilityDialog } from "../features/pack/ProbabilityDialog"
 import { RenamePackDialog } from "../features/pack/RenamePackDialog"
 import { ExportDialog } from "../features/export/ExportDialog"
@@ -292,7 +291,6 @@ export default function App() {
         undo: () => dispatch("edit.undo"),
         redo: () => dispatch("edit.redo"),
         exportSeries: () => dispatch("file.export.series"),
-        covers: () => dispatch("file.covers"),
       }),
     })
   }
@@ -341,7 +339,6 @@ export default function App() {
       <NewPackDialog />
       <AlbumDialog />
       <RenamePackDialog />
-      <CoverDialog />
       <ProbabilityDialog />
       <ExportDialog previews={previews} />
       <BundleExportDialog />

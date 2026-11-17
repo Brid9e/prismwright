@@ -58,7 +58,6 @@ describe("buildMenuModel", () => {
       "separator",
       "file.save",
       "file.renamePack",
-      "file.covers",
       "file.probabilities",
       "file.album",
       "separator",
@@ -104,14 +103,6 @@ describe("buildMenuModel", () => {
       id: "file.album",
       text: { key: "common:menu.album" },
     })
-  })
-
-  // 封面紧随重命名：同属「给系列补外观」的一组。位置钉在这里，免得被后来的项挤走。
-  it("文件菜单在重命名系列下面有系列封面", () => {
-    const ids = submenu(buildMenuModel(base), "file")
-      .items.filter((n) => n.kind === "item")
-      .map((n) => n.id)
-    expect(ids.indexOf("file.covers")).toBe(ids.indexOf("file.renamePack") + 1)
   })
 
   it("无最近项时「最近打开」子菜单给一条禁用的占位", () => {
@@ -207,7 +198,6 @@ describe("buildMenuModel（自绘标题栏）", () => {
       "separator",
       "file.save",
       "file.renamePack",
-      "file.covers",
       "file.probabilities",
       "file.album",
       "separator",

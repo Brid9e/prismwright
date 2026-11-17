@@ -37,7 +37,6 @@ describe("editorContextItems", () => {
       undo: vi.fn(),
       redo: vi.fn(),
       exportSeries: vi.fn(),
-      covers: vi.fn(),
     }
     const items = editorContextItems({ t, ...actions })
     expect(labels(items)).toEqual([
@@ -47,11 +46,7 @@ describe("editorContextItems", () => {
       "common:menu.redo",
       "---",
       "common:menu.exportSeries",
-      "common:menu.covers",
     ])
-    // 封面项的回调原样透传：动作表由调用方（App）注入，模型不该二次包装。
-    const coverItem = items.find((i) => i.kind === "item" && i.label === "common:menu.covers")
-    expect(coverItem?.kind === "item" && coverItem.onSelect).toBe(actions.covers)
     for (const item of items) {
       if (item.kind === "item") click(items, item.label)
     }
@@ -59,7 +54,6 @@ describe("editorContextItems", () => {
     expect(actions.undo).toHaveBeenCalledOnce()
     expect(actions.redo).toHaveBeenCalledOnce()
     expect(actions.exportSeries).toHaveBeenCalledOnce()
-    expect(actions.covers).toHaveBeenCalledOnce()
   })
 })
 
