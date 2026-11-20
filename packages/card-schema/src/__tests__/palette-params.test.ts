@@ -4,7 +4,19 @@ import { EffectSchema, LayerSchema, PackSchema } from "../schema.js"
 
 describe("PaletteParamsSchema", () => {
   it("默认 colors 为空数组（= 本目标不出全息）", () => {
-    expect(PaletteParamsSchema.parse({})).toEqual({ colors: [], composite: "palette" })
+    expect(PaletteParamsSchema.parse({})).toEqual({
+      colors: [],
+      composite: "palette",
+      hue: 0.036,
+      sat: 1.3,
+      lift: 0.4,
+      tint: 1,
+      deltaBase: 0.2,
+      deltaContrast: 0.3,
+      deltaBright: 0.1,
+      grid: 1,
+      gridScale: 0.79,
+    })
   })
 
   it("旧格式（裸 hex 字符串数组）按下标等距展开并按 at 升序", () => {

@@ -28,6 +28,7 @@ import type {
   Effect,
   GlossParams,
   GradientParams,
+  HoloGridParams,
   ImageParams,
   LatticeParams,
   Layer,
@@ -511,6 +512,22 @@ export const PaletteParamsSchema = z.object({
   colors: z.array(ColorStopInputSchema).max(8).default([]).transform(normalizeStops),
   // 合成方式：palette = 色带；balatro = 小丑牌式 delta lerp + HSL 蓝偏（不读 colors）。
   composite: z.enum(["palette", "balatro"]).default("palette"),
+  // 小丑牌合成的可调项：默认值即 holo.fs 的常量。
+  hue: z.number().min(0).max(0.2).default(0.036),
+  sat: z.number().min(0).max(2).default(1.3),
+  lift: z.number().min(0).max(1).default(0.4),
+  tint: z.number().min(0).max(1).default(1),
+  deltaBase: z.number().min(0).max(1).default(0.2),
+  deltaContrast: z.number().min(0).max(1).default(0.3),
+  deltaBright: z.number().min(0).max(1).default(0.1),
+  grid: z.number().min(0).max(1).default(1),
+  gridScale: z.number().min(0.1).max(2).default(0.79),
+})
+
+/** 独立网格效果（holoGrid）：交叉网纹的密度 + 色相加量强度。 */
+export const HoloGridParamsSchema = z.object({
+  size: z.number().min(0.1).max(2).default(0.79),
+  strength: z.number().min(0).max(1).default(1),
 })
 
 /**
@@ -594,6 +611,12 @@ export const EffectSchema = z.discriminatedUnion("kind", [
     id: z.string().min(1),
     enabled: z.boolean().default(true),
     params: PaletteParamsSchema,
+  }),
+  z.object({
+    kind: z.literal("holoGrid"),
+    id: z.string().min(1),
+    enabled: z.boolean().default(true),
+    params: HoloGridParamsSchema,
   }),
   z.object({
     kind: z.literal("maskPreset"),
@@ -779,6 +802,8 @@ const _assertGlossParams: GlossParams = {} as z.infer<typeof GlossParamsSchema>
 const _assertGlossParamsBack: z.infer<typeof GlossParamsSchema> = {} as GlossParams
 const _assertPaletteParams: PaletteParams = {} as z.infer<typeof PaletteParamsSchema>
 const _assertPaletteParamsBack: z.infer<typeof PaletteParamsSchema> = {} as PaletteParams
+const _assertHoloGridParams: HoloGridParams = {} as z.infer<typeof HoloGridParamsSchema>
+const _assertHoloGridParamsBack: z.infer<typeof HoloGridParamsSchema> = {} as HoloGridParams
 const _assertMaskPresetParams: MaskPresetParams = {} as z.infer<typeof MaskPresetParamsSchema>
 const _assertMaskPresetParamsBack: z.infer<typeof MaskPresetParamsSchema> = {} as MaskPresetParams
 const _assertMaskImageParams: MaskImageParams = {} as z.infer<typeof MaskImageParamsSchema>
@@ -835,6 +860,8 @@ void [
   _assertGlossParamsBack,
   _assertPaletteParams,
   _assertPaletteParamsBack,
+  _assertHoloGridParams,
+  _assertHoloGridParamsBack,
   _assertMaskPresetParams,
   _assertMaskPresetParamsBack,
   _assertMaskImageParams,
