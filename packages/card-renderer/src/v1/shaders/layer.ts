@@ -272,9 +272,12 @@ float baseFrontLum(vec2 uv) {
 }
 
 // 卡面原图按底图变换（fit / offset / scale / rotation）采样：与卡面片元看到的图同一套换算。
+// 越界按「无内容」处理（alpha 0）：不能 clamp 拉边，否则 contain / 缩小 / 旋转时会把边缘像素
+// 拉伸到整块留白区（卡面片元自己也不拉边，见 base.ts 的 uMapBackground）。
 vec4 faceFrontSample(vec2 uv) {
   vec2 m = mat2(uFaceMapMatrix.xy, uFaceMapMatrix.zw) * (uv - 0.5) + 0.5 + uFaceMapOffset;
-  return texture2D(uFrontMap, clamp(m, 0.0, 1.0));
+  if (any(lessThan(m, vec2(0.0))) || any(greaterThan(m, vec2(1.0)))) return vec4(0.0);
+  return texture2D(uFrontMap, m);
 }
 
 // 小丑牌 holo.fs 的合成：内容自身 HSL 加相位/网纹，提饱和提亮，再按内容对比度做 delta lerp。
@@ -418,6 +421,10 @@ ${ancestorEraseGLSL()}
   // 颜色类效果不走这道门，它们作用在下面的内容（图片 / 文字）上。
   // 色标带的透明度（holo4.a）乘在最后：某个相位处的色标越透明，箔在那里越淡。
   float alpha = mw * uHoloMix * uHoloAlpha * uOpacity * uHasHolo * card * ancestorClip * erase * holo4.a;
+  // 小丑牌合成但没有任何内容 / 卡面原图：不落回色带（色标在 UI 里是隐藏的），直接不出图。
+  if (uPaletteComposite > 0.5 && uHasImage < 0.5 && uHasText < 0.5 && uHasFront < 0.5) {
+    alpha = 0.0;
+  }
 
   // 图片 / 文字是「本层的内容」：效果作用在内容上，而不是被内容原地盖住。浮雕（刻纹 / 摩尔纹）
   // 与光泽光带都走与卡面同一批公共件，故图层和一张小卡面的表现一致。没有自有相位效果时
@@ -472,7 +479,8 @@ ${ancestorEraseGLSL()}
     : vec3(0.0);
   // 调色板合成 = 小丑牌：拿内容（图片 / 文字 / 卡面原图）自身颜色做 delta lerp + HSL 蓝偏；
   // 整段替换 palette 的 holo 合成，覆盖仍由本层的蒙版 / 不透明度决定。
-  if (uPaletteComposite > 0.5 && uHasHolo > 0.5 && uHasFront > 0.5) {
+  if (uPaletteComposite > 0.5 && uHasHolo > 0.5
+      && (uHasImage > 0.5 || uHasText > 0.5 || uHasFront > 0.5)) {
     vec4 front = faceFrontSample(vUv);
     vec3 content = uHasImage > 0.5 ? imgC : (uHasText > 0.5 ? textC : front.rgb);
     float contentA = uHasImage > 0.5

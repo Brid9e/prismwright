@@ -399,3 +399,20 @@ describe("LAYER_FRAGMENT 独立网格", () => {
     expect(GLSL_COMMON).toContain("vec3 holoHueShift(")
   })
 })
+
+describe("LAYER_FRAGMENT 小丑牌合成的边界（final review）", () => {
+  it("按内容可用性放行：图片/文字/原图任一即可，无原图不再误走色带", () => {
+    expect(LAYER_FRAGMENT).toContain(
+      "(uHasImage > 0.5 || uHasText > 0.5 || uHasFront > 0.5)"
+    )
+    expect(LAYER_FRAGMENT).toContain(
+      "uPaletteComposite > 0.5 && uHasImage < 0.5 && uHasText < 0.5 && uHasFront < 0.5"
+    )
+  })
+
+  it("卡面原图越界时按无内容处理，不拉边", () => {
+    expect(LAYER_FRAGMENT).toContain(
+      "if (any(lessThan(m, vec2(0.0))) || any(greaterThan(m, vec2(1.0)))) return vec4(0.0);"
+    )
+  })
+})
