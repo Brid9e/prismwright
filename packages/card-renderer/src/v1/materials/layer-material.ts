@@ -306,6 +306,15 @@ export function createLayerMaterial(p: LayerMaterialParams): ShaderMaterial {
       uOpacity: { value: u.uOpacity },
       uHasHolo: { value: u.hasHolo || paletteComposite ? 1 : 0 },
       uPaletteComposite: { value: paletteComposite ? 1 : 0 },
+      uPaletteHue: { value: paletteParams?.hue ?? 0.036 },
+      uPaletteSat: { value: paletteParams?.sat ?? 1.3 },
+      uPaletteLift: { value: paletteParams?.lift ?? 0.4 },
+      uPaletteTint: { value: paletteParams?.tint ?? 1 },
+      uPaletteDeltaBase: { value: paletteParams?.deltaBase ?? 0.2 },
+      uPaletteDeltaContrast: { value: paletteParams?.deltaContrast ?? 0.3 },
+      uPaletteDeltaBright: { value: paletteParams?.deltaBright ?? 0.1 },
+      uPaletteGrid: { value: paletteParams?.grid ?? 1 },
+      uPaletteGridScale: { value: paletteParams?.gridScale ?? 0.79 },
       // 内容浮雕只认本层自有的摩尔纹：`fx` 里的 uMoire* 在「本层没有 moire」时填的是继承
       // 自卡面的那份（见 toEffectUniforms），拿它当浮雕高度场会把整卡花纹压到图片 / 文字上。
       uOwnMoireCount: { value: ownMoireCount(p.effects) },

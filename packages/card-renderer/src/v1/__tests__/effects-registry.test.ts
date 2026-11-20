@@ -28,6 +28,7 @@ describe("EFFECT_REGISTRY", () => {
     expect(EFFECT_REGISTRY.lattice.role).toBe("phase")
     expect(EFFECT_REGISTRY.moire.role).toBe("phase")
     expect(EFFECT_REGISTRY.gloss.role).toBe("color")
+    expect(EFFECT_REGISTRY.holoGrid.role).toBe("color")
     expect(EFFECT_REGISTRY.maskPreset.role).toBe("alpha")
     expect(EFFECT_REGISTRY.imageMask.role).toBe("alpha")
   })
@@ -47,11 +48,12 @@ describe("EFFECT_REGISTRY", () => {
     expect(EFFECT_REGISTRY.image.scope).toBe("layer")
   })
 
-  it("EFFECT_KINDS 覆盖全部九种（含 image）", () => {
+  it("EFFECT_KINDS 覆盖全部十种（含 image）", () => {
     expect([...EFFECT_KINDS].sort()).toEqual(
       [
         "gradient",
         "gloss",
+        "holoGrid",
         "image",
         "imageMask",
         "lattice",
@@ -68,6 +70,7 @@ describe("EFFECT_REGISTRY", () => {
       gradient: "layer",
       lattice: "layer",
       palette: "layer",
+      holoGrid: "layer",
       moire: "both",
       gloss: "both",
       maskPreset: "both",
@@ -272,6 +275,7 @@ describe("EFFECT_REGISTRY", () => {
       imageMask: [],
       maskErase: [],
       palette: [],
+      holoGrid: ["size", "strength"],
       image: [],
     }
     for (const kind of EFFECT_KINDS) {

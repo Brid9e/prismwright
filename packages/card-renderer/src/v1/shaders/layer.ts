@@ -122,6 +122,20 @@ uniform float uOpacity;
 uniform float uHasHolo;
 // 调色板合成：0 = 色带（palette），1 = 小丑牌式 delta lerp + HSL 蓝偏。
 uniform float uPaletteComposite;
+// 小丑牌合成的可调项（默认即 holo.fs 的常量）。
+uniform float uPaletteHue;
+uniform float uPaletteSat;
+uniform float uPaletteLift;
+uniform float uPaletteTint;
+uniform float uPaletteDeltaBase;
+uniform float uPaletteDeltaContrast;
+uniform float uPaletteDeltaBright;
+uniform float uPaletteGrid;
+uniform float uPaletteGridScale;
+// 独立网格效果：最多一条，只贡献色相。
+uniform float uHoloGridCount;
+uniform float uHoloGridSize[1];
+uniform float uHoloGridStrength[1];
 uniform float uPhaseSpeed;
 uniform float uTiltGain;
 // 时间（秒）：推进全息相位，用于导出的透明 WebM。实时预览恒置 0（见 card-view），
@@ -265,21 +279,17 @@ vec4 faceFrontSample(vec2 uv) {
 
 // 小丑牌 holo.fs 的合成：内容自身 HSL 加相位/网纹，提饱和提亮，再按内容对比度做 delta lerp。
 // 不读调色板；delta 乘 holoMix / holoAlpha，保留图层的强度滑块。
-vec3 balatroTint(vec3 tex, vec2 uv, float phase) {
+vec3 balatroTint(vec3 tex, vec2 uv, float phase, float extraGrid) {
   vec4 hsl = balatroHSL(vec4(0.5 * tex + 0.5 * vec3(0.0, 0.0, 1.0), 1.0));
-  float gridsize = 0.79;
-  float fac = 0.5 * max(
-    max(0.0, abs(cos(uv.x * gridsize * 20.0)) * 7.0 - 6.0),
-    max(max(0.0, cos(uv.y * gridsize * 45.0 + uv.x * gridsize * 20.0) * 7.0 - 6.0),
-        max(0.0, cos(uv.y * gridsize * 45.0 - uv.x * gridsize * 20.0) * 7.0 - 6.0)));
-  hsl.x = fract(hsl.x + fract(phase * 0.036) + fac);
-  hsl.y = clamp(hsl.y * 1.3, 0.0, 1.0);
-  hsl.z = hsl.z * 0.6 + 0.4;
+  float fac = holoGridValue(uv, uPaletteGridScale) * uPaletteGrid;
+  hsl.x = fract(hsl.x + fract(phase * uPaletteHue) + fac + extraGrid);
+  hsl.y = clamp(hsl.y * uPaletteSat, 0.0, 1.0);
+  hsl.z = mix(hsl.z, 1.0, uPaletteLift);
   float hi = max(tex.r, max(tex.g, tex.b));
   float lo = min(tex.r, min(tex.g, tex.b));
-  float delta = 0.2 + 0.3 * (hi - lo) + 0.1 * hi;
+  float delta = uPaletteDeltaBase + uPaletteDeltaContrast * (hi - lo) + uPaletteDeltaBright * hi;
   delta = clamp(delta * uHoloMix * uHoloAlpha, 0.0, 1.0);
-  vec3 tinted = balatroRGB(hsl).rgb * vec3(0.9, 0.8, 1.2);
+  vec3 tinted = balatroRGB(hsl).rgb * mix(vec3(1.0), vec3(0.9, 0.8, 1.2), uPaletteTint);
   return mix(tex, tinted, delta);
 }
 
@@ -355,11 +365,16 @@ void main() {
   float phase = holoPhase(V, N, bUv, uOffset, uDistortionStrength, uNoiseStrength, poleView, poleSoft, uGradientStraight);
   vec4 holo4 = holoColor(phase, grazing, uPhaseSpeed, uTime);
   vec3 holo = holo4.rgb;
+  // 独立网格：色相加量；色带合成在 holoColor 之后偏移色相，小丑牌合成作为 extraGrid。
+  float independentGrid = uHoloGridCount > 0.5
+    ? holoGridValue(vUv, uHoloGridSize[0]) * uHoloGridStrength[0]
+    : 0.0;
 
   // 颜色组：光泽往图层全息色上叠加光带（与卡面共用 GLSL_COMMON.glossBands，主色换成 holo）。
   // 切带取本目标的有效摩尔纹——uMoire* 数组已由 host 侧按「自身，为空则继承卡面」填好（§6.4）。
   // 该步在蒙版权重之前：光带随 holo 一起被下面的 alpha（含 mw）相乘，故光泽自动跟随图层蒙版。
   holo = glossBands(holo, bUv, moireSum, R.x);
+  holo = holoHueShift(holo, independentGrid);
 
   // 内置蒙版启用时就不必采图：门控在前，省一次纹理取样。
   // 图蒙版按位移 / 缩放 / 旋转变换后采样；蒙版图没盖到的地方视为不裁切（maskInside = 0）。
@@ -463,7 +478,7 @@ ${ancestorEraseGLSL()}
     float contentA = uHasImage > 0.5
       ? imgA
       : (uHasText > 0.5 ? textA : mw * uOpacity * card * ancestorClip * erase * front.a);
-    outC = balatroTint(content, vUv, phase);
+    outC = balatroTint(content, vUv, phase, independentGrid);
     outA = contentA;
   }
   // 暗部颜色：只取图层的色相 / 饱和度，把它的亮度换成卡面底图的亮度，再按「暗度」给 alpha。

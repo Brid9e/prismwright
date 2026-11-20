@@ -155,3 +155,19 @@ describe("toEffectUniforms", () => {
     expect(u.uMaskPresetInvert.slice(0, 2)).toEqual([1, 0])
   })
 })
+
+describe("toEffectUniforms holoGrid", () => {
+  it("holoGrid 打包成 uHoloGridCount / uHoloGridSize / uHoloGridStrength", () => {
+    const u = toEffectUniforms([effect("holoGrid", { size: 0.5, strength: 0.8 })], [])
+    expect(u.uHoloGridCount).toBe(1)
+    expect(u.uHoloGridSize[0]).toBe(0.5)
+    expect(u.uHoloGridStrength[0]).toBe(0.8)
+  })
+
+  it("没有 holoGrid 时计数 0，数组填 0", () => {
+    const u = toEffectUniforms([], [])
+    expect(u.uHoloGridCount).toBe(0)
+    expect(u.uHoloGridSize).toEqual([0])
+    expect(u.uHoloGridStrength).toEqual([0])
+  })
+})

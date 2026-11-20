@@ -22,6 +22,7 @@ import type {
   MoireParams,
   GlossParams,
   PaletteParams,
+  HoloGridParams,
 } from "@cardbara/schema"
 import { patternModeCode } from "../mapping"
 
@@ -43,6 +44,8 @@ export const IMAGE_MASK_MAX = 1
 export const MASK_ERASE_MAX = 1
 /** 调色板（色标表）单目标上限：固定 1（一个目标一份调色板）。 */
 export const PALETTE_MAX = 1
+/** 独立网格单目标上限：固定 1（一个目标一份网格）。 */
+export const HOLO_GRID_MAX = 1
 /** 图片效果单目标上限：一个图层最多一张图片（要多张就多建图层）。 */
 export const IMAGE_MAX = 1
 
@@ -673,10 +676,134 @@ export const EFFECT_REGISTRY = {
         type: "colorStops",
         visibleWhen: (p) => p.composite !== "balatro",
       },
+      // 小丑牌合成的可调项：默认值即 holo.fs 的常量，只在 balatro 模式下显示。
+      {
+        key: "hue",
+        labelKey: "palette.hue",
+        type: "slider",
+        min: 0,
+        max: 0.2,
+        step: 0.001,
+        precision: 3,
+        visibleWhen: (p) => p.composite === "balatro",
+      },
+      {
+        key: "sat",
+        labelKey: "palette.sat",
+        type: "slider",
+        min: 0,
+        max: 2,
+        step: 0.01,
+        precision: 2,
+        visibleWhen: (p) => p.composite === "balatro",
+      },
+      {
+        key: "lift",
+        labelKey: "palette.lift",
+        type: "slider",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        precision: 2,
+        visibleWhen: (p) => p.composite === "balatro",
+      },
+      {
+        key: "tint",
+        labelKey: "palette.tint",
+        type: "slider",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        precision: 2,
+        visibleWhen: (p) => p.composite === "balatro",
+      },
+      {
+        key: "deltaBase",
+        labelKey: "palette.deltaBase",
+        type: "slider",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        precision: 2,
+        visibleWhen: (p) => p.composite === "balatro",
+      },
+      {
+        key: "deltaContrast",
+        labelKey: "palette.deltaContrast",
+        type: "slider",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        precision: 2,
+        visibleWhen: (p) => p.composite === "balatro",
+      },
+      {
+        key: "deltaBright",
+        labelKey: "palette.deltaBright",
+        type: "slider",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        precision: 2,
+        visibleWhen: (p) => p.composite === "balatro",
+      },
+      {
+        key: "grid",
+        labelKey: "palette.grid",
+        type: "slider",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        precision: 2,
+        visibleWhen: (p) => p.composite === "balatro",
+      },
+      {
+        key: "gridScale",
+        labelKey: "palette.gridScale",
+        type: "slider",
+        min: 0.1,
+        max: 2,
+        step: 0.01,
+        precision: 2,
+        visibleWhen: (p) => p.composite === "balatro",
+      },
     ],
     // 调色板是「资源 + 门控」型：色标不进任何定长数组 uniform——材质侧经 resolvePalette 直接解析，
     // 填进 `spectrum()` 的 `uColors` / `uStops`（见 materials/layer-material.ts）。
     packUniforms: () => ({}),
+  },
+  holoGrid: {
+    kind: "holoGrid",
+    role: "color",
+    scope: "layer",
+    maxPerTarget: HOLO_GRID_MAX,
+    defaultParams: () => parseParams("holoGrid", {}),
+    labelKey: "holoGrid.label",
+    fields: [
+      {
+        key: "size",
+        labelKey: "holoGrid.size",
+        type: "slider",
+        min: 0.1,
+        max: 2,
+        step: 0.01,
+        precision: 2,
+      },
+      {
+        key: "strength",
+        labelKey: "holoGrid.strength",
+        type: "slider",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        precision: 2,
+      },
+    ],
+    // 与小丑牌一样只贡献色相：size/strength 两个标量，进定长数组。
+    packUniforms: (p: HoloGridParams): PackedUniforms => ({
+      size: p.size,
+      strength: p.strength,
+    }),
   },
   maskPreset: {
     kind: "maskPreset",
@@ -1078,6 +1205,7 @@ export const EFFECT_KINDS: readonly EffectKind[] = [
   "moire",
   "gloss",
   "palette",
+  "holoGrid",
   "maskPreset",
   "imageMask",
   "maskErase",

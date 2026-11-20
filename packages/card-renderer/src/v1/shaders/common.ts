@@ -991,4 +991,21 @@ vec4 balatroHSL(vec4 c) {
   hsl.x = mod(hsl.x / 6.0, 1.0);
   return hsl;
 }
+
+// 交叉网纹（小丑牌 holo.fs 的 fac）：x 向 + 两条 ±45° 的细线，返回 0..~0.5 的色相加量。
+// 调色板的 balatro 合成与独立的「网格」效果共用这一份。
+float holoGridValue(vec2 uv, float size) {
+  return 0.5 * max(
+    max(0.0, abs(cos(uv.x * size * 20.0)) * 7.0 - 6.0),
+    max(max(0.0, cos(uv.y * size * 45.0 + uv.x * size * 20.0) * 7.0 - 6.0),
+        max(0.0, cos(uv.y * size * 45.0 - uv.x * size * 20.0) * 7.0 - 6.0)));
+}
+
+// 只改色相的偏移：独立网格叠到色带全息上时用（不动亮度）。
+vec3 holoHueShift(vec3 c, float amount) {
+  if (abs(amount) < 1e-4) return c;
+  vec4 h = balatroHSL(vec4(c, 1.0));
+  h.x = fract(h.x + amount);
+  return balatroRGB(h).rgb;
+}
 `

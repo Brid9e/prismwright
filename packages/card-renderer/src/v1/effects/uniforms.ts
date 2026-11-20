@@ -14,6 +14,7 @@ import {
   GRADIENT_MAX,
   LATTICE_MAX,
   GLOSS_MAX,
+  HOLO_GRID_MAX,
   MASK_PRESET_MAX,
   type PackedUniforms,
 } from "./registry"
@@ -47,6 +48,10 @@ export interface EffectUniformArrays {
   uLatticeStrength: number[]
   uLatticeOffsetX: number[]
   uLatticeOffsetY: number[]
+  // 颜色：独立网格
+  uHoloGridCount: number
+  uHoloGridSize: number[]
+  uHoloGridStrength: number[]
   // 颜色：光泽
   uGlossCount: number
   uGlossMode: number[]
@@ -158,6 +163,7 @@ export function toEffectUniforms(
   const gradientItems = pick(effects, "gradient", GRADIENT_MAX)
   const latticeItems = pick(effects, "lattice", LATTICE_MAX)
   const glossItems = pick(effects, "gloss", GLOSS_MAX)
+  const gridItems = pick(effects, "holoGrid", HOLO_GRID_MAX)
   const maskItems = pick(effects, "maskPreset", MASK_PRESET_MAX)
 
   return {
@@ -200,6 +206,10 @@ export function toEffectUniforms(
     uGlossOffsetX: fill(GLOSS_MAX, pack(glossItems, "offsetX")),
     uGlossOffsetY: fill(GLOSS_MAX, pack(glossItems, "offsetY")),
     uGlossSoftness: fill(GLOSS_MAX, pack(glossItems, "softness")),
+
+    uHoloGridCount: gridItems.length,
+    uHoloGridSize: fill(HOLO_GRID_MAX, pack(gridItems, "size")),
+    uHoloGridStrength: fill(HOLO_GRID_MAX, pack(gridItems, "strength")),
 
     uMaskPresetCount: maskItems.length,
     uMaskPresetSides: fill(MASK_PRESET_MAX, pack(maskItems, "sides")),

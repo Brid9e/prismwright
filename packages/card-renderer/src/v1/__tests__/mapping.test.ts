@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest"
 import {
   EffectSchema,
+  PaletteParamsSchema,
   DEFAULT_GRADIENT_PHASE,
   type Layer,
   type Effect,
@@ -259,12 +260,14 @@ describe("paletteIsActive", () => {
   })
 
   it("色标为空 → false（已添加但删空了色标，属合法中间态）", () => {
-    const empty: PaletteParams = { colors: [], composite: "palette" }
+    const empty: PaletteParams = PaletteParamsSchema.parse({ colors: [] })
     expect(paletteIsActive(empty)).toBe(false)
   })
 
   it("色标非空 → true", () => {
-    const nonEmpty: PaletteParams = { colors: [{ color: "#111111", at: 0 }], composite: "palette" }
+    const nonEmpty: PaletteParams = PaletteParamsSchema.parse({
+      colors: [{ color: "#111111", at: 0 }],
+    })
     expect(paletteIsActive(nonEmpty)).toBe(true)
   })
 })

@@ -382,3 +382,20 @@ describe("LAYER_FRAGMENT 小丑牌合成", () => {
     expect(GLSL_COMMON).toContain("vec4 balatroRGB(")
   })
 })
+
+describe("LAYER_FRAGMENT 小丑牌参数", () => {
+  it("小丑牌合成的可调项都来自 uniform", () => {
+    expect(LAYER_FRAGMENT).toContain("uniform float uPaletteHue;")
+    expect(LAYER_FRAGMENT).toContain("holoGridValue(uv, uPaletteGridScale) * uPaletteGrid")
+    expect(LAYER_FRAGMENT).toContain("mix(hsl.z, 1.0, uPaletteLift)")
+  })
+})
+
+describe("LAYER_FRAGMENT 独立网格", () => {
+  it("声明并使用 uHoloGrid* / holoHueShift", () => {
+    expect(LAYER_FRAGMENT).toContain("uniform float uHoloGridCount;")
+    expect(LAYER_FRAGMENT).toContain("uHoloGridSize[0]")
+    expect(LAYER_FRAGMENT).toContain("holoHueShift(")
+    expect(GLSL_COMMON).toContain("vec3 holoHueShift(")
+  })
+})
