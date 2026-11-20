@@ -33,7 +33,21 @@
     "colors": "Gradient",
     "composite": "Composite",
     "compositePalette": "Palette (bands)",
-    "compositeBalatro": "Balatro (shadow tint)"
+    "compositeBalatro": "Balatro (shadow tint)",
+    "hue": "Hue shift",
+    "sat": "Saturation",
+    "lift": "Lift",
+    "tint": "Blue tint",
+    "deltaBase": "Mix strength",
+    "deltaContrast": "Contrast boost",
+    "deltaBright": "Brightness boost",
+    "grid": "Grid strength",
+    "gridScale": "Grid size"
+  },
+  "holoGrid": {
+    "label": "Grid",
+    "size": "Density",
+    "strength": "Strength"
   },
   "lattice": {
     "label": "Lattice",

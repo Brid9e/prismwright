@@ -5,7 +5,7 @@
  * 以及离屏画布的尺寸与摆放换算。像素合成与 PNG 落盘在 `compose.ts`，需 DOM，故不在此处。
  */
 import { describe, it, expect } from "vitest"
-import { createLayer, type Effect, type Layer } from "@cardbara/schema"
+import { createLayer, PaletteParamsSchema, type Effect, type Layer } from "@cardbara/schema"
 import { CARD_ASPECT } from "@cardbara/renderer/v1"
 import {
   findFlattenGroups,
@@ -52,7 +52,7 @@ describe("isFlattenable", () => {
       id: "p1",
       enabled: true,
       kind: "palette",
-      params: { colors: [], composite: "palette" },
+      params: PaletteParamsSchema.parse({ colors: [] }),
     } as Effect)
     expect(isFlattenable(layer)).toBe(false)
   })
@@ -99,7 +99,7 @@ describe("findFlattenGroups", () => {
 
   it("中间被别的层隔开就各算各的——合并会改变绘制顺序", () => {
     const palette = imageLayer()
-    palette.effects.push({ id: "p", enabled: true, kind: "palette", params: { colors: [], composite: "palette" } } as Effect)
+    palette.effects.push({ id: "p", enabled: true, kind: "palette", params: PaletteParamsSchema.parse({ colors: [] }) } as Effect)
     const layers = [
       imageLayer({}, "assets/a.png"),
       palette,

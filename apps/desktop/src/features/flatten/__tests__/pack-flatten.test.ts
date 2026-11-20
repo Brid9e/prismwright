@@ -6,7 +6,7 @@
  * 像素合成由 `compose` 注入，本文件用假实现，只验编排。
  */
 import { describe, it, expect, vi } from "vitest"
-import { createCard, createEmptyPack, createLayer, type Effect, type Layer, type Pack } from "@cardbara/schema"
+import { createCard, createEmptyPack, createLayer, PaletteParamsSchema, type Effect, type Layer, type Pack } from "@cardbara/schema"
 import { applyFlatten, planFlatten } from "../pack-flatten"
 import { groupFingerprint } from "../flatten"
 
@@ -28,7 +28,7 @@ function imageLayer(path: string, over: Partial<Layer> = {}): Layer {
 /** 一层挂调色板：不可合并，用来把两组图片隔开。 */
 function holoLayer(): Layer {
   const layer = createLayer("全息")
-  layer.effects.push({ id: "p", enabled: true, kind: "palette", params: { colors: [], composite: "palette" } } as Effect)
+  layer.effects.push({ id: "p", enabled: true, kind: "palette", params: PaletteParamsSchema.parse({ colors: [] }) } as Effect)
   return layer
 }
 
