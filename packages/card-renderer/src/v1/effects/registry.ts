@@ -176,10 +176,10 @@ const MODE_OPTIONS: readonly FieldOption[] = [
   { value: "rays", labelKey: "pattern.rays" },
 ]
 
-/** 调色板的合成方式：色带 / 小丑牌式暗部叠色。 */
+/** 调色板的合成方式：色带 / 叠色式暗部叠色。 */
 const PALETTE_COMPOSITE_OPTIONS: readonly FieldOption[] = [
   { value: "palette", labelKey: "palette.compositePalette" },
-  { value: "balatro", labelKey: "palette.compositeBalatro" },
+  { value: "tint", labelKey: "palette.compositeTint" },
 ]
 
 /** 图蒙版来源的选择项（与 `MaskSource` 一一对应）。 */
@@ -669,14 +669,14 @@ export const EFFECT_REGISTRY = {
         type: "select",
         options: PALETTE_COMPOSITE_OPTIONS,
       },
-      // 小丑牌合成不读色标：隐藏色标，避免用户以为改色仍有反应。
+      // 叠色合成不读色标：隐藏色标，避免用户以为改色仍有反应。
       {
         key: "colors",
         labelKey: "palette.colors",
         type: "colorStops",
-        visibleWhen: (p) => p.composite !== "balatro",
+        visibleWhen: (p) => p.composite !== "tint",
       },
-      // 小丑牌合成的可调项：默认值即 holo.fs 的常量，只在 balatro 模式下显示。
+      // 叠色合成的可调项：默认值即 holo.fs 的常量，只在 叠色模式下显示。
       {
         key: "hue",
         labelKey: "palette.hue",
@@ -685,7 +685,7 @@ export const EFFECT_REGISTRY = {
         max: 0.2,
         step: 0.001,
         precision: 3,
-        visibleWhen: (p) => p.composite === "balatro",
+        visibleWhen: (p) => p.composite === "tint",
       },
       {
         key: "sat",
@@ -695,7 +695,7 @@ export const EFFECT_REGISTRY = {
         max: 2,
         step: 0.01,
         precision: 2,
-        visibleWhen: (p) => p.composite === "balatro",
+        visibleWhen: (p) => p.composite === "tint",
       },
       {
         key: "lift",
@@ -705,7 +705,7 @@ export const EFFECT_REGISTRY = {
         max: 1,
         step: 0.01,
         precision: 2,
-        visibleWhen: (p) => p.composite === "balatro",
+        visibleWhen: (p) => p.composite === "tint",
       },
       {
         key: "tint",
@@ -715,7 +715,7 @@ export const EFFECT_REGISTRY = {
         max: 1,
         step: 0.01,
         precision: 2,
-        visibleWhen: (p) => p.composite === "balatro",
+        visibleWhen: (p) => p.composite === "tint",
       },
       {
         key: "deltaBase",
@@ -725,7 +725,7 @@ export const EFFECT_REGISTRY = {
         max: 1,
         step: 0.01,
         precision: 2,
-        visibleWhen: (p) => p.composite === "balatro",
+        visibleWhen: (p) => p.composite === "tint",
       },
       {
         key: "deltaContrast",
@@ -735,7 +735,7 @@ export const EFFECT_REGISTRY = {
         max: 1,
         step: 0.01,
         precision: 2,
-        visibleWhen: (p) => p.composite === "balatro",
+        visibleWhen: (p) => p.composite === "tint",
       },
       {
         key: "deltaBright",
@@ -745,7 +745,7 @@ export const EFFECT_REGISTRY = {
         max: 1,
         step: 0.01,
         precision: 2,
-        visibleWhen: (p) => p.composite === "balatro",
+        visibleWhen: (p) => p.composite === "tint",
       },
       {
         key: "grid",
@@ -755,7 +755,7 @@ export const EFFECT_REGISTRY = {
         max: 1,
         step: 0.01,
         precision: 2,
-        visibleWhen: (p) => p.composite === "balatro",
+        visibleWhen: (p) => p.composite === "tint",
       },
       {
         key: "gridScale",
@@ -765,7 +765,27 @@ export const EFFECT_REGISTRY = {
         max: 2,
         step: 0.01,
         precision: 2,
-        visibleWhen: (p) => p.composite === "balatro",
+        visibleWhen: (p) => p.composite === "tint",
+      },
+      {
+        key: "offsetX",
+        labelKey: "palette.offsetX",
+        type: "slider",
+        min: -1,
+        max: 1,
+        step: 0.01,
+        precision: 2,
+        visibleWhen: (p) => p.composite === "tint",
+      },
+      {
+        key: "offsetY",
+        labelKey: "palette.offsetY",
+        type: "slider",
+        min: -1,
+        max: 1,
+        step: 0.01,
+        precision: 2,
+        visibleWhen: (p) => p.composite === "tint",
       },
     ],
     // 调色板是「资源 + 门控」型：色标不进任何定长数组 uniform——材质侧经 resolvePalette 直接解析，
@@ -798,11 +818,31 @@ export const EFFECT_REGISTRY = {
         step: 0.01,
         precision: 2,
       },
+      {
+        key: "offsetX",
+        labelKey: "holoGrid.offsetX",
+        type: "slider",
+        min: -1,
+        max: 1,
+        step: 0.01,
+        precision: 2,
+      },
+      {
+        key: "offsetY",
+        labelKey: "holoGrid.offsetY",
+        type: "slider",
+        min: -1,
+        max: 1,
+        step: 0.01,
+        precision: 2,
+      },
     ],
-    // 与小丑牌一样只贡献色相：size/strength 两个标量，进定长数组。
+    // 与叠色一样只贡献色相：size/strength/offset 进定长数组。
     packUniforms: (p: HoloGridParams): PackedUniforms => ({
       size: p.size,
       strength: p.strength,
+      offsetX: p.offsetX,
+      offsetY: p.offsetY,
     }),
   },
   maskPreset: {

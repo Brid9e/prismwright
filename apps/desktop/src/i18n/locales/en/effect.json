@@ -33,7 +33,7 @@
     "colors": "Gradient",
     "composite": "Composite",
     "compositePalette": "Palette (bands)",
-    "compositeBalatro": "Balatro (shadow tint)",
+    "compositeTint": "Shadow tint",
     "hue": "Hue shift",
     "sat": "Saturation",
     "lift": "Lift",
@@ -42,12 +42,16 @@
     "deltaContrast": "Contrast boost",
     "deltaBright": "Brightness boost",
     "grid": "Grid strength",
-    "gridScale": "Grid size"
+    "gridScale": "Grid size",
+    "offsetX": "Offset X",
+    "offsetY": "Offset Y"
   },
   "holoGrid": {
     "label": "Grid",
     "size": "Density",
-    "strength": "Strength"
+    "strength": "Strength",
+    "offsetX": "Offset X",
+    "offsetY": "Offset Y"
   },
   "lattice": {
     "label": "Lattice",

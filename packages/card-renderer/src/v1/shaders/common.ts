@@ -960,9 +960,9 @@ vec3 glossBands(vec3 baseColor, vec2 uv, float moireSum, float viewX) {
   return rgb;
 }
 
-// 小丑牌 holo.fs 的 HSL 工具（逐字同款公式，加 balatro 前缀避免与后续函数撞名）。
-// 只被图层片元的「调色板合成 = 小丑牌」分支使用。
-float balatroHue(float s, float t, float h) {
+// 叠色 holo.fs 的 HSL 工具（逐字同款公式，命名避免与后续函数撞名）。
+// 只被图层片元的「调色板合成 = 叠色」分支使用。
+float hue2rgb(float s, float t, float h) {
   float hs = mod(h, 1.0) * 6.0;
   if (hs < 1.0) return (t - s) * hs + s;
   if (hs < 3.0) return t;
@@ -970,14 +970,14 @@ float balatroHue(float s, float t, float h) {
   return s;
 }
 
-vec4 balatroRGB(vec4 c) {
+vec4 hslToRgb(vec4 c) {
   if (c.y < 0.0001) return vec4(vec3(c.z), c.a);
   float t = (c.z < 0.5) ? c.y * c.z + c.z : -c.y * c.z + (c.y + c.z);
   float s = 2.0 * c.z - t;
-  return vec4(balatroHue(s, t, c.x + 1.0 / 3.0), balatroHue(s, t, c.x), balatroHue(s, t, c.x - 1.0 / 3.0), c.w);
+  return vec4(hue2rgb(s, t, c.x + 1.0 / 3.0), hue2rgb(s, t, c.x), hue2rgb(s, t, c.x - 1.0 / 3.0), c.w);
 }
 
-vec4 balatroHSL(vec4 c) {
+vec4 rgbToHsl(vec4 c) {
   float low = min(c.r, min(c.g, c.b));
   float high = max(c.r, max(c.g, c.b));
   float delta = high - low;
@@ -992,8 +992,8 @@ vec4 balatroHSL(vec4 c) {
   return hsl;
 }
 
-// 交叉网纹（小丑牌 holo.fs 的 fac）：x 向 + 两条 ±45° 的细线，返回 0..~0.5 的色相加量。
-// 调色板的 balatro 合成与独立的「网格」效果共用这一份。
+// 交叉网纹（叠色 holo.fs 的 fac）：x 向 + 两条 ±45° 的细线，返回 0..~0.5 的色相加量。
+// 调色板的叠色合成与独立的「网格」效果共用这一份。
 float holoGridValue(vec2 uv, float size) {
   return 0.5 * max(
     max(0.0, abs(cos(uv.x * size * 20.0)) * 7.0 - 6.0),
@@ -1004,8 +1004,8 @@ float holoGridValue(vec2 uv, float size) {
 // 只改色相的偏移：独立网格叠到色带全息上时用（不动亮度）。
 vec3 holoHueShift(vec3 c, float amount) {
   if (abs(amount) < 1e-4) return c;
-  vec4 h = balatroHSL(vec4(c, 1.0));
+  vec4 h = rgbToHsl(vec4(c, 1.0));
   h.x = fract(h.x + amount);
-  return balatroRGB(h).rgb;
+  return hslToRgb(h).rgb;
 }
 `

@@ -16,7 +16,13 @@ describe("PaletteParamsSchema", () => {
       deltaBright: 0.1,
       grid: 1,
       gridScale: 0.79,
+      offsetX: 0,
+      offsetY: 0,
     })
+  })
+
+  it("旧的 composite=balatro 落到 tint", () => {
+    expect(PaletteParamsSchema.parse({ composite: "balatro" }).composite).toBe("tint")
   })
 
   it("旧格式（裸 hex 字符串数组）按下标等距展开并按 at 升序", () => {

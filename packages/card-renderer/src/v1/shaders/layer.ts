@@ -120,9 +120,9 @@ uniform float uHoloAlpha;
 uniform float uOpacity;
 // 1 = 本层出全息箔；0 = 纯蒙版（palette 色标为空）——本层不出箔，仅以蒙版裁切子树。
 uniform float uHasHolo;
-// 调色板合成：0 = 色带（palette），1 = 小丑牌式 delta lerp + HSL 蓝偏。
+// 调色板合成：0 = 色带（palette），1 = 叠色式 delta lerp + HSL 蓝偏。
 uniform float uPaletteComposite;
-// 小丑牌合成的可调项（默认即 holo.fs 的常量）。
+// 叠色合成的可调项（默认即 holo.fs 的常量）。
 uniform float uPaletteHue;
 uniform float uPaletteSat;
 uniform float uPaletteLift;
@@ -132,10 +132,14 @@ uniform float uPaletteDeltaContrast;
 uniform float uPaletteDeltaBright;
 uniform float uPaletteGrid;
 uniform float uPaletteGridScale;
+uniform float uPaletteOffsetX;
+uniform float uPaletteOffsetY;
 // 独立网格效果：最多一条，只贡献色相。
 uniform float uHoloGridCount;
 uniform float uHoloGridSize[1];
 uniform float uHoloGridStrength[1];
+uniform float uHoloGridOffsetX[1];
+uniform float uHoloGridOffsetY[1];
 uniform float uPhaseSpeed;
 uniform float uTiltGain;
 // 时间（秒）：推进全息相位，用于导出的透明 WebM。实时预览恒置 0（见 card-view），
@@ -280,11 +284,11 @@ vec4 faceFrontSample(vec2 uv) {
   return texture2D(uFrontMap, m);
 }
 
-// 小丑牌 holo.fs 的合成：内容自身 HSL 加相位/网纹，提饱和提亮，再按内容对比度做 delta lerp。
+// 叠色 holo.fs 的合成：内容自身 HSL 加相位/网纹，提饱和提亮，再按内容对比度做 delta lerp。
 // 不读调色板；delta 乘 holoMix / holoAlpha，保留图层的强度滑块。
-vec3 balatroTint(vec3 tex, vec2 uv, float phase, float extraGrid) {
-  vec4 hsl = balatroHSL(vec4(0.5 * tex + 0.5 * vec3(0.0, 0.0, 1.0), 1.0));
-  float fac = holoGridValue(uv, uPaletteGridScale) * uPaletteGrid;
+vec3 hslTint(vec3 tex, vec2 uv, float phase, float extraGrid) {
+  vec4 hsl = rgbToHsl(vec4(0.5 * tex + 0.5 * vec3(0.0, 0.0, 1.0), 1.0));
+  float fac = holoGridValue(uv - vec2(uPaletteOffsetX, uPaletteOffsetY), uPaletteGridScale) * uPaletteGrid;
   hsl.x = fract(hsl.x + fract(phase * uPaletteHue) + fac + extraGrid);
   hsl.y = clamp(hsl.y * uPaletteSat, 0.0, 1.0);
   hsl.z = mix(hsl.z, 1.0, uPaletteLift);
@@ -292,7 +296,7 @@ vec3 balatroTint(vec3 tex, vec2 uv, float phase, float extraGrid) {
   float lo = min(tex.r, min(tex.g, tex.b));
   float delta = uPaletteDeltaBase + uPaletteDeltaContrast * (hi - lo) + uPaletteDeltaBright * hi;
   delta = clamp(delta * uHoloMix * uHoloAlpha, 0.0, 1.0);
-  vec3 tinted = balatroRGB(hsl).rgb * mix(vec3(1.0), vec3(0.9, 0.8, 1.2), uPaletteTint);
+  vec3 tinted = hslToRgb(hsl).rgb * mix(vec3(1.0), vec3(0.9, 0.8, 1.2), uPaletteTint);
   return mix(tex, tinted, delta);
 }
 
@@ -368,9 +372,9 @@ void main() {
   float phase = holoPhase(V, N, bUv, uOffset, uDistortionStrength, uNoiseStrength, poleView, poleSoft, uGradientStraight);
   vec4 holo4 = holoColor(phase, grazing, uPhaseSpeed, uTime);
   vec3 holo = holo4.rgb;
-  // 独立网格：色相加量；色带合成在 holoColor 之后偏移色相，小丑牌合成作为 extraGrid。
+  // 独立网格：色相加量；色带合成在 holoColor 之后偏移色相，叠色合成作为 extraGrid。
   float independentGrid = uHoloGridCount > 0.5
-    ? holoGridValue(vUv, uHoloGridSize[0]) * uHoloGridStrength[0]
+    ? holoGridValue(vUv - vec2(uHoloGridOffsetX[0], uHoloGridOffsetY[0]), uHoloGridSize[0]) * uHoloGridStrength[0]
     : 0.0;
 
   // 颜色组：光泽往图层全息色上叠加光带（与卡面共用 GLSL_COMMON.glossBands，主色换成 holo）。
@@ -421,7 +425,7 @@ ${ancestorEraseGLSL()}
   // 颜色类效果不走这道门，它们作用在下面的内容（图片 / 文字）上。
   // 色标带的透明度（holo4.a）乘在最后：某个相位处的色标越透明，箔在那里越淡。
   float alpha = mw * uHoloMix * uHoloAlpha * uOpacity * uHasHolo * card * ancestorClip * erase * holo4.a;
-  // 小丑牌合成但没有任何内容 / 卡面原图：不落回色带（色标在 UI 里是隐藏的），直接不出图。
+  // 叠色合成但没有任何内容 / 卡面原图：不落回色带（色标在 UI 里是隐藏的），直接不出图。
   if (uPaletteComposite > 0.5 && uHasImage < 0.5 && uHasText < 0.5 && uHasFront < 0.5) {
     alpha = 0.0;
   }
@@ -477,7 +481,7 @@ ${ancestorEraseGLSL()}
   vec3 outC = outA > 1e-4
     ? (textC * textA + sceneC * sceneA * (1.0 - textA)) / outA
     : vec3(0.0);
-  // 调色板合成 = 小丑牌：拿内容（图片 / 文字 / 卡面原图）自身颜色做 delta lerp + HSL 蓝偏；
+  // 调色板合成 = 叠色：拿内容（图片 / 文字 / 卡面原图）自身颜色做 delta lerp + HSL 蓝偏；
   // 整段替换 palette 的 holo 合成，覆盖仍由本层的蒙版 / 不透明度决定。
   if (uPaletteComposite > 0.5 && uHasHolo > 0.5
       && (uHasImage > 0.5 || uHasText > 0.5 || uHasFront > 0.5)) {
@@ -486,7 +490,7 @@ ${ancestorEraseGLSL()}
     float contentA = uHasImage > 0.5
       ? imgA
       : (uHasText > 0.5 ? textA : mw * uOpacity * card * ancestorClip * erase * front.a);
-    outC = balatroTint(content, vUv, phase, independentGrid);
+    outC = hslTint(content, vUv, phase, independentGrid);
     outA = contentA;
   }
   // 暗部颜色：只取图层的色相 / 饱和度，把它的亮度换成卡面底图的亮度，再按「暗度」给 alpha。

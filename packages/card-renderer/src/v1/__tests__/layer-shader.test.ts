@@ -373,20 +373,20 @@ describe("LAYER_FRAGMENT 暗部颜色", () => {
   })
 })
 
-describe("LAYER_FRAGMENT 小丑牌合成", () => {
-  it("声明并使用了 uPaletteComposite / balatroTint", () => {
+describe("LAYER_FRAGMENT 叠色合成", () => {
+  it("声明并使用了 uPaletteComposite / hslTint", () => {
     expect(LAYER_FRAGMENT).toContain("uniform float uPaletteComposite;")
-    expect(LAYER_FRAGMENT).toContain("vec3 balatroTint(")
+    expect(LAYER_FRAGMENT).toContain("vec3 hslTint(")
     expect(LAYER_FRAGMENT).toContain("if (uPaletteComposite > 0.5")
-    expect(GLSL_COMMON).toContain("vec4 balatroHSL(")
-    expect(GLSL_COMMON).toContain("vec4 balatroRGB(")
+    expect(GLSL_COMMON).toContain("vec4 rgbToHsl(")
+    expect(GLSL_COMMON).toContain("vec4 hslToRgb(")
   })
 })
 
-describe("LAYER_FRAGMENT 小丑牌参数", () => {
-  it("小丑牌合成的可调项都来自 uniform", () => {
+describe("LAYER_FRAGMENT 叠色参数", () => {
+  it("叠色合成的可调项都来自 uniform", () => {
     expect(LAYER_FRAGMENT).toContain("uniform float uPaletteHue;")
-    expect(LAYER_FRAGMENT).toContain("holoGridValue(uv, uPaletteGridScale) * uPaletteGrid")
+    expect(LAYER_FRAGMENT).toContain("holoGridValue(uv - vec2(uPaletteOffsetX, uPaletteOffsetY), uPaletteGridScale) * uPaletteGrid")
     expect(LAYER_FRAGMENT).toContain("mix(hsl.z, 1.0, uPaletteLift)")
   })
 })
@@ -395,12 +395,13 @@ describe("LAYER_FRAGMENT 独立网格", () => {
   it("声明并使用 uHoloGrid* / holoHueShift", () => {
     expect(LAYER_FRAGMENT).toContain("uniform float uHoloGridCount;")
     expect(LAYER_FRAGMENT).toContain("uHoloGridSize[0]")
+    expect(LAYER_FRAGMENT).toContain("uHoloGridOffsetX[0]")
     expect(LAYER_FRAGMENT).toContain("holoHueShift(")
     expect(GLSL_COMMON).toContain("vec3 holoHueShift(")
   })
 })
 
-describe("LAYER_FRAGMENT 小丑牌合成的边界（final review）", () => {
+describe("LAYER_FRAGMENT 叠色合成的边界（final review）", () => {
   it("按内容可用性放行：图片/文字/原图任一即可，无原图不再误走色带", () => {
     expect(LAYER_FRAGMENT).toContain(
       "(uHasImage > 0.5 || uHasText > 0.5 || uHasFront > 0.5)"

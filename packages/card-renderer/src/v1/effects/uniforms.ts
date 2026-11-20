@@ -52,6 +52,8 @@ export interface EffectUniformArrays {
   uHoloGridCount: number
   uHoloGridSize: number[]
   uHoloGridStrength: number[]
+  uHoloGridOffsetX: number[]
+  uHoloGridOffsetY: number[]
   // 颜色：光泽
   uGlossCount: number
   uGlossMode: number[]
@@ -210,6 +212,8 @@ export function toEffectUniforms(
     uHoloGridCount: gridItems.length,
     uHoloGridSize: fill(HOLO_GRID_MAX, pack(gridItems, "size")),
     uHoloGridStrength: fill(HOLO_GRID_MAX, pack(gridItems, "strength")),
+    uHoloGridOffsetX: fill(HOLO_GRID_MAX, pack(gridItems, "offsetX")),
+    uHoloGridOffsetY: fill(HOLO_GRID_MAX, pack(gridItems, "offsetY")),
 
     uMaskPresetCount: maskItems.length,
     uMaskPresetSides: fill(MASK_PRESET_MAX, pack(maskItems, "sides")),

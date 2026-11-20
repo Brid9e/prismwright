@@ -908,12 +908,12 @@ describe("createLayerMaterial 暗部颜色", () => {
 })
 
 describe("createLayerMaterial 调色板合成", () => {
-  it("composite=balatro 接线到 uPaletteComposite，并强制开箔", () => {
+  it("composite=tint 接线到 uPaletteComposite，并强制开箔", () => {
     const effect = EffectSchema.parse({
       kind: "palette",
       id: "p",
       enabled: true,
-      params: { colors: ["#111111"], composite: "balatro" },
+      params: { colors: ["#111111"], composite: "tint" },
     }) as Effect
     const m = build({ effects: [effect] })
     expect(m.uniforms.uPaletteComposite.value).toBe(1)
@@ -926,13 +926,13 @@ describe("createLayerMaterial 调色板合成", () => {
   })
 })
 
-describe("createLayerMaterial 小丑牌参数", () => {
-  it("小丑牌参数接到 uPalette* uniform，默认值不变", () => {
+describe("createLayerMaterial 叠色参数", () => {
+  it("叠色参数接到 uPalette* uniform，默认值不变", () => {
     const effect = EffectSchema.parse({
       kind: "palette",
       id: "p",
       enabled: true,
-      params: { colors: ["#111111"], composite: "balatro", sat: 1.5, grid: 0.2 },
+      params: { colors: ["#111111"], composite: "tint", sat: 1.5, grid: 0.2, offsetX: 0.1, offsetY: -0.2 },
     }) as Effect
     const m = build({ effects: [effect] })
     expect(m.uniforms.uPaletteSat.value).toBe(1.5)
@@ -941,6 +941,8 @@ describe("createLayerMaterial 小丑牌参数", () => {
     expect(m.uniforms.uPaletteLift.value).toBe(0.4)
     expect(m.uniforms.uPaletteTint.value).toBe(1)
     expect(m.uniforms.uPaletteDeltaBase.value).toBe(0.2)
+    expect(m.uniforms.uPaletteOffsetX.value).toBe(0.1)
+    expect(m.uniforms.uPaletteOffsetY.value).toBe(-0.2)
   })
 })
 
@@ -950,11 +952,13 @@ describe("createLayerMaterial holoGrid", () => {
       kind: "holoGrid",
       id: "g",
       enabled: true,
-      params: { size: 0.6, strength: 0.5 },
+      params: { size: 0.6, strength: 0.5, offsetX: 0.1, offsetY: 0.2 },
     }) as Effect
     const m = build({ effects: [effect] })
     expect(m.uniforms.uHoloGridCount.value).toBe(1)
     expect(m.uniforms.uHoloGridSize.value[0]).toBe(0.6)
     expect(m.uniforms.uHoloGridStrength.value[0]).toBe(0.5)
+    expect(m.uniforms.uHoloGridOffsetX.value[0]).toBe(0.1)
+    expect(m.uniforms.uHoloGridOffsetY.value[0]).toBe(0.2)
   })
 })

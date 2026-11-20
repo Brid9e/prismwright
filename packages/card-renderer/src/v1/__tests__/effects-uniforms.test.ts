@@ -158,10 +158,12 @@ describe("toEffectUniforms", () => {
 
 describe("toEffectUniforms holoGrid", () => {
   it("holoGrid 打包成 uHoloGridCount / uHoloGridSize / uHoloGridStrength", () => {
-    const u = toEffectUniforms([effect("holoGrid", { size: 0.5, strength: 0.8 })], [])
+    const u = toEffectUniforms([effect("holoGrid", { size: 0.5, strength: 0.8, offsetX: 0.1, offsetY: -0.2 })], [])
     expect(u.uHoloGridCount).toBe(1)
     expect(u.uHoloGridSize[0]).toBe(0.5)
     expect(u.uHoloGridStrength[0]).toBe(0.8)
+    expect(u.uHoloGridOffsetX[0]).toBe(0.1)
+    expect(u.uHoloGridOffsetY[0]).toBe(-0.2)
   })
 
   it("没有 holoGrid 时计数 0，数组填 0", () => {
@@ -169,5 +171,7 @@ describe("toEffectUniforms holoGrid", () => {
     expect(u.uHoloGridCount).toBe(0)
     expect(u.uHoloGridSize).toEqual([0])
     expect(u.uHoloGridStrength).toEqual([0])
+    expect(u.uHoloGridOffsetX).toEqual([0])
+    expect(u.uHoloGridOffsetY).toEqual([0])
   })
 })

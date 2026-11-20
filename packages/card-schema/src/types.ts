@@ -526,7 +526,7 @@ export interface MaskEraseParams {
  * 之前的「空色板」语义一致，故删空所有色标即等于关掉箔，不必再删掉整条效果。颜色类效果不受
  * 此限制：它们照常作用在本层的图片 / 文字上，不需要调色板开路。
  */
-export type PaletteComposite = "palette" | "balatro"
+export type PaletteComposite = "palette" | "tint"
 
 export interface PaletteParams {
   /** 色标（最多 8 个），`at` 为相位域位置，驱动 `spectrum()` 调色板混色。默认 `[]`。 */
@@ -534,29 +534,33 @@ export interface PaletteParams {
   /**
    * 合成方式：
    * - `palette`：现有色带合成，全息色来自 `colors`；
-   * - `balatro`：小丑牌式合成，取内容自身的 HSL、加色相偏移与网纹，再按内容对比度做 delta lerp
+   * - `tint`：叠色合成，取内容自身的 HSL、加色相偏移与网纹，再按内容对比度做 delta lerp
    *   （不读 `colors`；亮度由 HSL 提亮 + 蓝偏得到，不会整卡发白）。
    * 默认 `palette`。
    */
   composite: PaletteComposite
-  /** 小丑牌合成：色相随相位的偏移倍率（默认 0.036）。 */
+  /** 叠色合成：色相随相位的偏移倍率（默认 0.036）。 */
   hue: number
-  /** 小丑牌合成：饱和度倍数（默认 1.3）。 */
+  /** 叠色合成：饱和度倍数（默认 1.3）。 */
   sat: number
-  /** 小丑牌合成：向白提亮的比例（0 = 不提亮，默认 0.4）。 */
+  /** 叠色合成：向白提亮的比例（0 = 不提亮，默认 0.4）。 */
   lift: number
-  /** 小丑牌合成：蓝偏强度（0 = 不偏色，1 = 通道权重 0.9/0.8/1.2，默认 1）。 */
+  /** 叠色合成：蓝偏强度（0 = 不偏色，1 = 通道权重 0.9/0.8/1.2，默认 1）。 */
   tint: number
-  /** 小丑牌合成：混入底色的基础 delta（默认 0.2）。 */
+  /** 叠色合成：混入底色的基础 delta（默认 0.2）。 */
   deltaBase: number
-  /** 小丑牌合成：内容对比度对 delta 的加成（默认 0.3）。 */
+  /** 叠色合成：内容对比度对 delta 的加成（默认 0.3）。 */
   deltaContrast: number
-  /** 小丑牌合成：内容亮度对 delta 的加成（默认 0.1）。 */
+  /** 叠色合成：内容亮度对 delta 的加成（默认 0.1）。 */
   deltaBright: number
-  /** 小丑牌合成：内置交叉网纹的强度（0 = 关，默认 1）。 */
+  /** 叠色合成：内置交叉网纹的强度（0 = 关，默认 1）。 */
   grid: number
-  /** 小丑牌合成：内置交叉网纹的密度（默认 0.79）。 */
+  /** 叠色合成：内置交叉网纹的密度（默认 0.79）。 */
   gridScale: number
+  /** 叠色合成：内置网纹的水平偏移（卡面 UV，-1..1，默认 0）。 */
+  offsetX: number
+  /** 叠色合成：内置网纹的垂直偏移（卡面 UV，-1..1，默认 0）。 */
+  offsetY: number
 }
 
 /** 独立网格效果（holoGrid）参数：交叉网纹的密度与色相加量强度。 */
@@ -565,6 +569,10 @@ export interface HoloGridParams {
   size: number
   /** 色相加量强度 0–1；默认 1。 */
   strength: number
+  /** 网纹水平偏移（卡面 UV，-1..1，默认 0）。 */
+  offsetX: number
+  /** 网纹垂直偏移（卡面 UV，-1..1，默认 0）。 */
+  offsetY: number
 }
 
 /**

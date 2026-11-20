@@ -33,7 +33,7 @@
     "colors": "渐变色",
     "composite": "合成方式",
     "compositePalette": "调色板（色带）",
-    "compositeBalatro": "小丑牌（暗部叠色）",
+    "compositeTint": "暗部叠色",
     "hue": "色相偏移",
     "sat": "饱和度",
     "lift": "提亮",
@@ -42,12 +42,16 @@
     "deltaContrast": "对比度加成",
     "deltaBright": "亮度加成",
     "grid": "网格强度",
-    "gridScale": "网格大小"
+    "gridScale": "网格大小",
+    "offsetX": "偏移 X",
+    "offsetY": "偏移 Y"
   },
   "holoGrid": {
     "label": "网格",
     "size": "密度",
-    "strength": "强度"
+    "strength": "强度",
+    "offsetX": "偏移 X",
+    "offsetY": "偏移 Y"
   },
   "lattice": {
     "label": "刻纹",

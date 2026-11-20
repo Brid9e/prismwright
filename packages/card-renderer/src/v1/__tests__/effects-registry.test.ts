@@ -275,7 +275,7 @@ describe("EFFECT_REGISTRY", () => {
       imageMask: [],
       maskErase: [],
       palette: [],
-      holoGrid: ["size", "strength"],
+      holoGrid: ["size", "strength", "offsetX", "offsetY"],
       image: [],
     }
     for (const kind of EFFECT_KINDS) {

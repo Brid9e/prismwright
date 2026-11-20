@@ -510,9 +510,13 @@ function normalizeStops(raw: readonly (string | ColorStop)[]): ColorStop[] {
  */
 export const PaletteParamsSchema = z.object({
   colors: z.array(ColorStopInputSchema).max(8).default([]).transform(normalizeStops),
-  // 合成方式：palette = 色带；balatro = 小丑牌式 delta lerp + HSL 蓝偏（不读 colors）。
-  composite: z.enum(["palette", "balatro"]).default("palette"),
-  // 小丑牌合成的可调项：默认值即 holo.fs 的常量。
+  // 合成方式：palette = 色带；tint = 叠色（HSL delta lerp + 蓝偏，不读 colors）。
+  composite: z
+    .enum(["palette", "tint", "balatro"])
+    .default("palette")
+    // 旧数据里的 balatro 落到 tint：数据里不再保留来源名。
+    .transform((v) => (v === "balatro" ? "tint" : v)),
+  // 叠色合成的可调项：默认值即 holo.fs 的常量。
   hue: z.number().min(0).max(0.2).default(0.036),
   sat: z.number().min(0).max(2).default(1.3),
   lift: z.number().min(0).max(1).default(0.4),
@@ -522,12 +526,16 @@ export const PaletteParamsSchema = z.object({
   deltaBright: z.number().min(0).max(1).default(0.1),
   grid: z.number().min(0).max(1).default(1),
   gridScale: z.number().min(0.1).max(2).default(0.79),
+  offsetX: z.number().min(-1).max(1).default(0),
+  offsetY: z.number().min(-1).max(1).default(0),
 })
 
 /** 独立网格效果（holoGrid）：交叉网纹的密度 + 色相加量强度。 */
 export const HoloGridParamsSchema = z.object({
   size: z.number().min(0.1).max(2).default(0.79),
   strength: z.number().min(0).max(1).default(1),
+  offsetX: z.number().min(-1).max(1).default(0),
+  offsetY: z.number().min(-1).max(1).default(0),
 })
 
 /**
