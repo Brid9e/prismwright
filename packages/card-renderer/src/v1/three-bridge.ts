@@ -5,7 +5,10 @@
  * 使 `mapping.ts` 等纯逻辑保持零 three 依赖，也让「three 版本差异」只在此文件处理。
  *
  * `screen` 需要自定义混合：`src=ONE, dst=ONE_MINUS_SRC_COLOR`（即 `src + dst*(1-src)`），
- * three 未内建，故用 `CustomBlending` 手工指定。其余三种用 three 内建枚举。
+ * three 未内建，故用 `CustomBlending` 手工指定。
+ *
+ * `shadow`（暗部颜色）由图层片元完成「按卡面底图亮度取暗部、保留亮度」的合成，颜色与 alpha
+ * 已是最终 over 需要的值，故这里仍用 `NormalBlending`。
  */
 import {
   AdditiveBlending,
@@ -36,6 +39,9 @@ export function resolveBlending(mode: BlendName): BlendingConfig {
       return { blending: MultiplyBlending }
     case "screen":
       return { blending: CustomBlending, blendSrc: OneFactor, blendDst: OneMinusSrcColorFactor }
+    case "shadow":
+      // 片元已按「底色亮度」算好颜色与 alpha，直接走 over（见 shaders/layer.ts）。
+      return { blending: NormalBlending }
     case "normal":
     default:
       return { blending: NormalBlending }

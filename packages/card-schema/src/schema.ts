@@ -101,8 +101,13 @@ export const DEFAULT_BUMP_LIGHT_COLOR = "#ffffff"
 /** 稀有度档位枚举，取值与手写类型 `Rarity` 一致；数组顺序即由低到高的排序。 */
 export const RaritySchema = z.enum(["common", "rare", "epic", "legendary"])
 
-/** 混合模式枚举，取值与手写类型 `BlendMode` 一致（对应 canvas 合成操作）。 */
-export const BlendModeSchema = z.enum(["add", "normal", "screen", "multiply"])
+/**
+ * 混合模式枚举，取值与手写类型 `BlendMode` 一致。
+ *
+ * `add` / `normal` / `screen` / `multiply` 对应 canvas 合成操作；`shadow`（暗部颜色）不是
+ * 固定混合函数——图层片元按卡面底图亮度把图层色相铺到暗部、保留底图亮度，再由 normal 合成。
+ */
+export const BlendModeSchema = z.enum(["add", "normal", "screen", "multiply", "shadow"])
 
 /** 蒙版语义枚举，取值与手写类型 `MaskMode` 一致。 */
 export const MaskModeSchema = z.enum(["line", "fill"])

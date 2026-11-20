@@ -39,6 +39,7 @@
     "label": "混合模式",
     "add": "叠加",
     "normal": "正常",
+    "shadow": "暗部颜色",
     "screen": "滤色",
     "multiply": "正片叠底"
   },

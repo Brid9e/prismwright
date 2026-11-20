@@ -361,3 +361,14 @@ describe("图层内容吃同一套颜色效果链", () => {
     expect(GLSL_COMMON).toContain("if (uOwnMoireCount < 0.5 && uLatticeCount < 0.5) return 1.0;")
   })
 })
+
+describe("LAYER_FRAGMENT 暗部颜色", () => {
+  it("声明并使用了 uShadowMode / uHasFront / baseFrontLum", () => {
+    expect(LAYER_FRAGMENT).toContain("uniform float uShadowMode;")
+    expect(LAYER_FRAGMENT).toContain("uniform float uHasFront;")
+    expect(LAYER_FRAGMENT).toContain("float baseFrontLum(vec2 uv)")
+    expect(LAYER_FRAGMENT).toContain("if (uShadowMode > 0.5 && uHasFront > 0.5)")
+    // 保留底图亮度的关键：结果色亮度被换成 baseLum，而不是图层自己的亮度。
+    expect(LAYER_FRAGMENT).toContain("outC * (baseLum / styleLum)")
+  })
+})

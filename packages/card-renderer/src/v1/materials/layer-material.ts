@@ -149,6 +149,8 @@ export function createLayerMaterial(p: LayerMaterialParams): ShaderMaterial {
   // 避免二者取自不同列表时「门开着却采样到默认调色板」。
   const palette = paletteUniforms(resolvePalette(p.layer.effects)?.colors ?? [])
   const blend = resolveBlending(u.blend)
+  // 暗部颜色：片元拿卡面原图算亮度，把色相铺进暗部；没有原图时退化为正常叠加。
+  const shadow = u.blend === "shadow"
 
   // 本层效果 + 卡面 moire 继承一并打包成定长数组（键即着色器 uniform 名）。
   const fx = toEffectUniforms(p.effects, p.inheritedMoire)
@@ -382,6 +384,9 @@ export function createLayerMaterial(p: LayerMaterialParams): ShaderMaterial {
       uBumpInvert: { value: bump.invert ? 1 : 0 },
       uFaceMapMatrix: { value: new Vector4(...faceUv.matrix) },
       uFaceMapOffset: { value: new Vector2(faceUv.offsetU, faceUv.offsetV) },
+      // 暗部颜色（blend = shadow）：片元按卡面原图亮度把色相铺进暗部；无原图时整段跳过。
+      uShadowMode: { value: shadow ? 1 : 0 },
+      uHasFront: { value: frontValid ? 1 : 0 },
     },
     vertexShader: GLSL_VERTEX,
     fragmentShader: LAYER_FRAGMENT,

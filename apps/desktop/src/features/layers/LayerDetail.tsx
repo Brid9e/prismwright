@@ -29,7 +29,7 @@ import { imageTargetForEffect } from "../effects/effectOps"
 import { TextDetail } from "./TextDetail"
 
 /** 混合模式取值，与 `layer.blend.*` 的 i18n key 一一对应。「正常」置首：它是新建层的默认。 */
-const BLEND_MODES: BlendMode[] = ["normal", "add", "screen", "multiply"]
+const BLEND_MODES: BlendMode[] = ["normal", "shadow", "add", "screen", "multiply"]
 
 /**
  * 三个合成滑块的取值范围与提交方式；范围与 schema 的字段约束保持一致。

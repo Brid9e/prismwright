@@ -24,7 +24,7 @@
 export type Rarity = "common" | "rare" | "epic" | "legendary"
 
 /** 图层与下层的混合模式，取值对齐 canvas `globalCompositeOperation`。 */
-export type BlendMode = "add" | "normal" | "screen" | "multiply"
+export type BlendMode = "add" | "normal" | "screen" | "multiply" | "shadow"
 
 /** 蒙版语义：`line` = 暗线处出全息（对齐 buling 线稿）；`fill` = 亮区出全息。 */
 export type MaskMode = "line" | "fill"

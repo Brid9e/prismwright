@@ -9,7 +9,7 @@
  * `new ShaderMaterial(...)` 是纯 JS，不需要 GL 上下文，因此可以在 node 里构造。
  */
 import { describe, it, expect } from "vitest"
-import { Color, DataTexture, RGBAFormat, Vector2, Vector4, type Texture } from "three"
+import { Color, DataTexture, NormalBlending, RGBAFormat, Vector2, Vector4, type Texture } from "three"
 import {
   EffectSchema,
   CardFaceSchema,
@@ -881,5 +881,28 @@ describe("createLayerMaterial 的法线（bump）绑定", () => {
     })
     expect(m.uniforms.uBumpSource.value).toBe(1)
     expect(m.uniforms.uNormalMap.value).toBe(normalTexture)
+  })
+})
+
+describe("createLayerMaterial 暗部颜色", () => {
+  // 暗部颜色不是固定混合函数：片元按卡面原图亮度把色相铺进暗部、保留底图亮度，故混合走 normal。
+  it("shadow 用 normal 混合，由 uShadowMode 打开片元合成", () => {
+    const material = build({
+      layer: LayerSchema.parse({ id: "l1", blend: "shadow" }),
+      front: placeholder,
+    })
+    expect(material.blending).toBe(NormalBlending)
+    expect(material.uniforms.uShadowMode.value).toBe(1)
+    expect(material.uniforms.uHasFront.value).toBe(1)
+  })
+
+  it("shadow 没有卡面原图时 uHasFront=0，片元跳过暗部合成", () => {
+    const material = build({ layer: LayerSchema.parse({ id: "l1", blend: "shadow" }) })
+    expect(material.uniforms.uShadowMode.value).toBe(1)
+    expect(material.uniforms.uHasFront.value).toBe(0)
+  })
+
+  it("其他混合模式 uShadowMode=0", () => {
+    expect(build().uniforms.uShadowMode.value).toBe(0)
   })
 })

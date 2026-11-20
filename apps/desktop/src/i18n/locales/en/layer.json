@@ -39,6 +39,7 @@
     "label": "Blend",
     "add": "Add",
     "normal": "Normal",
+    "shadow": "Shadow color",
     "screen": "Screen",
     "multiply": "Multiply"
   },

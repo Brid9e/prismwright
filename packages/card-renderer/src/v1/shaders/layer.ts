@@ -198,6 +198,9 @@ uniform float uBumpInvert;
 // 卡面底图的采样变换（继承卡面法线时用）：与卡面片元的 uMapMatrix / uMapOffset 同构。
 uniform vec4 uFaceMapMatrix;
 uniform vec2 uFaceMapOffset;
+// 暗部颜色（blend = shadow）：片元按卡面原图亮度把图层色相铺进暗部，保留底图亮度。
+uniform float uShadowMode;
+uniform float uHasFront;
 
 // 本层自己的擦除图（maskErase 挂在**本层**效果列表里）；uHasLayerErase = 0 时整段跳过。
 uniform sampler2D uLayerEraseMap;
@@ -242,6 +245,14 @@ float faceBumpHeightAt(vec2 uv) {
   vec2 m = mat2(uFaceMapMatrix.xy, uFaceMapMatrix.zw) * (uv - 0.5) + 0.5 + uFaceMapOffset;
   if (any(lessThan(m, vec2(0.0))) || any(greaterThan(m, vec2(1.0)))) return 0.0;
   return bumpLuma(texture2D(uFrontMap, m).rgb);
+}
+
+// 暗部颜色用：卡面原图（按底图变换采样）的亮度。图外按 1（亮）处理——宁可不显花纹，
+// 也不要把「没有底图」的地方当成暗部铺满。
+float baseFrontLum(vec2 uv) {
+  vec2 m = mat2(uFaceMapMatrix.xy, uFaceMapMatrix.zw) * (uv - 0.5) + 0.5 + uFaceMapOffset;
+  if (any(lessThan(m, vec2(0.0))) || any(greaterThan(m, vec2(1.0)))) return 1.0;
+  return dot(texture2D(uFrontMap, m).rgb, vec3(0.299, 0.587, 0.114));
 }
 
 // 本层法线的高度场：来源 2 = 卡面底图，否则 = 本层图片（来源 0 不会进入这段）。
@@ -416,6 +427,15 @@ ${ancestorEraseGLSL()}
   vec3 outC = outA > 1e-4
     ? (textC * textA + sceneC * sceneA * (1.0 - textA)) / outA
     : vec3(0.0);
+  // 暗部颜色：只取图层的色相 / 饱和度，把它的亮度换成卡面底图的亮度，再按「暗度」给 alpha。
+  // 于是暗处显花纹、亮处淡出；over 合成后像素亮度仍是底图亮度，卡牌明暗不变。
+  if (uShadowMode > 0.5 && uHasFront > 0.5) {
+    float baseLum = baseFrontLum(vUv);
+    float dark = 1.0 - clamp(baseLum, 0.0, 1.0);
+    float styleLum = dot(outC, vec3(0.299, 0.587, 0.114));
+    outC = styleLum > 1e-3 ? outC * (baseLum / styleLum) : vec3(baseLum);
+    outA *= dark;
+  }
   // 绘画辅助（只在交互视图的绘画会话里打开）：被本层画笔擦掉的位置铺半透明底色，否则擦完
   // 只剩下层透出来，看不出这一层自己擦到哪了。只算本层那张图——整卡擦除的底色由卡面材质
   // 负责，这里再叠一次只会更深。用数值而非色值字面量：写 #hex 会被 lint 的硬编码色值规则命中。
