@@ -28,7 +28,7 @@ function imageLayer(path: string, over: Partial<Layer> = {}): Layer {
 /** 一层挂调色板：不可合并，用来把两组图片隔开。 */
 function holoLayer(): Layer {
   const layer = createLayer("全息")
-  layer.effects.push({ id: "p", enabled: true, kind: "palette", params: { colors: [] } } as Effect)
+  layer.effects.push({ id: "p", enabled: true, kind: "palette", params: { colors: [], composite: "palette" } } as Effect)
   return layer
 }
 

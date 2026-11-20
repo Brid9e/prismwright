@@ -959,4 +959,36 @@ vec3 glossBands(vec3 baseColor, vec2 uv, float moireSum, float viewX) {
   }
   return rgb;
 }
+
+// 小丑牌 holo.fs 的 HSL 工具（逐字同款公式，加 balatro 前缀避免与后续函数撞名）。
+// 只被图层片元的「调色板合成 = 小丑牌」分支使用。
+float balatroHue(float s, float t, float h) {
+  float hs = mod(h, 1.0) * 6.0;
+  if (hs < 1.0) return (t - s) * hs + s;
+  if (hs < 3.0) return t;
+  if (hs < 4.0) return (t - s) * (4.0 - hs) + s;
+  return s;
+}
+
+vec4 balatroRGB(vec4 c) {
+  if (c.y < 0.0001) return vec4(vec3(c.z), c.a);
+  float t = (c.z < 0.5) ? c.y * c.z + c.z : -c.y * c.z + (c.y + c.z);
+  float s = 2.0 * c.z - t;
+  return vec4(balatroHue(s, t, c.x + 1.0 / 3.0), balatroHue(s, t, c.x), balatroHue(s, t, c.x - 1.0 / 3.0), c.w);
+}
+
+vec4 balatroHSL(vec4 c) {
+  float low = min(c.r, min(c.g, c.b));
+  float high = max(c.r, max(c.g, c.b));
+  float delta = high - low;
+  float sum = high + low;
+  vec4 hsl = vec4(0.0, 0.0, 0.5 * sum, c.a);
+  if (delta == 0.0) return hsl;
+  hsl.y = (hsl.z < 0.5) ? delta / sum : delta / (2.0 - sum);
+  if (high == c.r) hsl.x = (c.g - c.b) / delta;
+  else if (high == c.g) hsl.x = (c.b - c.r) / delta + 2.0;
+  else hsl.x = (c.r - c.g) / delta + 4.0;
+  hsl.x = mod(hsl.x / 6.0, 1.0);
+  return hsl;
+}
 `

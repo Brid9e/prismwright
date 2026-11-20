@@ -259,12 +259,12 @@ describe("paletteIsActive", () => {
   })
 
   it("色标为空 → false（已添加但删空了色标，属合法中间态）", () => {
-    const empty: PaletteParams = { colors: [] }
+    const empty: PaletteParams = { colors: [], composite: "palette" }
     expect(paletteIsActive(empty)).toBe(false)
   })
 
   it("色标非空 → true", () => {
-    const nonEmpty: PaletteParams = { colors: [{ color: "#111111", at: 0 }] }
+    const nonEmpty: PaletteParams = { colors: [{ color: "#111111", at: 0 }], composite: "palette" }
     expect(paletteIsActive(nonEmpty)).toBe(true)
   })
 })

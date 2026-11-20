@@ -52,7 +52,7 @@ describe("isFlattenable", () => {
       id: "p1",
       enabled: true,
       kind: "palette",
-      params: { colors: [] },
+      params: { colors: [], composite: "palette" },
     } as Effect)
     expect(isFlattenable(layer)).toBe(false)
   })
@@ -99,7 +99,7 @@ describe("findFlattenGroups", () => {
 
   it("中间被别的层隔开就各算各的——合并会改变绘制顺序", () => {
     const palette = imageLayer()
-    palette.effects.push({ id: "p", enabled: true, kind: "palette", params: { colors: [] } } as Effect)
+    palette.effects.push({ id: "p", enabled: true, kind: "palette", params: { colors: [], composite: "palette" } } as Effect)
     const layers = [
       imageLayer({}, "assets/a.png"),
       palette,

@@ -372,3 +372,13 @@ describe("LAYER_FRAGMENT 暗部颜色", () => {
     expect(LAYER_FRAGMENT).toContain("outC * (baseLum / styleLum)")
   })
 })
+
+describe("LAYER_FRAGMENT 小丑牌合成", () => {
+  it("声明并使用了 uPaletteComposite / balatroTint", () => {
+    expect(LAYER_FRAGMENT).toContain("uniform float uPaletteComposite;")
+    expect(LAYER_FRAGMENT).toContain("vec3 balatroTint(")
+    expect(LAYER_FRAGMENT).toContain("if (uPaletteComposite > 0.5")
+    expect(GLSL_COMMON).toContain("vec4 balatroHSL(")
+    expect(GLSL_COMMON).toContain("vec4 balatroRGB(")
+  })
+})

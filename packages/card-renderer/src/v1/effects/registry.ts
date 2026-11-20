@@ -173,6 +173,12 @@ const MODE_OPTIONS: readonly FieldOption[] = [
   { value: "rays", labelKey: "pattern.rays" },
 ]
 
+/** 调色板的合成方式：色带 / 小丑牌式暗部叠色。 */
+const PALETTE_COMPOSITE_OPTIONS: readonly FieldOption[] = [
+  { value: "palette", labelKey: "palette.compositePalette" },
+  { value: "balatro", labelKey: "palette.compositeBalatro" },
+]
+
 /** 图蒙版来源的选择项（与 `MaskSource` 一一对应）。 */
 const MASK_SOURCE_OPTIONS: readonly FieldOption[] = [
   { value: "image", labelKey: "imageMask.sourceImage" },
@@ -653,7 +659,21 @@ export const EFFECT_REGISTRY = {
     // 与 maskPreset 的 `id: "polygon"` 同理——新建时给一组可见初值，而非空。
     defaultParams: () => parseParams("palette", { colors: DEFAULT_STOPS.map((s) => ({ ...s })) }),
     labelKey: "palette.label",
-    fields: [{ key: "colors", labelKey: "palette.colors", type: "colorStops" }],
+    fields: [
+      {
+        key: "composite",
+        labelKey: "palette.composite",
+        type: "select",
+        options: PALETTE_COMPOSITE_OPTIONS,
+      },
+      // 小丑牌合成不读色标：隐藏色标，避免用户以为改色仍有反应。
+      {
+        key: "colors",
+        labelKey: "palette.colors",
+        type: "colorStops",
+        visibleWhen: (p) => p.composite !== "balatro",
+      },
+    ],
     // 调色板是「资源 + 门控」型：色标不进任何定长数组 uniform——材质侧经 resolvePalette 直接解析，
     // 填进 `spectrum()` 的 `uColors` / `uStops`（见 materials/layer-material.ts）。
     packUniforms: () => ({}),

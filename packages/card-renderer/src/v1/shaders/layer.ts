@@ -120,6 +120,8 @@ uniform float uHoloAlpha;
 uniform float uOpacity;
 // 1 = 本层出全息箔；0 = 纯蒙版（palette 色标为空）——本层不出箔，仅以蒙版裁切子树。
 uniform float uHasHolo;
+// 调色板合成：0 = 色带（palette），1 = 小丑牌式 delta lerp + HSL 蓝偏。
+uniform float uPaletteComposite;
 uniform float uPhaseSpeed;
 uniform float uTiltGain;
 // 时间（秒）：推进全息相位，用于导出的透明 WebM。实时预览恒置 0（见 card-view），
@@ -253,6 +255,32 @@ float baseFrontLum(vec2 uv) {
   vec2 m = mat2(uFaceMapMatrix.xy, uFaceMapMatrix.zw) * (uv - 0.5) + 0.5 + uFaceMapOffset;
   if (any(lessThan(m, vec2(0.0))) || any(greaterThan(m, vec2(1.0)))) return 1.0;
   return dot(texture2D(uFrontMap, m).rgb, vec3(0.299, 0.587, 0.114));
+}
+
+// 卡面原图按底图变换（fit / offset / scale / rotation）采样：与卡面片元看到的图同一套换算。
+vec4 faceFrontSample(vec2 uv) {
+  vec2 m = mat2(uFaceMapMatrix.xy, uFaceMapMatrix.zw) * (uv - 0.5) + 0.5 + uFaceMapOffset;
+  return texture2D(uFrontMap, clamp(m, 0.0, 1.0));
+}
+
+// 小丑牌 holo.fs 的合成：内容自身 HSL 加相位/网纹，提饱和提亮，再按内容对比度做 delta lerp。
+// 不读调色板；delta 乘 holoMix / holoAlpha，保留图层的强度滑块。
+vec3 balatroTint(vec3 tex, vec2 uv, float phase) {
+  vec4 hsl = balatroHSL(vec4(0.5 * tex + 0.5 * vec3(0.0, 0.0, 1.0), 1.0));
+  float gridsize = 0.79;
+  float fac = 0.5 * max(
+    max(0.0, abs(cos(uv.x * gridsize * 20.0)) * 7.0 - 6.0),
+    max(max(0.0, cos(uv.y * gridsize * 45.0 + uv.x * gridsize * 20.0) * 7.0 - 6.0),
+        max(0.0, cos(uv.y * gridsize * 45.0 - uv.x * gridsize * 20.0) * 7.0 - 6.0)));
+  hsl.x = fract(hsl.x + fract(phase * 0.036) + fac);
+  hsl.y = clamp(hsl.y * 1.3, 0.0, 1.0);
+  hsl.z = hsl.z * 0.6 + 0.4;
+  float hi = max(tex.r, max(tex.g, tex.b));
+  float lo = min(tex.r, min(tex.g, tex.b));
+  float delta = 0.2 + 0.3 * (hi - lo) + 0.1 * hi;
+  delta = clamp(delta * uHoloMix * uHoloAlpha, 0.0, 1.0);
+  vec3 tinted = balatroRGB(hsl).rgb * vec3(0.9, 0.8, 1.2);
+  return mix(tex, tinted, delta);
 }
 
 // 本层法线的高度场：来源 2 = 卡面底图，否则 = 本层图片（来源 0 不会进入这段）。
@@ -427,6 +455,17 @@ ${ancestorEraseGLSL()}
   vec3 outC = outA > 1e-4
     ? (textC * textA + sceneC * sceneA * (1.0 - textA)) / outA
     : vec3(0.0);
+  // 调色板合成 = 小丑牌：拿内容（图片 / 文字 / 卡面原图）自身颜色做 delta lerp + HSL 蓝偏；
+  // 整段替换 palette 的 holo 合成，覆盖仍由本层的蒙版 / 不透明度决定。
+  if (uPaletteComposite > 0.5 && uHasHolo > 0.5 && uHasFront > 0.5) {
+    vec4 front = faceFrontSample(vUv);
+    vec3 content = uHasImage > 0.5 ? imgC : (uHasText > 0.5 ? textC : front.rgb);
+    float contentA = uHasImage > 0.5
+      ? imgA
+      : (uHasText > 0.5 ? textA : mw * uOpacity * card * ancestorClip * erase * front.a);
+    outC = balatroTint(content, vUv, phase);
+    outA = contentA;
+  }
   // 暗部颜色：只取图层的色相 / 饱和度，把它的亮度换成卡面底图的亮度，再按「暗度」给 alpha。
   // 于是暗处显花纹、亮处淡出；over 合成后像素亮度仍是底图亮度，卡牌明暗不变。
   if (uShadowMode > 0.5 && uHasFront > 0.5) {

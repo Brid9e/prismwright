@@ -509,6 +509,8 @@ function normalizeStops(raw: readonly (string | ColorStop)[]): ColorStop[] {
  */
 export const PaletteParamsSchema = z.object({
   colors: z.array(ColorStopInputSchema).max(8).default([]).transform(normalizeStops),
+  // 合成方式：palette = 色带；balatro = 小丑牌式 delta lerp + HSL 蓝偏（不读 colors）。
+  composite: z.enum(["palette", "balatro"]).default("palette"),
 })
 
 /**

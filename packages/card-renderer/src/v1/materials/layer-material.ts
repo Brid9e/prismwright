@@ -147,7 +147,10 @@ export function createLayerMaterial(p: LayerMaterialParams): ShaderMaterial {
   const u = toUniforms(p.layer)
   // 色标与 uHasHolo 同源：都取本层效果列表（`toUniforms(p.layer)` 也读 `layer.effects`），
   // 避免二者取自不同列表时「门开着却采样到默认调色板」。
-  const palette = paletteUniforms(resolvePalette(p.layer.effects)?.colors ?? [])
+  const paletteParams = resolvePalette(p.layer.effects)
+  const palette = paletteUniforms(paletteParams?.colors ?? [])
+  // 小丑牌合成不读色标，效果本身存在就应该开箔（颜色从内容自身来）。
+  const paletteComposite = paletteParams?.composite === "balatro"
   const blend = resolveBlending(u.blend)
   // 暗部颜色：片元拿卡面原图算亮度，把色相铺进暗部；没有原图时退化为正常叠加。
   const shadow = u.blend === "shadow"
@@ -301,7 +304,8 @@ export function createLayerMaterial(p: LayerMaterialParams): ShaderMaterial {
       uHoloMix: { value: u.uHoloMix },
       uHoloAlpha: { value: u.uHoloAlpha },
       uOpacity: { value: u.uOpacity },
-      uHasHolo: { value: u.hasHolo ? 1 : 0 },
+      uHasHolo: { value: u.hasHolo || paletteComposite ? 1 : 0 },
+      uPaletteComposite: { value: paletteComposite ? 1 : 0 },
       // 内容浮雕只认本层自有的摩尔纹：`fx` 里的 uMoire* 在「本层没有 moire」时填的是继承
       // 自卡面的那份（见 toEffectUniforms），拿它当浮雕高度场会把整卡花纹压到图片 / 文字上。
       uOwnMoireCount: { value: ownMoireCount(p.effects) },

@@ -526,9 +526,19 @@ export interface MaskEraseParams {
  * 之前的「空色板」语义一致，故删空所有色标即等于关掉箔，不必再删掉整条效果。颜色类效果不受
  * 此限制：它们照常作用在本层的图片 / 文字上，不需要调色板开路。
  */
+export type PaletteComposite = "palette" | "balatro"
+
 export interface PaletteParams {
   /** 色标（最多 8 个），`at` 为相位域位置，驱动 `spectrum()` 调色板混色。默认 `[]`。 */
   colors: ColorStop[]
+  /**
+   * 合成方式：
+   * - `palette`：现有色带合成，全息色来自 `colors`；
+   * - `balatro`：小丑牌式合成，取内容自身的 HSL、加色相偏移与网纹，再按内容对比度做 delta lerp
+   *   （不读 `colors`；亮度由 HSL 提亮 + 蓝偏得到，不会整卡发白）。
+   * 默认 `palette`。
+   */
+  composite: PaletteComposite
 }
 
 /**

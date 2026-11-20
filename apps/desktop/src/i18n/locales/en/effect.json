@@ -28,7 +28,13 @@
     "offsetY": "Gradient offset Y",
     "straight": "Straight"
   },
-  "palette": { "label": "Palette", "colors": "Gradient" },
+  "palette": {
+    "label": "Palette",
+    "colors": "Gradient",
+    "composite": "Composite",
+    "compositePalette": "Palette (bands)",
+    "compositeBalatro": "Balatro (shadow tint)"
+  },
   "lattice": {
     "label": "Lattice",
     "count": "Families",

@@ -28,7 +28,13 @@
     "offsetY": "渐变偏移 Y",
     "straight": "整齐"
   },
-  "palette": { "label": "调色板", "colors": "渐变色" },
+  "palette": {
+    "label": "调色板",
+    "colors": "渐变色",
+    "composite": "合成方式",
+    "compositePalette": "调色板（色带）",
+    "compositeBalatro": "小丑牌（暗部叠色）"
+  },
   "lattice": {
     "label": "刻纹",
     "count": "族数",

@@ -4,7 +4,7 @@ import { EffectSchema, LayerSchema, PackSchema } from "../schema.js"
 
 describe("PaletteParamsSchema", () => {
   it("默认 colors 为空数组（= 本目标不出全息）", () => {
-    expect(PaletteParamsSchema.parse({})).toEqual({ colors: [] })
+    expect(PaletteParamsSchema.parse({})).toEqual({ colors: [], composite: "palette" })
   })
 
   it("旧格式（裸 hex 字符串数组）按下标等距展开并按 at 升序", () => {

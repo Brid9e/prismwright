@@ -906,3 +906,22 @@ describe("createLayerMaterial 暗部颜色", () => {
     expect(build().uniforms.uShadowMode.value).toBe(0)
   })
 })
+
+describe("createLayerMaterial 调色板合成", () => {
+  it("composite=balatro 接线到 uPaletteComposite，并强制开箔", () => {
+    const effect = EffectSchema.parse({
+      kind: "palette",
+      id: "p",
+      enabled: true,
+      params: { colors: ["#111111"], composite: "balatro" },
+    }) as Effect
+    const m = build({ effects: [effect] })
+    expect(m.uniforms.uPaletteComposite.value).toBe(1)
+    expect(m.uniforms.uHasHolo.value).toBe(1)
+  })
+
+  it("默认调色板合成是 0", () => {
+    const m = build({ effects: [palette(["#111111"])] })
+    expect(m.uniforms.uPaletteComposite.value).toBe(0)
+  })
+})
