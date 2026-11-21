@@ -40,6 +40,10 @@ import { TextureCache } from "./textures"
 import { TextTextureCache } from "./text-texture"
 import { createBaseMaterial } from "./materials/base-material"
 import { createLayerMaterial, type AncestorMask } from "./materials/layer-material"
+import {
+  EDGE_BEVEL_RENDER_ORDER,
+  createEdgeBevelMaterial,
+} from "./materials/edge-bevel-material"
 import { glossMaskParams } from "./effects/gloss-mask"
 import { BASE_DISTANCE } from "./zoom"
 import {
@@ -158,6 +162,19 @@ export async function createCardFrameRenderer(
   slab.renderOrder = -1
   slab.visible = false
   scene.add(slab)
+
+  // 边缘假倒角：与交互视图同一份材质；平视保留淡倒角，倾斜时增强。
+  const edgeMat = createEdgeBevelMaterial({
+    aspect,
+    cornerRadius,
+    lightAngle: card.frontBumpLightAngle,
+  })
+  const edgeMesh = new Mesh(geometry, edgeMat)
+  edgeMesh.renderOrder = EDGE_BEVEL_RENDER_ORDER
+  edgeMesh.raycast = () => {}
+  edgeMesh.visible = true
+  edgeMat.uniforms.uTilt.value = 0.25
+  scene.add(edgeMesh)
 
   const layerGroup: Mesh[] = []
   const layerMats: ShaderMaterial[] = []
@@ -284,6 +301,8 @@ export async function createCardFrameRenderer(
     for (const m of layerGroup) scene.remove(m)
     for (const mat of layerMats) mat.dispose()
     baseMat?.dispose()
+    scene.remove(edgeMesh)
+    edgeMat.dispose()
     scene.remove(slab)
     slab.geometry.dispose()
     for (const mat of slab.material as unknown[]) (mat as { dispose(): void }).dispose()
@@ -304,6 +323,10 @@ export async function createCardFrameRenderer(
       // 有倾角才画侧壁：平视下它本来就投不出像素，关掉则能保证平视导出与旧版逐像素一致。
       slab.visible = t.x !== 0 || t.y !== 0
       slab.rotation.set(t.x, t.y, 0)
+      // 边缘倒角：平视 0.25，倾斜时升到 1。
+      edgeMesh.visible = true
+      edgeMat.uniforms.uTilt.value = slab.visible ? 1 : 0.25
+      edgeMesh.rotation.set(t.x, t.y, 0)
       for (const m of layerGroup) m.rotation.set(t.x, t.y, 0)
       // 只有图层随时间流动；卡面底图不含相位项，不接 uTime。
       for (const mat of layerMats) mat.uniforms.uTime.value = time
@@ -313,6 +336,9 @@ export async function createCardFrameRenderer(
       baseMesh.rotation.set(0, 0, 0)
       slab.rotation.set(0, 0, 0)
       slab.visible = false
+      edgeMesh.rotation.set(0, 0, 0)
+      edgeMesh.visible = true
+      edgeMat.uniforms.uTilt.value = 0.25
       for (const m of layerGroup) m.rotation.set(0, 0, 0)
       return new Promise<Blob>((resolve, reject) => {
         canvas.toBlob((blob) => {
