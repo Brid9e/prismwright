@@ -34,12 +34,12 @@ describe("groupByRole", () => {
     expect(groups.every((g) => g.effects.length === 0)).toBe(true)
   })
 
-  it("条目按角色落到对应组：渐变/刻纹/摩尔纹 → 相位，光泽 → 颜色，两类蒙版 → alpha", () => {
+  it("条目按角色落到对应组：渐变/摩尔纹 → 相位，光泽/网格 → 颜色，两类蒙版 → alpha", () => {
     const effects = [
       fx("gradient", "g"),
-      fx("lattice", "l"),
       fx("moire", "m"),
       fx("gloss", "s"),
+      fx("holoGrid", "hg"),
       fx("maskPreset", "p"),
       fx("imageMask", "im"),
     ]
@@ -47,8 +47,8 @@ describe("groupByRole", () => {
       groupByRole(effects).map((g) => [g.role, g.effects.map((e) => e.kind)]),
     )
 
-    expect(byRole.phase).toEqual(["gradient", "lattice", "moire"])
-    expect(byRole.color).toEqual(["gloss"])
+    expect(byRole.phase).toEqual(["gradient", "moire"])
+    expect(byRole.color).toEqual(["gloss", "holoGrid"])
     // 程序化蒙版与图蒙版并列在 alpha 组，顺序按列表序。
     expect(byRole.alpha).toEqual(["maskPreset", "imageMask"])
   })
@@ -112,7 +112,7 @@ describe("fieldsForScope", () => {
   })
 
   it("全程无字段级 scope 的 kind 两端字段完全一致", () => {
-    expect(fieldsForScope("lattice", "layer")).toEqual(fieldsForScope("lattice", "face"))
+    expect(fieldsForScope("holoGrid", "layer")).toEqual(fieldsForScope("holoGrid", "face"))
   })
 
   it("光泽的「作为蒙版」只对图层显示：光带裁的是子树，卡面底下没有可裁的东西", () => {

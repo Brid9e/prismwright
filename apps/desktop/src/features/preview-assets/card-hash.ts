@@ -72,7 +72,7 @@ export function cardRenderHash(card: Card, aspect: number): string {
     frontOffsetY: card.frontOffsetY,
     frontScale: card.frontScale,
     frontRotation: card.frontRotation,
-    // 法线（bump）也直接改画面（光泽 / 摩尔纹 / 刻纹的走势），漏掉它的后果同样是「拖了滑块，
+    // 法线（bump）也直接改画面（光泽 / 摩尔纹的走势），漏掉它的后果同样是「拖了滑块，
     // 预览与缩略图还是旧画面」。
     frontBumpStrength: card.frontBumpStrength,
     frontBumpDetail: card.frontBumpDetail,

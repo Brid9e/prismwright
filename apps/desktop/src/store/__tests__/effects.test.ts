@@ -77,9 +77,9 @@ describe("packStore 效果栈原语", () => {
 
   it("addEffect 落在图层：只增长该图层，卡面不受影响", async () => {
     const { ref, layerId } = await setup()
-    usePackStore.getState().addEffect(ref, { scope: "layer", layerId }, "lattice")
+    usePackStore.getState().addEffect(ref, { scope: "layer", layerId }, "holoGrid")
     expect(layerEffects()).toHaveLength(1)
-    expect(narrow(layerEffects()[0], "lattice").enabled).toBe(true)
+    expect(narrow(layerEffects()[0], "holoGrid").enabled).toBe(true)
     expect(faceEffects()).toHaveLength(0)
   })
 
@@ -107,7 +107,7 @@ describe("packStore 效果栈原语", () => {
   })
 
   // 用 gloss 而非 gradient：gradient 槽位已收敛为 1，同目标加两条会被静默拒绝，取不到 `b`；
-  // 且 gloss 的 scope 为 both，落在卡面目标上不越 scope 不变式（lattice 是 layer 专属）。
+  // 且 gloss 的 scope 为 both，落在卡面目标上不越 scope 不变式（holoGrid 是 layer 专属）。
   it("defaultParams 每次返回新对象：两条条目不共享引用", async () => {
     const { ref } = await setup()
     usePackStore.getState().addEffect(ref, { scope: "face" }, "gloss")
@@ -214,9 +214,9 @@ describe("packStore 效果栈原语", () => {
   it("moveEffect 重排同列表；越界 toIndex 夹取；不存在的 id 不留历史点", async () => {
     const { ref } = await setup()
     usePackStore.getState().addEffect(ref, { scope: "face" }, "gradient")
-    usePackStore.getState().addEffect(ref, { scope: "face" }, "lattice")
+    usePackStore.getState().addEffect(ref, { scope: "face" }, "moire")
     const [g, l] = faceEffects()
-    expect(faceEffects().map((e) => e.kind)).toEqual(["gradient", "lattice"])
+    expect(faceEffects().map((e) => e.kind)).toEqual(["gradient", "moire"])
 
     // 把首位移到末尾。
     usePackStore.getState().moveEffect(ref, { scope: "face" }, g.id, 2)
@@ -237,7 +237,7 @@ describe("packStore 效果栈原语", () => {
   it("moveEffect 落回原位是无变化，不入历史点", async () => {
     const { ref } = await setup()
     usePackStore.getState().addEffect(ref, { scope: "face" }, "gradient")
-    usePackStore.getState().addEffect(ref, { scope: "face" }, "lattice")
+    usePackStore.getState().addEffect(ref, { scope: "face" }, "moire")
     const [g, l] = faceEffects()
 
     const past = usePackStore.getState().past.length
@@ -250,7 +250,7 @@ describe("packStore 效果栈原语", () => {
   it("目标隔离：卡面的效果 id 对图层目标不解析（反之亦然），且不留历史点", async () => {
     const { ref, layerId } = await setup()
     usePackStore.getState().addEffect(ref, { scope: "face" }, "gradient")
-    usePackStore.getState().addEffect(ref, { scope: "layer", layerId }, "lattice")
+    usePackStore.getState().addEffect(ref, { scope: "layer", layerId }, "holoGrid")
     const faceId = faceEffects()[0].id
     const layerIdEffect = layerEffects()[0].id
 

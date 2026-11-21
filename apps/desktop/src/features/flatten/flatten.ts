@@ -47,7 +47,7 @@ export function imageEffectPath(layer: Layer): string | null {
   // 有子层 = 它是别人的父层（可能正作为蒙版裁切子树），整棵子树都不能被烤平。
   if (layer.children.length > 0) return null
   if (!MERGEABLE_BLENDS.has(layer.blend)) return null
-  // 只认「唯一一条生效效果且是 image」：多一条（调色板、蒙版、刻纹…）都不再是纯图片层。
+  // 只认「唯一一条生效效果且是 image」：多一条（调色板、蒙版、网格…）都不再是纯图片层。
   const active = layer.effects.filter((e) => e.enabled)
   if (active.length !== 1) return null
   const only = active[0]

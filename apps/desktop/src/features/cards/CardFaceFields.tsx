@@ -178,7 +178,7 @@ export function CardFaceFields({ face, faceRef, card, showSeriesAspect = true }:
       </PropertyRow>
 
       {/* 法线贴图：与底图的亮度法线二选一，有贴图时贴图接管（见 bump.ts 的 resolveBump）。
-          独立一行、不受「已设置底图」限制——法线自带形状，没有底图时也能让光泽 / 摩尔纹 / 刻纹
+          独立一行、不受「已设置底图」限制——法线自带形状，没有底图时也能让光泽 / 摩尔纹
           显出凹凸。 */}
       <PropertyRow label={t("field.frontNormalPath")}>
         <span
@@ -275,9 +275,9 @@ export function CardFaceFields({ face, faceRef, card, showSeriesAspect = true }:
         </>
       )}
 
-      {/* 法线（bump）：底图亮度差或法线贴图，扰动光泽 / 摩尔纹 / 刻纹的走势，并继承给没有
+      {/* 法线（bump）：底图亮度差或法线贴图，扰动光泽 / 摩尔纹的走势，并继承给没有
           自带法线的图层。强度 0 = 关（默认），其余各项在 0 时不起作用；光照 0 = 不出明暗
-          （只影响走势），没有光泽 / 摩尔纹 / 刻纹时凹凸只靠它显形。
+          （只影响走势），没有光泽 / 摩尔纹时凹凸只靠它显形。
           两个来源有一个就显示——法线贴图不依赖底图。 */}
       {(face.front || face.frontNormalPath) && (
         <>

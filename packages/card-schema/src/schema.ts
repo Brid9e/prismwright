@@ -90,7 +90,7 @@ export const DEFAULT_CARD_ASPECT = 2.5 / 3.5
 export const DEFAULT_CORNER_RADIUS = 0.06
 
 /**
- * 法线光照缺省方向（度，-180–180）：127° ≈ 刻纹浮雕那束固定斜光 (-0.6, 0.8) 的方向，
+ * 法线光照缺省方向（度，-180–180）：127° ≈ 摩尔纹浮雕那束固定斜光 (-0.6, 0.8) 的方向，
  * 两者的明暗因此默认同向。编辑器与渲染器共用这一个值。
  */
 export const DEFAULT_BUMP_LIGHT_ANGLE = 127
@@ -247,8 +247,8 @@ export const MoireParamsSchema = z.object({
   depth: z.number().min(0).max(1).default(0.25),
   twist: z.number().min(-1).max(1).default(0),
   twistSeed: TwistSeedSchema,
-  // 卡面浮雕强度：把刻纹当作卡面的一层高度场渲染成明暗（≈磨砂 / 蚀刻质感），与「切光带」那条
-  // 通路并列。默认 0 = 卡面无浮雕，存量系列解析后画面逐像素不变；调大才让刻纹浮现在卡面上。
+  // 卡面浮雕强度：把摩尔纹当作卡面的一层高度场渲染成明暗（≈磨砂 / 蚀刻质感），与「切光带」那条
+  // 通路并列。默认 0 = 卡面无浮雕，存量系列解析后画面逐像素不变；调大才让纹样浮现在卡面上。
   faceStrength: z.number().min(0).max(1).default(0),
 })
 
@@ -270,7 +270,7 @@ export const GlossParamsSchema = z.object({
   // 作为蒙版：光带场不再上色，而是变成覆盖率向下裁切子图层（见 types.ts 的注释）。
   // 默认 false = 普通光泽，存量行为不变。
   asMask: z.boolean().default(false),
-  // 光带整场平移（UV 域，正 = 图案往右 / 往上挪）。与 lattice 的 offsetX 同口径、同量程；
+  // 光带整场平移（UV 域，正 = 图案往右 / 往上挪）。与网格的 offsetX 同口径、同量程；
   // 缺省 0 = 钉在原来位置，存量画面逐像素不变。新增字段带默认值，故不必升 schemaVersion。
   offsetX: z.number().min(-1).max(1).default(0),
   offsetY: z.number().min(-1).max(1).default(0),
@@ -392,12 +392,12 @@ export const ImageParamsSchema = z.object({
   // 落盘的仍是具体数值——渲染器不认这个标志，旧版本读到的也是对齐好的画面。
   // 新增字段带默认值（additive default），故不必升 schemaVersion。
   followFront: z.boolean().default(false),
-  // 法线（bump）：由图片自身的亮度差生成，扰动光泽 / 摩尔纹 / 刻纹的走势。
+  // 法线（bump）：由图片自身的亮度差生成，扰动光泽 / 摩尔纹的走势。
   // 强度 0（默认）= 本条目不开，图层沿用卡面底图的法线（见渲染器 bump.ts 的继承规则）；
   // 上限 10：法线贴图的坡向量级比亮度差大，需要更大的强度才够「凸」。
   // 其余各项只在强度 > 0 时起作用。细节是取样步长（卡高单位），流向是图案被推着走的比例，
   // 光照是高度场上那束斜光的明暗强度（0 = 只影响走势、不出明暗）、方向与颜色。方向缺省 127°
-  // = 与刻纹浮雕的固定斜光同向（(-0.6, 0.8)）；白光缺省 = 明暗不带色偏。
+  // = 与摩尔纹浮雕的固定斜光同向（(-0.6, 0.8)）；白光缺省 = 明暗不带色偏。
   // 新增字段带默认值（additive default），故不必升 schemaVersion。
   bumpStrength: z.number().min(0).max(10).default(0),
   bumpDetail: z.number().min(0.001).max(0.05).default(0.01),
@@ -659,7 +659,7 @@ export const LayerSchema: z.ZodType<Layer, z.ZodTypeDef, unknown> = z.object({
   // 故不必升 schemaVersion。见 docs/superpowers/specs/2026-10-30-text-layer-design.md §3.5。
   kind: LayerKindSchema.default("normal"),
   text: TextParamsSchema.nullable().default(null),
-  // 效果栈列表：渐变 / 调色板 / 几何刻纹 / 蒙版等效果都以此挂载。
+  // 效果栈列表：渐变 / 调色板 / 网格 / 蒙版等效果都以此挂载。
   effects: EffectsSchema,
   // 子图层（递归）：任意图层都可作父层。默认 []。
   children: z.array(z.lazy(() => LayerSchema)).default([]),
@@ -675,11 +675,11 @@ export const CardFaceSchema = z.object({
   frontOffsetY: z.number().default(0),
   frontScale: z.number().default(1),
   frontRotation: z.number().default(0),
-  // 法线（bump）：卡面底图自身亮度差生成的伪法线，扰动光泽 / 摩尔纹 / 刻纹的走势，并向下继承给
+  // 法线（bump）：卡面底图自身亮度差生成的伪法线，扰动光泽 / 摩尔纹的走势，并向下继承给
   // 没有自带法线的图层。强度 0（默认）= 关，存量画面逐像素不变；其余各项只在强度 > 0 时起作用。
   // 上限 10：法线贴图的坡向量级比亮度差大，需要更大的强度才够「凸」。
   // 光照 = 高度场上那束斜光的明暗强度（0 = 只影响走势、不出明暗，画法与加光照之前一致）、
-  // 方向（缺省 127° = 与刻纹浮雕的固定斜光同向）与颜色（缺省白光 = 不带色偏）。
+  // 方向（缺省 127° = 与摩尔纹浮雕的固定斜光同向）与颜色（缺省白光 = 不带色偏）。
   // 新增字段带默认值（additive default），故不必升 schemaVersion。
   frontBumpStrength: z.number().min(0).max(10).default(0),
   frontBumpDetail: z.number().min(0.001).max(0.05).default(0.01),
@@ -783,7 +783,7 @@ const _assertLayerBackward: z.infer<typeof LayerSchema> = {} as Layer
 const _assertCardFaceForward: CardFace = {} as z.infer<typeof CardFaceSchema>
 const _assertCardFaceBackward: z.infer<typeof CardFaceSchema> = {} as CardFace
 
-// PatternMode / 九种效果参数（Gradient / Lattice / Moire / Gloss / Palette / MaskPreset / ImageMask / MaskErase / Image）
+// PatternMode / 九种效果参数（Gradient / HoloGrid / Moire / Gloss / Palette / MaskPreset / ImageMask / MaskErase / Image）
 const _assertPatternMode: PatternMode = {} as z.infer<typeof PatternModeSchema>
 const _assertPatternModeBack: z.infer<typeof PatternModeSchema> = {} as PatternMode
 const _assertGradientParams: GradientParams = {} as z.infer<typeof GradientParamsSchema>

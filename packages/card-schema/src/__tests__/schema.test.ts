@@ -493,7 +493,7 @@ describe("MaskPresetParamsSchema", () => {
     expect(() => p({ flipX: 1 })).toThrow()
   })
 
-  // 旋转取**度**、值域 0–360（与 GradientParams.angle / LatticeParams.angle 同口径），换算弧度交给着色器。
+  // 旋转取**度**、值域 0–360（与 GradientParams.angle / HoloGridParams.angle 同口径），换算弧度交给着色器。
   // 默认 0 = 不转，着色器里 cos(0)/sin(0) 恰好是 1/0，采样点逐位不动。
   it("rotation 默认 0（度）、接受端点 0 与 360、拒绝越界", () => {
     expect(p().rotation).toBe(0)

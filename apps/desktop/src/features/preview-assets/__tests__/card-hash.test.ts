@@ -134,7 +134,7 @@ describe("cardRenderHash", () => {
     expect(cardRenderHash({ ...sampleCard(), frontRotation: 15 }, ASPECT)).not.toBe(base)
   })
 
-  // 法线直接改光泽 / 摩尔纹 / 刻纹的走势：漏折进哈希同样会停在旧画面。
+  // 法线直接改光泽 / 摩尔纹的走势：漏折进哈希同样会停在旧画面。
   it("改法线参数必变", () => {
     const base = cardRenderHash(sampleCard(), ASPECT)
     expect(cardRenderHash({ ...sampleCard(), frontBumpStrength: 0.5 }, ASPECT)).not.toBe(base)

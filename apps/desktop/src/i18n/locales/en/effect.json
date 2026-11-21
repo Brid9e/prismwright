@@ -44,13 +44,6 @@
   },
   "holoGrid": {
     "label": "Grid",
-    "size": "Density",
-    "strength": "Strength",
-    "offsetX": "Offset X",
-    "offsetY": "Offset Y"
-  },
-  "lattice": {
-    "label": "Lattice",
     "count": "Families",
     "angle": "Angle",
     "density": "Density",
