@@ -273,28 +273,26 @@ float gradientRamp(vec2 uvw, float mode, float angle, float twist, float twistSe
   return ramp + twistPhase(uvw, twist, twistSeed);
 }
 
-// 几何刻纹场：N 族等角余弦条纹各取峰后求和，clamp 到 [0,1]。
+// 线族场（网格）：N 族等角余弦条纹各取峰后求和，clamp 到 [0,1]。
 //
-// 参数化：族数 / 角 / 频率 / 线宽 / 偏移全为入参（网格在片元里按当前参数求值），strength 仍在调用处乘。
+// 参数化：族数 / 角 / 频率 / 线宽全为入参（网格在片元里按当前参数求值），strength 仍在调用处乘；
+// 整幅平移由调用方先对 uv 做减法（uv - offset），故这里只管几何本身。
 //
 // 每条族是「法向为 dir_i、彼此平行的一组线」——即 dot(uv - 0.5, dir) 的等值线（只有取值为 0
 // 的那条过卡心）。取 |cos| 的波峰：只有 |cos| 高于 1 - width 的那一段被照亮，平滑波因此锐化
 // 成细亮线（width 越小越细锐），峰值归一化到 1。
 // width = 1/7 时阈值正好是 1 - 1/7 = 6/7，即加本参数之前写死的那个阈值，画面逐像素不变。
 // 族角为 angle + i*180/families：families=2 得正交方格、families=3 得正三角格。
-// 整幅点阵可由 offsetX / offsetY 平移（UV 域，且在旋转之前），默认 0 即钉在卡面原位。
 // 常量上界 8 + if (float(i) < families) 守卫，符合 GLSL ES 1.00 的 constant-index-expression
 // 约定（与 base.ts 的光带循环同构）。
-float latticeField(vec2 uv, float families, float angle, float density, float width, float offsetX, float offsetY) {
+float latticeField(vec2 uv, float families, float angle, float density, float width) {
   float acc = 0.0;
   // n 兜住 families=0（关闭态）时的除零；关闭时循环体本就不执行，故 n 取什么数都无副作用。
   float n = max(families, 1.0);
   // 线宽既是阈值（1 - w）又是归一化的除数：max(0, (|cos| - (1 - w)) / w)。
   // 再兜一层除数下限：schema 下限是 0.02，但 uniform 是外部可写的，别让 0 除进去。
   float w = max(width, 0.01);
-  // 偏移在旋转之前减掉：整幅点阵刚性平移，X 永远指卡面水平方向（与 angle 无关）。
-  // 默认 0 时这一行与「uv - 0.5」逐字等价。
-  vec2 p = uv - vec2(offsetX, offsetY) - 0.5;
+  vec2 p = uv - 0.5;
   for (int i = 0; i < 8; i++) {
     if (float(i) < families) {
       float a = radians(angle + float(i) * 180.0 / n);

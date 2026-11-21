@@ -388,6 +388,38 @@ describe("LAYER_FRAGMENT 独立网格", () => {
     expect(LAYER_FRAGMENT).toContain("holoHueShift(")
     expect(GLSL_COMMON).toContain("vec3 holoHueShift(")
   })
+
+  // GLSL 没有默认参数：声明 7 参、调用 5 参是硬编译错误，整段图层片元都会失效。
+  // 字符串测试只查子串抓不到，故这里数一遍顶层逗号。
+  it("latticeField 的声明与网格调用参数个数一致", () => {
+    const decl = GLSL_COMMON.match(/float latticeField\(([^)]*)\)/)
+    expect(decl).not.toBeNull()
+    const declArity = decl![1].split(",").length
+
+    const start = LAYER_FRAGMENT.indexOf("latticeField(vUv")
+    expect(start).toBeGreaterThan(-1)
+    const callStart = start + "latticeField(".length
+    let depth = 1
+    let end = -1
+    for (let i = callStart; i < LAYER_FRAGMENT.length; i++) {
+      const ch = LAYER_FRAGMENT[i]
+      if (ch === "(") depth++
+      else if (ch === ")" && --depth === 0) {
+        end = i
+        break
+      }
+    }
+    expect(end).toBeGreaterThan(-1)
+
+    let commas = 0
+    depth = 0
+    for (const ch of LAYER_FRAGMENT.slice(callStart, end)) {
+      if (ch === "(") depth++
+      else if (ch === ")") depth--
+      else if (ch === "," && depth === 0) commas++
+    }
+    expect(commas + 1).toBe(declArity)
+  })
 })
 
 describe("LAYER_FRAGMENT 叠色合成的边界（final review）", () => {
