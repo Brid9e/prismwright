@@ -69,17 +69,12 @@
 | `deltaBase` | 基础混合权重 | 0.2 | 0–1 |
 | `deltaContrast` | 内容对比度加成 | 0.3 | 0–1 |
 | `deltaBright` | 内容亮度加成 | 0.1 | 0–1 |
-| `grid` | 内置网格强度（0 = 关） | 1 | 0–1 |
-| `gridScale` | 内置网格密度 | 0.79 | 0.1–2 |
-| `offsetX` | 内置网纹水平偏移（卡面 UV） | 0 | -1–1 |
-| `offsetY` | 内置网纹垂直偏移（卡面 UV） | 0 | -1–1 |
 
 公式：
 
 ```
 hsl = HSL(0.5*content + 0.5*blue)
-fac = holoGridValue(uv - offset, gridScale) * grid
-hsl.x = fract(hsl.x + fract(phase*hue) + fac + independentGrid)
+hsl.x = fract(hsl.x + fract(phase*hue) + independentGrid)
 hsl.y = clamp(hsl.y * sat)
 hsl.z = mix(hsl.z, 1, lift)
 delta = deltaBase + deltaContrast*(hi-lo) + deltaBright*hi
@@ -104,14 +99,14 @@ result = mix(content, tinted, delta)
   - **色带合成**：对 `holoColor` 得到的 `holo` 做 HSL 色相偏移 `holoGridValue(uv - offset, size) * strength`；
   - **叠色合成**：作为 `extraGrid` 加进 `hsl.x`；
   - 两者都只改色相，不改亮度；蒙版/不透明度照旧。
-- 与内置网格的关系：两处可同时开，效果会叠加；独立网格默认不挂在层上，所以默认画面不变。用户要「只用独立网格」时，把 `palette.grid` 设为 0。
+- 叠色本身不画网格；要网格就加这条「网格」效果（网格密度/强度/偏移都在这里）。
 
 ### 4.3 UI / i18n
 
 - 调色板效果面板：
   - 合成方式（调色板/叠色）；
   - `palette`：色标；
-  - `tint`：11 个滑杆（上表，含 X/Y 偏移），色标隐藏。
+  - `tint`：7 个滑杆（色相/饱和/提亮/蓝偏/三项 delta），色标隐藏；网格由「网格」效果提供。
 - 新增效果菜单出现「网格」，面板四个滑杆（大小/强度/X 偏移/Y 偏移）。
 - 中英文案补 `effect.json`；字段可见性按 `composite` 过滤。
 
@@ -144,7 +139,7 @@ result = mix(content, tinted, delta)
 
 ## 7. 待确认
 
-1. 叠色合成的 11 个参数是否全要，还是有想删/想加的（比如「蓝偏」是否拆成预混 + 通道权重两项）？
+1. 叠色合成的 7 个参数是否全要，还是有想删/想加的（比如「蓝偏」是否拆成预混 + 通道权重两项）？
 2. 独立网格的默认值 0.79/1 是否可以；需不需要再加角度/线宽？
 3. 内置网格默认开、独立网格默认关——这个默认是否可以（避免默认叠加两层）？
 4. 预览仍静态（time=0）、只有导出动，是否接受？

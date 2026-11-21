@@ -130,10 +130,6 @@ uniform float uPaletteTint;
 uniform float uPaletteDeltaBase;
 uniform float uPaletteDeltaContrast;
 uniform float uPaletteDeltaBright;
-uniform float uPaletteGrid;
-uniform float uPaletteGridScale;
-uniform float uPaletteOffsetX;
-uniform float uPaletteOffsetY;
 // 独立网格效果：最多一条，只贡献色相。
 uniform float uHoloGridCount;
 uniform float uHoloGridSize[1];
@@ -286,10 +282,9 @@ vec4 faceFrontSample(vec2 uv) {
 
 // 叠色 holo.fs 的合成：内容自身 HSL 加相位/网纹，提饱和提亮，再按内容对比度做 delta lerp。
 // 不读调色板；delta 乘 holoMix / holoAlpha，保留图层的强度滑块。
-vec3 hslTint(vec3 tex, vec2 uv, float phase, float extraGrid) {
+vec3 hslTint(vec3 tex, float phase, float extraGrid) {
   vec4 hsl = rgbToHsl(vec4(0.5 * tex + 0.5 * vec3(0.0, 0.0, 1.0), 1.0));
-  float fac = holoGridValue(uv - vec2(uPaletteOffsetX, uPaletteOffsetY), uPaletteGridScale) * uPaletteGrid;
-  hsl.x = fract(hsl.x + fract(phase * uPaletteHue) + fac + extraGrid);
+  hsl.x = fract(hsl.x + fract(phase * uPaletteHue) + extraGrid);
   hsl.y = clamp(hsl.y * uPaletteSat, 0.0, 1.0);
   hsl.z = mix(hsl.z, 1.0, uPaletteLift);
   float hi = max(tex.r, max(tex.g, tex.b));
@@ -490,7 +485,7 @@ ${ancestorEraseGLSL()}
     float contentA = uHasImage > 0.5
       ? imgA
       : (uHasText > 0.5 ? textA : mw * uOpacity * card * ancestorClip * erase * front.a);
-    outC = hslTint(content, vUv, phase, independentGrid);
+    outC = hslTint(content, phase, independentGrid);
     outA = contentA;
   }
   // 暗部颜色：只取图层的色相 / 饱和度，把它的亮度换成卡面底图的亮度，再按「暗度」给 alpha。

@@ -524,10 +524,6 @@ export const PaletteParamsSchema = z.object({
   deltaBase: z.number().min(0).max(1).default(0.2),
   deltaContrast: z.number().min(0).max(1).default(0.3),
   deltaBright: z.number().min(0).max(1).default(0.1),
-  grid: z.number().min(0).max(1).default(1),
-  gridScale: z.number().min(0.1).max(2).default(0.79),
-  offsetX: z.number().min(-1).max(1).default(0),
-  offsetY: z.number().min(-1).max(1).default(0),
 })
 
 /** 独立网格效果（holoGrid）：交叉网纹的密度 + 色相加量强度。 */

@@ -932,17 +932,14 @@ describe("createLayerMaterial 叠色参数", () => {
       kind: "palette",
       id: "p",
       enabled: true,
-      params: { colors: ["#111111"], composite: "tint", sat: 1.5, grid: 0.2, offsetX: 0.1, offsetY: -0.2 },
+      params: { colors: ["#111111"], composite: "tint", sat: 1.5 },
     }) as Effect
     const m = build({ effects: [effect] })
     expect(m.uniforms.uPaletteSat.value).toBe(1.5)
-    expect(m.uniforms.uPaletteGrid.value).toBe(0.2)
     expect(m.uniforms.uPaletteHue.value).toBe(0.036)
     expect(m.uniforms.uPaletteLift.value).toBe(0.4)
     expect(m.uniforms.uPaletteTint.value).toBe(1)
     expect(m.uniforms.uPaletteDeltaBase.value).toBe(0.2)
-    expect(m.uniforms.uPaletteOffsetX.value).toBe(0.1)
-    expect(m.uniforms.uPaletteOffsetY.value).toBe(-0.2)
   })
 })
 

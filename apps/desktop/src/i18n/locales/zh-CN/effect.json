@@ -40,11 +40,7 @@
     "tint": "蓝偏",
     "deltaBase": "叠加强度",
     "deltaContrast": "对比度加成",
-    "deltaBright": "亮度加成",
-    "grid": "网格强度",
-    "gridScale": "网格大小",
-    "offsetX": "偏移 X",
-    "offsetY": "偏移 Y"
+    "deltaBright": "亮度加成"
   },
   "holoGrid": {
     "label": "网格",

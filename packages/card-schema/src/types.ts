@@ -553,14 +553,6 @@ export interface PaletteParams {
   deltaContrast: number
   /** 叠色合成：内容亮度对 delta 的加成（默认 0.1）。 */
   deltaBright: number
-  /** 叠色合成：内置交叉网纹的强度（0 = 关，默认 1）。 */
-  grid: number
-  /** 叠色合成：内置交叉网纹的密度（默认 0.79）。 */
-  gridScale: number
-  /** 叠色合成：内置网纹的水平偏移（卡面 UV，-1..1，默认 0）。 */
-  offsetX: number
-  /** 叠色合成：内置网纹的垂直偏移（卡面 UV，-1..1，默认 0）。 */
-  offsetY: number
 }
 
 /** 独立网格效果（holoGrid）参数：交叉网纹的密度与色相加量强度。 */

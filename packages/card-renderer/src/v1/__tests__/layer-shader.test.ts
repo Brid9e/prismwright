@@ -386,7 +386,6 @@ describe("LAYER_FRAGMENT 叠色合成", () => {
 describe("LAYER_FRAGMENT 叠色参数", () => {
   it("叠色合成的可调项都来自 uniform", () => {
     expect(LAYER_FRAGMENT).toContain("uniform float uPaletteHue;")
-    expect(LAYER_FRAGMENT).toContain("holoGridValue(uv - vec2(uPaletteOffsetX, uPaletteOffsetY), uPaletteGridScale) * uPaletteGrid")
     expect(LAYER_FRAGMENT).toContain("mix(hsl.z, 1.0, uPaletteLift)")
   })
 })

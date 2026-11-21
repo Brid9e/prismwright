@@ -14,10 +14,6 @@ describe("PaletteParamsSchema", () => {
       deltaBase: 0.2,
       deltaContrast: 0.3,
       deltaBright: 0.1,
-      grid: 1,
-      gridScale: 0.79,
-      offsetX: 0,
-      offsetY: 0,
     })
   })
 

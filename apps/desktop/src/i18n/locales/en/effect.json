@@ -40,11 +40,7 @@
     "tint": "Blue tint",
     "deltaBase": "Mix strength",
     "deltaContrast": "Contrast boost",
-    "deltaBright": "Brightness boost",
-    "grid": "Grid strength",
-    "gridScale": "Grid size",
-    "offsetX": "Offset X",
-    "offsetY": "Offset Y"
+    "deltaBright": "Brightness boost"
   },
   "holoGrid": {
     "label": "Grid",
