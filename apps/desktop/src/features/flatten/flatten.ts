@@ -13,8 +13,8 @@
  * 尺寸换算全部走渲染器自己的 `fitSpan` + `CARD_ASPECT`：合并产物要在同一套坐标系里
  * 摆放，公式抄两份必然漂移。
  */
-import { CARD_ASPECT, fitSpan } from "@cardbara/renderer/v1"
-import type { ImageParams, Layer } from "@cardbara/schema"
+import { CARD_ASPECT, fitSpan } from "@prismwright/renderer/v1"
+import type { ImageParams, Layer } from "@prismwright/schema"
 
 /**
  * 可以安全烤进位图的混合模式。

@@ -58,7 +58,7 @@ export default {
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
         mono: ["ui-monospace", "SFMono-Regular", "monospace"],
-        // 品牌展示字体，只用于固定拉丁字标（如起始屏与标题栏的 Cardbara）。
+        // 品牌展示字体，只用于固定拉丁字标（如起始屏与标题栏的 Prismwright）。
         // 不再随包分发第三方字体，直接用系统 UI 字体，避免任何字体授权问题。
         display: ['"Segoe UI Variable Display"', '"Segoe UI"', "system-ui", "sans-serif"],
       },

@@ -18,12 +18,12 @@
  * 串行与关闭：批处理严格串行（一次只跑一张卡），期间新落盘的保存会**合并**为紧随其后的一轮重扫，
  * 不会并行抢占 GPU。窗口关闭前调用方应 `await handle.idle()` 等队列跑空，以免产物写到一半被腰斩。
  */
-import type { Card } from "@cardbara/schema"
+import type { Card } from "@prismwright/schema"
 import {
   createCardFrameRenderer,
   type CardFrameRenderer,
   type ResolveAsset,
-} from "@cardbara/renderer/v1"
+} from "@prismwright/renderer/v1"
 import { join } from "../../app/path"
 import { usePackStore } from "../../store/packStore"
 import { ffmpeg } from "../../tauri/ffmpeg"

@@ -63,7 +63,9 @@ pub struct BundleInfo {
 /// 校验清单的基本结构与类型。失败一律折叠成 [`container::E_INVALID`]。
 fn validate_manifest(manifest: &serde_json::Value, kind: u8) -> Result<(), String> {
     let invalid = || container::E_INVALID.to_string();
-    if manifest["format"] != "cardbara-bundle" || manifest["version"] != 1 {
+    // 兼容更名前导出的工程文件：旧清单用 cardbara-bundle，内容结构一致。
+    let format = manifest["format"].as_str().unwrap_or("");
+    if (format != "prismwright-bundle" && format != "cardbara-bundle") || manifest["version"] != 1 {
         return Err(invalid());
     }
     let expected = if kind == container::KIND_CARD {
@@ -251,12 +253,12 @@ mod tests {
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap()
             .as_nanos();
-        std::env::temp_dir().join(format!("cardbara-bundle-test-{tag}-{nanos}"))
+        std::env::temp_dir().join(format!("prismwright-bundle-test-{tag}-{nanos}"))
     }
 
     fn manifest(kind: &str) -> String {
         format!(
-            r#"{{"format":"cardbara-bundle","version":1,"kind":"{kind}","createdAt":"2026-11-06T00:00:00.000Z","appVersion":"0.1.0"}}"#
+            r#"{{"format":"prismwright-bundle","version":1,"kind":"{kind}","createdAt":"2026-11-06T00:00:00.000Z","appVersion":"0.1.0"}}"#
         )
     }
 
@@ -354,8 +356,8 @@ mod tests {
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap()
             .as_nanos();
-        // 故意不用 cardbara-bundle- 前缀，验证守卫不只看父目录。
-        let dir = std::env::temp_dir().join(format!("cardbara-keep-{nanos}"));
+        // 故意不用 prismwright-bundle- 前缀，验证守卫不只看父目录。
+        let dir = std::env::temp_dir().join(format!("prismwright-keep-{nanos}"));
         std::fs::create_dir_all(&dir).unwrap();
         assert!(cleanup_bundle(dir.to_str().unwrap()).is_err());
         assert!(dir.exists());

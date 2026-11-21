@@ -5,8 +5,8 @@
  * 缺失时静默无提示）；二是「已添加但未选图」（`path === ""`）是合法中间态，不能误报。
  */
 import { describe, it, expect } from "vitest"
-import type { Effect, EffectKind } from "@cardbara/schema"
-import { EFFECT_REGISTRY } from "@cardbara/renderer/v1"
+import type { Effect, EffectKind } from "@prismwright/schema"
+import { EFFECT_REGISTRY } from "@prismwright/renderer/v1"
 import { layerHasMissingAsset } from "../warn"
 
 /** 造一个带指定图片路径的合法条目（参数形状由注册表的默认值给出）。 */

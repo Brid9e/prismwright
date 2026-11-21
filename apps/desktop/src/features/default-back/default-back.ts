@@ -20,8 +20,8 @@ import {
   parsePack,
   type CardFace,
   type Pack,
-} from "@cardbara/schema"
-import { EFFECT_REGISTRY } from "@cardbara/renderer/v1"
+} from "@prismwright/schema"
+import { EFFECT_REGISTRY } from "@prismwright/renderer/v1"
 
 /** 应用数据目录下默认卡背工程的末级目录名。 */
 export const DEFAULT_BACK_DIR_NAME = "default-back"

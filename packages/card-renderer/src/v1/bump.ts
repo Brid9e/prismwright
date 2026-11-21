@@ -21,7 +21,7 @@ import {
   DEFAULT_BUMP_LIGHT_COLOR,
   type CardFace,
   type ImageParams,
-} from "@cardbara/schema"
+} from "@prismwright/schema"
 
 /** 法线的可调参数（不区分来源）。 */
 export interface BumpSettings {

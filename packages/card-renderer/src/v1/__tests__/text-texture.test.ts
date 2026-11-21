@@ -7,7 +7,7 @@
  */
 import { describe, it, expect, vi } from "vitest"
 import { DataTexture } from "three"
-import { LayerSchema, TextParamsSchema, type Layer } from "@cardbara/schema"
+import { LayerSchema, TextParamsSchema, type Layer } from "@prismwright/schema"
 import {
   TEXT_TEXTURE_HEIGHT,
   TEXT_TEXTURE_WIDTH,

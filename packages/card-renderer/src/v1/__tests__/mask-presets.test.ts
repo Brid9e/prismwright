@@ -6,7 +6,7 @@
  * 顺带覆盖 materializePreset 的物化规则。
  */
 import { describe, it, expect } from "vitest"
-import { MaskPresetParamsSchema } from "@cardbara/schema"
+import { MaskPresetParamsSchema } from "@prismwright/schema"
 import { MASK_PRESETS, materializePreset } from "../mask-presets/registry"
 
 /** schema 的全套默认（换个 id 即可，用于对照「位移 / 种子 / 整场变换」这些物化时应归位的项）。 */

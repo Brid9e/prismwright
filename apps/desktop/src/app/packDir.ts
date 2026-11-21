@@ -2,7 +2,7 @@
  * 默认新建系列目录的持久化。
  *
  * 与 `language.ts` 同库（`preferences.json`）：新建系列不再每次弹原生目录框，改用这里
- * 的默认目录 + 用户输入的名字拼出落盘路径。默认值是「文档目录 / Cardbara」，用户可在
+ * 的默认目录 + 用户输入的名字拼出落盘路径。默认值是「文档目录 / Prismwright」，用户可在
  * 设置里更换。读不出来一律静默回退，绝不拦住启动或编辑。
  */
 import { documentDir } from "@tauri-apps/api/path"
@@ -14,7 +14,7 @@ const STORE_PATH = "preferences.json"
 const NEW_PACK_DIR_KEY = "newPackDir"
 
 /** 默认目录的末级目录名，挂在用户的「文档」目录下。 */
-const DEFAULT_DIR_NAME = "Cardbara"
+const DEFAULT_DIR_NAME = "Prismwright"
 
 /**
  * 读取用户设置的默认新建目录。
@@ -49,7 +49,7 @@ export async function saveNewPackDir(dir: string): Promise<void> {
 /**
  * 解析当前应使用的默认新建目录。
  *
- * @returns 用户设置过就用它，否则用「文档目录 / Cardbara」；非 Tauri 环境或取文档目录
+ * @returns 用户设置过就用它，否则用「文档目录 / Prismwright」；非 Tauri 环境或取文档目录
  *   失败时回退空串——此时 `newPackFlow` 会把新建拦下并提示去设置里选目录。
  */
 export async function resolveNewPackDir(): Promise<string> {

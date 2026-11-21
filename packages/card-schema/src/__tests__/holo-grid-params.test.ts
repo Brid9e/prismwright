@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { EffectSchema, HoloGridParamsSchema, LayerSchema } from "@cardbara/schema"
+import { EffectSchema, HoloGridParamsSchema, LayerSchema } from "@prismwright/schema"
 
 describe("HoloGridParamsSchema", () => {
   it("默认继承刻纹参数", () => {

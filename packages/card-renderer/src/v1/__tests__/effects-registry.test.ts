@@ -6,7 +6,7 @@
  * （UI 据此生成控件、渲染层据此传参）。三者任一漂移都会让「加一种效果」在别处静默出错。
  */
 import { describe, it, expect } from "vitest"
-import { EffectSchema } from "@cardbara/schema"
+import { EffectSchema } from "@prismwright/schema"
 import {
   EFFECT_REGISTRY,
   EFFECT_KINDS,

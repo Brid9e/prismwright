@@ -1,6 +1,6 @@
-# Cardbara Editor
+# Prismwright Editor
 
-Cardbara（卡皮巴拉牌）是一款本地优先的开源卡牌系列编辑器：导入卡面素材、在 3D 预览里组合
+Prismwright（棱匠）是一款本地优先的开源卡牌系列编辑器：导入卡面素材、在 3D 预览里组合
 效果、编辑系列封面，并导出卡牌图片、GIF、WebM 与可导入的卡包文件。
 
 这个仓库只包含桌面编辑器与它依赖的共享包，不包含微信小程序、云函数或任何云端发布功能。
@@ -32,7 +32,7 @@ pnpm typecheck
 
 ```bash
 pnpm build                       # 前端产物（apps/desktop/dist）
-pnpm -F cardbara tauri build     # 桌面安装包
+pnpm -F @prismwright/desktop tauri build     # 桌面安装包
 ```
 
 导出 WebM 需要 ffmpeg：程序优先使用打包进资源的 ffmpeg（本地构建时放在

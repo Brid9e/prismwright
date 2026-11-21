@@ -10,7 +10,7 @@
  */
 import { describe, it, expect } from "vitest"
 import { Color, DataTexture, RGBAFormat } from "three"
-import { EffectSchema } from "@cardbara/schema"
+import { EffectSchema } from "@prismwright/schema"
 import { createBaseMaterial } from "../materials/base-material"
 import { CARD_BACKGROUND_COLOR } from "../card-scene"
 

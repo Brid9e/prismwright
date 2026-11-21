@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Cardbara 默认能力",
+  "description": "Prismwright 默认能力",
   "windows": ["main"],
   "permissions": [
     "core:default",

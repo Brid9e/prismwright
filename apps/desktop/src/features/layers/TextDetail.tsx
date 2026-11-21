@@ -12,7 +12,7 @@ import {
   type TextParams,
   type TextShadowParams,
   type TextStrokeParams,
-} from "@cardbara/schema"
+} from "@prismwright/schema"
 import { usePackStore, type FaceRef } from "../../store/packStore"
 import { ColorField } from "../../ui/ColorField"
 import { PropertyRow } from "../../ui/PropertyRow"

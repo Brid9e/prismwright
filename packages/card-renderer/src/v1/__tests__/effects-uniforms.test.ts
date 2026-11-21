@@ -6,7 +6,7 @@
  * 的唯一依据，任一处漂移都会让画面静默错位。
  */
 import { describe, it, expect } from "vitest"
-import { EffectSchema, type Effect } from "@cardbara/schema"
+import { EffectSchema, type Effect } from "@prismwright/schema"
 import { toEffectUniforms } from "../effects/uniforms"
 import {
   MOIRE_MAX,

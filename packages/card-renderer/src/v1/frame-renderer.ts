@@ -34,7 +34,7 @@ import {
   resolveImage,
   resolveImageMask,
   type CardFace,
-} from "@cardbara/schema"
+} from "@prismwright/schema"
 import type { ResolveAsset } from "./types"
 import { TextureCache } from "./textures"
 import { TextTextureCache } from "./text-texture"

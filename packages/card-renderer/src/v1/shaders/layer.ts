@@ -31,7 +31,7 @@
  * - 新增**作为蒙版**：文字层勾上后本层不出图（文字 / 图片 / 全息三路 alpha 一起归零），但字形
  *   alpha 作为祖先文字蒙版裁切整棵子树——与图蒙版的继承模型一致，只是裁切源换成字形。
  */
-import { MAX_NEST_DEPTH } from "@cardbara/schema"
+import { MAX_NEST_DEPTH } from "@prismwright/schema"
 import { GLOSS_MAX } from "../effects/registry"
 import { GLSL_COMMON } from "./common"
 

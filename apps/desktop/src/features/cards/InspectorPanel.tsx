@@ -5,7 +5,7 @@
  * 因此这里产出一个 `FaceRef` 交给所有子组件，使背面复用同一套 UI（设计文档偏离 D3）。
  */
 import { useTranslation } from "react-i18next"
-import { createCardFace, findLayerById, flattenLayers, type CardFace } from "@cardbara/schema"
+import { createCardFace, findLayerById, flattenLayers, type CardFace } from "@prismwright/schema"
 import { isDefaultBackPack } from "../default-back/default-back"
 import { useDefaultBackStore } from "../../store/defaultBackStore"
 import { findCard, usePackStore, type FaceRef } from "../../store/packStore"

@@ -6,7 +6,7 @@
  * `apps/miniprogram/miniprogram/utils/pack-style.js`（那边拼的是内联样式字符串）。
  */
 import type { CSSProperties } from "react"
-import type { PackArtBlend, PackArtFit, PackArtStyle } from "@cardbara/schema"
+import type { PackArtBlend, PackArtFit, PackArtStyle } from "@prismwright/schema"
 
 /**
  * 混合方式下拉框的顺序：默认值在前，其余按「常用 → 强烈 → 少见」排。

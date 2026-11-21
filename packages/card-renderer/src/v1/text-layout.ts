@@ -5,7 +5,7 @@
  * 按纹理高度换算成像素。块内坐标以**文字块中心**为原点，`y` 向上为正——画布 y 向下，
  * 绘制时取 `-y`（见 text-texture.ts）。
  */
-import type { TextAlign, TextParams } from "@cardbara/schema"
+import type { TextAlign, TextParams } from "@prismwright/schema"
 
 /** 一段绘制单元：一段文字 + 它左端相对「行起点」的 x 偏移（像素）。 */
 export interface TextRun {

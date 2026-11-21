@@ -45,16 +45,16 @@ describe("join", () => {
     [["C:\\", "p"], "C:\\p"],
     // 分隔符跟首段走：Windows 路径拼出来不该混进 `/`（功能上能用，但显示与人读都别扭）。
     [["C:\\x\\packs", "p"], "C:\\x\\packs\\p"],
-    [["C:\\Users\\Brid9e\\Documents", "Cardbara"], "C:\\Users\\Brid9e\\Documents\\Cardbara"],
+    [["C:\\Users\\Brid9e\\Documents", "Prismwright"], "C:\\Users\\Brid9e\\Documents\\Prismwright"],
     // 首段全是正斜杠时保持正斜杠（Windows 也认这种写法，别反过来又混一遍）。
     [["C:/Users/u/Documents", "p"], "C:/Users/u/Documents/p"],
-    // 首段自身已混着写（旧版本拼出的「文档/Cardbara」曾这样存进首选项）也要一并规整，
+    // 首段自身已混着写（旧版本拼出的「文档/Prismwright」曾这样存进首选项）也要一并规整，
     // 否则此后新建的完整路径会一直混着。
     [
-      ["C:\\Users\\Brid9e\\Documents/Cardbara", "我的系列"],
-      "C:\\Users\\Brid9e\\Documents\\Cardbara\\我的系列",
+      ["C:\\Users\\Brid9e\\Documents/Prismwright", "我的系列"],
+      "C:\\Users\\Brid9e\\Documents\\Prismwright\\我的系列",
     ],
-    [["/home/u/Documents/Cardbara", "我的系列"], "/home/u/Documents/Cardbara/我的系列"],
+    [["/home/u/Documents/Prismwright", "我的系列"], "/home/u/Documents/Prismwright/我的系列"],
   ])("%j -> %j", (parts, expected) => {
     expect(join(...parts)).toBe(expected)
   })

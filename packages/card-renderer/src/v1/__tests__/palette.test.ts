@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { DEFAULT_PALETTE, DEFAULT_STOPS } from "@cardbara/schema"
+import { DEFAULT_PALETTE, DEFAULT_STOPS } from "@prismwright/schema"
 import {
   MAX_PALETTE,
   padPalette,

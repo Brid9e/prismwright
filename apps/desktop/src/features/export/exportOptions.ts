@@ -5,7 +5,7 @@
  * 由 {@link ./runExport} 消费。帧数、默认文件名、保存过滤器这类派生量都收在这里，UI 与编排只读不算，
  * 免得两处各推一份、越推越偏。
  */
-import { EXPORT_SWAY_PERIOD } from "@cardbara/renderer/v1"
+import { EXPORT_SWAY_PERIOD } from "@prismwright/renderer/v1"
 import type { FileFilter } from "../../tauri/pack-fs"
 
 /** 导出格式。 */

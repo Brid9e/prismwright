@@ -283,7 +283,7 @@ async function main() {
   const urls = candidateUrls(lock.url, mirrors, { mirrorFirst: !!mirrorEnv })
   // 半成品放在产物目录旁边（`binaries/` 已 git 忽略）：重跑能续传，临时目录做不到这点。
   const zip = path.join(path.dirname(target), ".ffmpeg-download.zip")
-  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "cardbara-ffmpeg-"))
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "prismwright-ffmpeg-"))
   try {
     console.log(`下载 ${lock.version}（${(lock.size / 1024 / 1024).toFixed(1)}MB）…`)
     await download(urls, zip, lock, target)

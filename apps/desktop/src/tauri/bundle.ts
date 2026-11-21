@@ -3,7 +3,7 @@
  *
  * 与 `pack-fs.ts` 同一模式：上层只依赖 `bundleFs`，不直接接触 `invoke`。
  * 打开失败时 Rust 统一返回哨兵字符串 `E_BUNDLE_INVALID`，这里翻译成
- * {@link BundleInvalidError}，让 UI 能显示「文件已损坏或不是 Cardbara 工程文件」，
+ * {@link BundleInvalidError}，让 UI 能显示「文件已损坏或不是 Prismwright 工程文件」，
  * 而不必解析错误文案。
  */
 import { invoke } from "@tauri-apps/api/core"
@@ -69,7 +69,7 @@ export const bundleFs = {
   /** 原子安装到目标目录；目标已存在则失败。 */
   install: (path: string, dest: string): Promise<BundleExtractResult> =>
     call(() => invoke("bundle_install", { path, dest })),
-  /** 清理 `extract` 产生的临时目录（只接受 `cardbara-bundle-` 前缀）。 */
+  /** 清理 `extract` 产生的临时目录（只接受 `prismwright-bundle-` 前缀）。 */
   cleanup: (dir: string): Promise<void> => invoke("bundle_cleanup", { dir }),
   /** 删除 `install` 之后处理失败的目录（只接受带 `manifest.json` 的安装产物）。 */
   discardInstall: (dir: string): Promise<void> => invoke("bundle_discard_install", { dir }),

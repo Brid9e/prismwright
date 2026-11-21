@@ -3,7 +3,7 @@
 - 日期：2026-11-20
 - 状态：已实现（含后续改名与偏移）
 - 产品命名：调色板合成叫「叠色」（数据值 tint）；公式参考 Balatro holo.fs，UI 与数据不使用来源名。
-- 仓库：`D:\Code\cardbara-editor`
+- 仓库：`D:\Code\prismwright`
 - 相关提交：`f5fa7da`（调色板新增合成方式，第一版把叠色合成写死）、`5817cbf`（小程序 bundle 重建）
 
 ## 1. 背景与问题
@@ -121,7 +121,7 @@ result = mix(content, tinted, delta)
   - `shaders/layer.ts`（palette 参数 uniform、叠色合成、独立网格的应用）
 - 编辑器：`effect.json`（zh/en）；无需改 `EffectStack`（现有 select/slider 通用）
 - 测试：schema 默认值、材质 uniform、着色器字符串、uniform 打包、i18n
-- 小程序：`apps/miniprogram` 的 `lib/cardbara.js` 重建（monorepo）
+- 小程序：`apps/miniprogram` 的 `lib/prismwright.js` 重建（monorepo）
 
 ## 5. 备选与取舍
 

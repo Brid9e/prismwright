@@ -22,7 +22,7 @@ vi.mock("../../tauri/pack-fs", () => ({
   },
 }))
 
-import { findLayerById, type CardFace } from "@cardbara/schema"
+import { findLayerById, type CardFace } from "@prismwright/schema"
 import { usePackStore } from "../packStore"
 import type { FaceRef } from "../packStore"
 

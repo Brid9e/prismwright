@@ -10,7 +10,7 @@
  * 规则错了的症状是「图层的法线拖了没反应」或「选了法线贴图还在按亮度算」——都不报错。
  */
 import { describe, it, expect } from "vitest"
-import { CardFaceSchema, ImageParamsSchema } from "@cardbara/schema"
+import { CardFaceSchema, ImageParamsSchema } from "@prismwright/schema"
 import { BUMP_OFF, resolveBump, resolveLayerBump } from "../bump"
 
 /** 开了亮度法线的卡面（没有法线贴图）。 */

@@ -1,6 +1,9 @@
 {
-  "name": "@cardbara/schema",
+  "name": "@prismwright/schema",
   "version": "0.0.0",
+  "description": "Prismwright 卡牌 schema 与资产收集",
+  "repository": { "type": "git", "url": "https://github.com/Brid9e/prismwright.git" },
+  "homepage": "https://github.com/Brid9e/prismwright",
   "private": true,
   "type": "module",
   "main": "./src/index.ts",

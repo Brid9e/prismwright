@@ -52,7 +52,7 @@ export function Splitter({ left, center, right, leftCollapsed, rightCollapsed }:
   const rightRef = useCollapsedSync(rightCollapsed)
 
   return (
-    <PanelGroup direction="horizontal" autoSaveId="cardbara-layout" className="min-h-0 flex-1">
+    <PanelGroup direction="horizontal" autoSaveId="prismwright-layout" className="min-h-0 flex-1">
       <ResizePanel
         ref={leftRef}
         id="left"

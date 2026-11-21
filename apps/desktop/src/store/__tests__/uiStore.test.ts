@@ -101,8 +101,8 @@ describe("uiStore", () => {
 
   it("newPackDir 默认空，可设置", () => {
     expect(useUiStore.getState().newPackDir).toBe("")
-    useUiStore.getState().setNewPackDir("/home/u/Documents/Cardbara")
-    expect(useUiStore.getState().newPackDir).toBe("/home/u/Documents/Cardbara")
+    useUiStore.getState().setNewPackDir("/home/u/Documents/Prismwright")
+    expect(useUiStore.getState().newPackDir).toBe("/home/u/Documents/Prismwright")
   })
 
   it("requestNewPack / resolveNewPack 成对", () => {
@@ -175,7 +175,7 @@ describe("uiStore", () => {
     const info: BundleInfo = {
       kind: 2,
       manifest: {
-        format: "cardbara-bundle",
+        format: "prismwright-bundle",
         version: 1,
         kind: "series",
         includesHistory: false,

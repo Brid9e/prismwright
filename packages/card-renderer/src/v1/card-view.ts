@@ -39,7 +39,7 @@ import {
   resolveImage,
   resolveImageMask,
   type CardFace,
-} from "@cardbara/schema"
+} from "@prismwright/schema"
 import type { CardView, CardViewOptions, FlipState } from "./types"
 import { clampPixelRatio } from "./host"
 import {

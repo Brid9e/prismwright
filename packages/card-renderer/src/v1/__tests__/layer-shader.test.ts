@@ -5,7 +5,7 @@
  * 不报错也不生效——裁切会静默失效。这里用字符串断言把这个接缝钉住。
  */
 import { describe, it, expect } from "vitest"
-import { MAX_NEST_DEPTH } from "@cardbara/schema"
+import { MAX_NEST_DEPTH } from "@prismwright/schema"
 import { GLSL_COMMON } from "../shaders/common"
 import { LAYER_FRAGMENT } from "../shaders/layer"
 

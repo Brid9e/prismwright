@@ -1102,7 +1102,7 @@ mod read_asset_tests {
     /// 读取系列内的相对路径资源，且越界路径必须被 `safe_join` 拦下。
     #[test]
     fn reads_asset_and_rejects_traversal() {
-        let dir = std::env::temp_dir().join(format!("cardbara-read-asset-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("prismwright-read-asset-{}", std::process::id()));
         fs::create_dir_all(dir.join("assets")).unwrap();
         fs::write(dir.join("assets/a.bin"), [0u8, 1, 2]).unwrap();
 
@@ -1132,7 +1132,7 @@ mod theme_tests {
     /// 列目录只收 `*.json`、按文件名排序；目录不存在时为空。
     #[test]
     fn read_theme_dir_reads_only_json_sorted() {
-        let dir = std::env::temp_dir().join(format!("cardbara-themes-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("prismwright-themes-{}", std::process::id()));
         let _ = fs::remove_dir_all(&dir);
 
         assert!(read_theme_dir(&dir).unwrap().is_empty());

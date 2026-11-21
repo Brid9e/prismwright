@@ -19,7 +19,7 @@ vi.mock("../../tauri/pack-fs", () => ({
   },
 }))
 
-import { createCard } from "@cardbara/schema"
+import { createCard } from "@prismwright/schema"
 import { usePackStore } from "../packStore"
 
 describe("packStore.importCard", () => {

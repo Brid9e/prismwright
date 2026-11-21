@@ -9,9 +9,9 @@
  * （那等于替用户选了一组颜色）。但着色器的定长数组仍须填满非空值，故空输入回退到默认调色板
  * **只当占位**：`uHasHolo = 0` 时这些值不会被采样。颜色类效果不依赖这道门——它们照常作用在
  * 本层的图片 / 文字上（见 shaders/layer.ts 的内容效果链）。默认调色板的规范定义在
- * `@cardbara/schema`，与 v2 迁移共用同一份，避免两处漂移。
+ * `@prismwright/schema`，与 v2 迁移共用同一份，避免两处漂移。
  */
-import { alphaOf, DEFAULT_STOPS, type ColorStop } from "@cardbara/schema"
+import { alphaOf, DEFAULT_STOPS, type ColorStop } from "@prismwright/schema"
 
 /** 着色器 `uColors[8]` / `uStops[8]` 的固定长度。 */
 export const MAX_PALETTE = 8
@@ -39,14 +39,14 @@ export function padPalette(colors: readonly string[]): string[] {
  * 解析出「定长颜色 + 定长透明度 + 定长位置」，供材质设置
  * `uColors` / `uColorAlphas` / `uStops`。
  *
- * 命名与 `@cardbara/schema` 的 `resolvePalette(effects)` 区分：后者从效果列表挑出
+ * 命名与 `@prismwright/schema` 的 `resolvePalette(effects)` 区分：后者从效果列表挑出
  * `palette` 效果的参数，本函数则把色标数组折成着色器能吃的定长 uniform。二者常在同一处
  * 配合使用（`paletteUniforms(resolvePalette(effects)?.colors ?? [])`），故取 `*Uniforms` 之名。
  *
  * 位置也用末项重复补齐：补出来的段 `span` 为 0，着色器里被 `1e-5` 下限兜住，
  * `m` 落在该段时混的是同一个颜色，等于没混。透明度跟颜色一起补齐。
  *
- * @param stops - 色标（位置须已升序，见 `@cardbara/schema` 的解析期归一化）。
+ * @param stops - 色标（位置须已升序，见 `@prismwright/schema` 的解析期归一化）。
  * @returns 三者长度都恒为 {@link MAX_PALETTE}；空输入以 {@link DEFAULT_STOPS} 作占位
  *   （不会被采样——空色板的 `palette` 效果已由 `uHasHolo` 门控归零）。
  */
@@ -66,7 +66,7 @@ export function paletteUniforms(stops: readonly ColorStop[]): {
 /** 0–255 的整数分量。 */
 type Rgb = readonly [number, number, number]
 
-/** 解析 `#rgb` / `#rrggbb` / `#rrggbbaa` 的 RGB（合法长度见 `@cardbara/schema` 的 `HEX_COLOR`）。 */
+/** 解析 `#rgb` / `#rrggbb` / `#rrggbbaa` 的 RGB（合法长度见 `@prismwright/schema` 的 `HEX_COLOR`）。 */
 function parseHex(hex: string): Rgb {
   const body = hex.slice(1)
   const full =

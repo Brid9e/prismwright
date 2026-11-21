@@ -6,12 +6,12 @@
  */
 import { useCallback, useEffect, useRef } from "react"
 import type { Texture } from "three"
-import { createCardView, createDomHost, type CardView } from "@cardbara/renderer/v1"
-import type { CardFace } from "@cardbara/schema"
+import { createCardView, createDomHost, type CardView } from "@prismwright/renderer/v1"
+import type { CardFace } from "@prismwright/schema"
 import { createResolveAsset } from "./resolve-asset"
 
 /** 「重置视角」事件名；派发方在 `PreviewPanel`，监听方在本模块。 */
-export const RESET_TILT_EVENT = "cardbara:reset-tilt"
+export const RESET_TILT_EVENT = "prismwright:reset-tilt"
 
 export interface UseCardViewOptions {
   /** three canvas 的挂载容器。 */

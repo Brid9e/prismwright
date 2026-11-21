@@ -20,7 +20,7 @@ import {
   type Effect,
   type GradientParams,
   type ImageParams,
-} from "@cardbara/schema"
+} from "@prismwright/schema"
 import { CARD_ASPECT } from "../card-scene"
 import { MAX_PALETTE } from "../palette"
 import { createLayerMaterial } from "../materials/layer-material"

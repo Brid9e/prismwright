@@ -5,7 +5,7 @@
  * 宽高比在 schema 里就是「宽 / 高」，界面原样显示；圆角的存储单位是**卡高**，
  * 但对人来说百分比更直观，故界面上按 0–100% 呈现。
  */
-import { DEFAULT_CARD_ASPECT } from "@cardbara/schema"
+import { DEFAULT_CARD_ASPECT } from "@prismwright/schema"
 
 /** 宽高比下限（宽/高）：比 1:4 更瘦的卡在网格里已认不出是张卡。 */
 export const ASPECT_MIN = 0.25

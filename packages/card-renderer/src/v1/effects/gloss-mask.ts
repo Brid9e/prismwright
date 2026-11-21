@@ -4,7 +4,7 @@
  * 与 `pick(effects, "gloss", ...)` 同一种筛选口径（启用 + 列表序 + 截断到 `GLOSS_MAX`），
  * 只是多了一道 `asMask`：普通光泽照常出光、不能被当成裁切源。
  */
-import type { Effect, GlossParams } from "@cardbara/schema"
+import type { Effect, GlossParams } from "@prismwright/schema"
 import { GLOSS_MAX } from "./registry"
 
 export function glossMaskParams(effects: readonly Effect[]): GlossParams[] {

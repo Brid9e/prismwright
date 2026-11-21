@@ -15,7 +15,7 @@ import {
   type MaskMode,
   type PaletteParams,
   type PatternMode,
-} from "@cardbara/schema"
+} from "@prismwright/schema"
 
 /** 混合模式的枚举名（真正的 THREE.Blending 值在 three-bridge 里映射）。 */
 export type BlendName = Layer["blend"]

@@ -1,7 +1,10 @@
 {
-  "name": "cardbara",
+  "name": "@prismwright/desktop",
   "private": true,
   "version": "0.1.0",
+  "description": "Prismwright（棱匠）桌面编辑器",
+  "repository": { "type": "git", "url": "https://github.com/Brid9e/prismwright.git" },
+  "homepage": "https://github.com/Brid9e/prismwright",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,8 +15,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@cardbara/renderer": "workspace:*",
-    "@cardbara/schema": "workspace:*",
+    "@prismwright/renderer": "workspace:*",
+    "@prismwright/schema": "workspace:*",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",

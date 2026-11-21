@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Cardbara",
+  "productName": "Prismwright",
   "version": "0.1.0",
-  "identifier": "com.cardbara.app",
+  "identifier": "com.prismwright.app",
   "build": {
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Cardbara",
+        "title": "Prismwright",
         "width": 1280,
         "height": 800,
         "minWidth": 1024,

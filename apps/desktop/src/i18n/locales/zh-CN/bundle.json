@@ -1,5 +1,5 @@
 {
-  "filterName": "Cardbara 工程",
+  "filterName": "Prismwright 工程",
   "export": {
     "titleSeries": "导出系列工程",
     "titleCard": "导出卡片",
@@ -18,7 +18,7 @@
     "hintCard": "将导入到当前系列。",
     "hintCardNewPack": "当前没有打开的系列，将按卡名新建一个系列再导入。",
     "action": "导入",
-    "invalid": "文件已损坏或不是 Cardbara 工程文件",
+    "invalid": "文件已损坏或不是 Prismwright 工程文件",
     "failed": "导入失败：{{message}}",
     "defaultPackName": "导入的卡片"
   }

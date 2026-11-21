@@ -11,11 +11,11 @@ import {
   collectPackAssets,
   type Card,
   type Pack,
-} from "@cardbara/schema"
+} from "@prismwright/schema"
 import { sanitizeFileBase } from "../../app/path"
 
 /** 清单里的格式标识。 */
-export const BUNDLE_FORMAT = "cardbara-bundle"
+export const BUNDLE_FORMAT = "prismwright-bundle"
 /** 当前格式版本。 */
 export const BUNDLE_VERSION = 1
 

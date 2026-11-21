@@ -10,14 +10,14 @@ import type {
   EffectParams,
   EffectRole,
   MaskPresetParams,
-} from "@cardbara/schema"
+} from "@prismwright/schema"
 import {
   EFFECT_KINDS,
   EFFECT_REGISTRY,
   MASK_PRESETS,
   materializePreset,
-} from "@cardbara/renderer/v1"
-import type { FieldDescriptor } from "@cardbara/renderer/v1"
+} from "@prismwright/renderer/v1"
+import type { FieldDescriptor } from "@prismwright/renderer/v1"
 import type { AssetTarget } from "../../store/packStore"
 
 /** 一个角色分组下的条目。 */

@@ -1,12 +1,12 @@
 /**
  * 系列资源路径收集（桌面端入口）。
  *
- * 架构位置：数据层（`@cardbara/schema` 类型）与 IO 层（`packFs`）之间的纯函数桥。
+ * 架构位置：数据层（`@prismwright/schema` 类型）与 IO 层（`packFs`）之间的纯函数桥。
  * 系列内的图片（卡面、蒙版、背面）都以「相对系列根的路径」存于数据模型中，
  * 本模块负责从数据模型反推这些路径的集合，供「删除卡片时移入回收站」「撤销时恢复」
  * 等需要枚举文件的场景复用。
  *
- * **实现已下沉到 `@cardbara/schema`**：小程序发布后也要按卡预热资源，用的是同一份判定。
+ * **实现已下沉到 `@prismwright/schema`**：小程序发布后也要按卡预热资源，用的是同一份判定。
  * 少收一个路径的后果是「某张卡偶发缺图」，那种 bug 在两个实现里各写一遍几乎必然漂移。
  * 本文件保留这三个旧名字作为薄委托，调用点不动；新代码请直接用 schema 的
  * `collectFaceAssets` / `collectCardAssets` / `collectPackAssets`。
@@ -18,7 +18,7 @@ import {
   type Card,
   type CardFace,
   type Pack,
-} from "@cardbara/schema"
+} from "@prismwright/schema"
 
 /**
  * 收集单个卡面（卡片正面或系列背面）引用的资源相对路径。
@@ -55,5 +55,5 @@ export const collectCardRels = collectCardAssets
  */
 export const collectPackRels = collectPackAssets
 
-// 类型再导出：老调用点若从这里取类型（而非从 @cardbara/schema），改完实现后仍然可用。
+// 类型再导出：老调用点若从这里取类型（而非从 @prismwright/schema），改完实现后仍然可用。
 export type { Card, CardFace, Pack }

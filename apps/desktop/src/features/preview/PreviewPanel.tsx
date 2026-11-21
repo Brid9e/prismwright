@@ -8,8 +8,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Eye, EyeOff, Paintbrush, Redo2, RotateCcw, SquareDashed, Undo2, Waves } from "lucide-react"
 import { CanvasTexture, NoColorSpace } from "three"
-import { findLayerById, type CardFace } from "@cardbara/schema"
-import { CARD_ASPECT, MAX_ZOOM, MIN_ZOOM } from "@cardbara/renderer/v1"
+import { findLayerById, type CardFace } from "@prismwright/schema"
+import { CARD_ASPECT, MAX_ZOOM, MIN_ZOOM } from "@prismwright/renderer/v1"
 import { useDefaultBackStore } from "../../store/defaultBackStore"
 import { isDefaultBackPack } from "../default-back/default-back"
 import { findCard, usePackStore } from "../../store/packStore"
@@ -591,7 +591,7 @@ export function PreviewPanel() {
       bytes,
     )
     if (!result.ok) {
-      console.error("[cardbara] 擦除图写入失败", result)
+      console.error("[prismwright] 擦除图写入失败", result)
       return
     }
     resolveErasePaint()

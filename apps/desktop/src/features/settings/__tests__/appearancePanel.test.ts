@@ -53,7 +53,7 @@ describe("AppearancePanel", () => {
     // 主题下拉是编辑器统一的 Select（Radix：触发器是 button），当前选中项展示在触发器上；
     // 选项只在展开时渲染，故 SSR 里只钉触发器与导入按钮。
     expect(html).toContain('aria-haspopup="menu"')
-    expect(html).toContain("Cardbara 深色")
+    expect(html).toContain("Prismwright 深色")
     expect(html).toContain("导入主题…")
   })
 })

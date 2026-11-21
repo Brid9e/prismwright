@@ -1,5 +1,5 @@
 {
-  "filterName": "Cardbara project",
+  "filterName": "Prismwright project",
   "export": {
     "titleSeries": "Export series project",
     "titleCard": "Export card",
@@ -18,7 +18,7 @@
     "hintCard": "Imports into the current series.",
     "hintCardNewPack": "No series is open; a new series will be created from the card name.",
     "action": "Import",
-    "invalid": "This file is damaged or is not a Cardbara project file",
+    "invalid": "This file is damaged or is not a Prismwright project file",
     "failed": "Import failed: {{message}}",
     "defaultPackName": "Imported card"
   }

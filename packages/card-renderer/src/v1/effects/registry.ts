@@ -9,7 +9,7 @@
  * 做法沿用既有的 `mask-presets/registry.ts`（`MASK_PRESETS`）：同一份静态描述，
  * 由注册表当单一来源，消费方不再各写一遍默认值与字段。
  */
-import { DEFAULT_STOPS, EffectSchema } from "@cardbara/schema"
+import { DEFAULT_STOPS, EffectSchema } from "@prismwright/schema"
 import type {
   EffectKind,
   EffectRole,
@@ -22,7 +22,7 @@ import type {
   GlossParams,
   PaletteParams,
   HoloGridParams,
-} from "@cardbara/schema"
+} from "@prismwright/schema"
 import { patternModeCode } from "../mapping"
 
 /**

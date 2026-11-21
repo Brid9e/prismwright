@@ -4,7 +4,7 @@
  * 数据落在 `pack.album.pages`：每页恰好 {@link ALBUM_PAGE_SIZE} 格，`null` 是空格。
  * 对话框只负责把拖动事件翻成这里的调用；哪张卡在哪一格全由本模块决定，因而可单测。
  */
-import { ALBUM_PAGE_SIZE, type AlbumLayout } from "@cardbara/schema"
+import { ALBUM_PAGE_SIZE, type AlbumLayout } from "@prismwright/schema"
 
 /** 一页 9 格；`null` 表示这一格空着。 */
 export type AlbumPage = (string | null)[]

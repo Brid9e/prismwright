@@ -9,7 +9,7 @@
  * 字节相同就直接复用，不同才另存到 `assets/imported/<uuid>-<basename>`。这样反复导入
  * 同一个工程不会产生一堆内容相同的副本。
  */
-import { CardSchema, collectCardAssets, type Card } from "@cardbara/schema"
+import { CardSchema, collectCardAssets, type Card } from "@prismwright/schema"
 import { basename, join, toPackDirName } from "../../app/path"
 import { usePackStore } from "../../store/packStore"
 import { useUiStore } from "../../store/uiStore"

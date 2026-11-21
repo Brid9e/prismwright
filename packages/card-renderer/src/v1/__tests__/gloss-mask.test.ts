@@ -5,7 +5,7 @@
  * 「换颜色」与「当蒙版」也就无法各用各的。
  */
 import { describe, it, expect } from "vitest"
-import { EffectSchema, type Effect } from "@cardbara/schema"
+import { EffectSchema, type Effect } from "@prismwright/schema"
 import { glossMaskParams } from "../effects/gloss-mask"
 import { GLOSS_MAX } from "../effects/registry"
 

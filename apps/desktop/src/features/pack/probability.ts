@@ -8,7 +8,7 @@
  * - 某档有正权重、但包里没有该稀有度的卡时，服务端会兜底到「全部卡片均匀抽」，
  *   于是这份权重实际上落到了别的档上——面板要把这件事如实说出来，而不是假装生效。
  */
-import type { Pack } from "@cardbara/schema"
+import type { Pack } from "@prismwright/schema"
 
 /**
  * 可配置的档位，顺序即面板上的行序（低 → 高，隐藏款压在最后）。

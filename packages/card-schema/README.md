@@ -1,4 +1,4 @@
-# @cardbara/schema
+# @prismwright/schema
 
 Card Editor 的**数据层**包：纯 TypeScript + [zod](https://zod.dev/)，零 UI / IO 依赖。
 它定义了 `pack.json` 的完整数据模型、运行时校验、默认值工厂与版本守卫，是全部持久化
@@ -12,7 +12,7 @@ Card Editor 的**数据层**包：纯 TypeScript + [zod](https://zod.dev/)，零
 
 ## 导出结构
 
-所有符号统一从包根导入（`import { ... } from "@cardbara/schema"`），共七组：
+所有符号统一从包根导入（`import { ... } from "@prismwright/schema"`），共七组：
 
 | 组别 | 符号 | 说明 |
 |---|---|---|

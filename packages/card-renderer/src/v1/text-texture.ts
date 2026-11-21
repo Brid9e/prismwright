@@ -17,7 +17,7 @@ import {
   UnsignedByteType,
   type Texture,
 } from "three"
-import type { Layer, TextParams } from "@cardbara/schema"
+import type { Layer, TextParams } from "@prismwright/schema"
 import { CARD_ASPECT } from "./card-scene"
 import { flipRowsInPlace, fontCssString, layoutText, type TextBlockLayout } from "./text-layout"
 

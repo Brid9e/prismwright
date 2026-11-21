@@ -8,7 +8,7 @@
  * 名字由创建时的界面语言决定，之后不再随语言切换而变。为了让这份文案只在一个地方生成，
  * i18n 的依赖收在这个小模块里：store 与 schema 都不需要知道当前语言。
  */
-import { flattenLayers, type CardFace, type Pack } from "@cardbara/schema"
+import { flattenLayers, type CardFace, type Pack } from "@prismwright/schema"
 import i18n, { initI18n } from "../i18n/init"
 
 /** 图层名字为空的判定，与 {@link displayLayerName} 保持一致（全空白也算未命名）。 */

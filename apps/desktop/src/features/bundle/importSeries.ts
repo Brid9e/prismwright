@@ -8,7 +8,7 @@
  * 最近列表、云上记录都以 id 区分，撞了就成了同一个系列。改名同理——目录名只是磁盘位置，
  * 显示名取 `pack.json` 里的 `name`。
  */
-import { parsePack } from "@cardbara/schema"
+import { parsePack } from "@prismwright/schema"
 import { join, toPackDirName } from "../../app/path"
 import { usePackStore } from "../../store/packStore"
 import { useRecentStore } from "../../store/recentStore"

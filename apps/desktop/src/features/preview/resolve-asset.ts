@@ -1,13 +1,13 @@
 /**
  * 资源解析器：把系列内相对路径变成 three 纹理。
  *
- * 这是渲染器与运行环境解耦的那个注入点——`@cardbara/renderer` 不知道 Tauri 的
+ * 这是渲染器与运行环境解耦的那个注入点——`@prismwright/renderer` 不知道 Tauri 的
  * 存在，由这里负责「读字节 → object URL → 纹理」。用 object URL 而非直接把
  * ArrayBuffer 交给 `TextureLoader`：后者只接受可被浏览器解码的 URL/图片源，
  * object URL 是让浏览器解码字节的最短路径，且加载完成即可释放，不长期占用内存。
  */
 import { TextureLoader, type Texture } from "three"
-import type { ResolveAsset } from "@cardbara/renderer/v1"
+import type { ResolveAsset } from "@prismwright/renderer/v1"
 import { packFs } from "../../tauri/pack-fs"
 
 export interface ResolveAssetOptions {

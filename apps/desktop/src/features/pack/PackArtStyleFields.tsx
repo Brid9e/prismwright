@@ -11,7 +11,7 @@ import {
   type PackArtBlend,
   type PackArtFit,
   type PackArtStyle,
-} from "@cardbara/schema"
+} from "@prismwright/schema"
 import { usePackStore } from "../../store/packStore"
 import { PropertyRow } from "../../ui/PropertyRow"
 import { Select } from "../../ui/Select"

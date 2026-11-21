@@ -23,7 +23,7 @@ vi.mock("../../tauri/pack-fs", () => ({
   },
 }))
 
-import { findLayerById, type ColorStop } from "@cardbara/schema"
+import { findLayerById, type ColorStop } from "@prismwright/schema"
 import { usePackStore } from "../packStore"
 
 const stop = (color: string, at: number): ColorStop => ({ color, at })

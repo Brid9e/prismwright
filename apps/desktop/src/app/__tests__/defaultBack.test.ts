@@ -5,7 +5,7 @@
  * 文件系统与 Tauri 的路径 API 都 mock 掉，测的是这条编排本身。
  */
 import { describe, it, expect, beforeEach, vi } from "vitest"
-import { createEmptyPack, type Pack } from "@cardbara/schema"
+import { createEmptyPack, type Pack } from "@prismwright/schema"
 
 vi.mock("@tauri-apps/api/path", () => ({
   appDataDir: vi.fn(async () => "/data"),

@@ -6,7 +6,7 @@
  * canvas 的 `font` 赋值非法会**静默**沿用上一个字体，字形全错而没有任何报错。
  */
 import { describe, it, expect, vi } from "vitest"
-import { TextParamsSchema } from "@cardbara/schema"
+import { TextParamsSchema } from "@prismwright/schema"
 import { flipRowsInPlace, fontCssString, layoutRuns, layoutText } from "../text-layout"
 
 /** 每个字符宽 10px、忽略内容的假测量。 */

@@ -5,7 +5,7 @@
  * 会让导出「少一帧」「文件名带非法字符」这类问题悄悄溜进产物。
  */
 import { describe, it, expect } from "vitest"
-import { EXPORT_SWAY_PERIOD } from "@cardbara/renderer/v1"
+import { EXPORT_SWAY_PERIOD } from "@prismwright/renderer/v1"
 import {
   DEFAULT_EXPORT_OPTIONS,
   EXPORT_SIZE_PRESETS,

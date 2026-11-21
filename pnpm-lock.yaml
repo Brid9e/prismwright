@@ -29,10 +29,10 @@ importers:
 
   apps/desktop:
     dependencies:
-      '@cardbara/renderer':
+      '@prismwright/renderer':
         specifier: workspace:*
         version: link:../../packages/card-renderer
-      '@cardbara/schema':
+      '@prismwright/schema':
         specifier: workspace:*
         version: link:../../packages/card-schema
       '@dnd-kit/core':
@@ -150,7 +150,7 @@ importers:
 
   packages/card-renderer:
     dependencies:
-      '@cardbara/schema':
+      '@prismwright/schema':
         specifier: workspace:*
         version: link:../card-schema
     devDependencies:

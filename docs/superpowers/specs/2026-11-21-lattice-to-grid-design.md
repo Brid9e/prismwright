@@ -2,7 +2,7 @@
 
 - 日期：2026-11-21
 - 状态：草案，待确认
-- 仓库：`D:\Code\cardbara-editor`
+- 仓库：`D:\Code\prismwright`
 - 前置：`2026-11-20-balatro-holo-composite-design.md`（调色板合成 / 独立网格）
 
 ## 1. 背景

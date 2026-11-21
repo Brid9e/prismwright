@@ -5,7 +5,7 @@
  * 折叠态由调用方以集合传入，任一祖先被折叠，其整棵子树都不出现在展示行里。
  */
 import { describe, it, expect } from "vitest"
-import { LayerSchema } from "@cardbara/schema"
+import { LayerSchema } from "@prismwright/schema"
 import { toDisplayOrder } from "../order"
 
 /** 造树：P ── [A ── G, B]，另有顶层 S。 */

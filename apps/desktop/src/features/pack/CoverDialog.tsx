@@ -14,7 +14,7 @@
  */
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { DEFAULT_PACK_ART_STYLE } from "@cardbara/schema"
+import { DEFAULT_PACK_ART_STYLE } from "@prismwright/schema"
 import { usePackStore } from "../../store/packStore"
 import { useUiStore } from "../../store/uiStore"
 import { DialogShell } from "../../ui/Dialog"

@@ -63,8 +63,8 @@ describe("TitleBar（Windows）", () => {
   it("无系列时标题位回落为品牌锁形", () => {
     const html = render("windows")
     // 锁形 = logo + 字标：logo 以 aria-label 报出应用名（本用例固定 zh-CN），字标是固定的拉丁字。
-    expect(html).toContain('aria-label="卡皮巴拉牌"')
-    expect(html).toContain("Cardbara")
+    expect(html).toContain('aria-label="棱匠"')
+    expect(html).toContain("Prismwright")
   })
 
   // 「只能拖着标题移动」的回归：Tauri 只看命中目标自身有没有该属性，故左右两列的**留白**
@@ -144,7 +144,7 @@ describe("TitleBar（起始屏：variant=minimal）", () => {
   it("Windows：不画菜单、不画标题，只留设置图标", () => {
     const html = render("windows", "minimal")
     expect(html).not.toContain("文件")
-    expect(html).not.toContain("Cardbara")
+    expect(html).not.toContain("Prismwright")
     expect(html).toContain('aria-label="设置"')
   })
 
@@ -162,7 +162,7 @@ describe("TitleBar（起始屏：variant=minimal）", () => {
 
   it("macOS：同样只剩设置图标，标题与交通灯让位都不画", () => {
     const html = render("macos", "minimal")
-    expect(html).not.toContain("Cardbara")
+    expect(html).not.toContain("Prismwright")
     expect(html).not.toContain("76px")
     expect(html).toContain('aria-label="设置"')
   })

@@ -11,7 +11,7 @@ import {
   createEmptyPack,
   createLayer,
   type Pack,
-} from "@cardbara/schema"
+} from "@prismwright/schema"
 import { initI18n } from "../../i18n/init"
 import {
   defaultLayerName,

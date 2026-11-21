@@ -35,7 +35,7 @@ import {
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { GripVertical, Pipette, Plus, X } from "lucide-react"
-import { alphaOf, withAlpha, type ColorStop } from "@cardbara/schema"
+import { alphaOf, withAlpha, type ColorStop } from "@prismwright/schema"
 import {
   DEFAULT_NEW_STOP,
   addStop,

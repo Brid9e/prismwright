@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 use super::archive;
 
 /// 临时目录名前缀；清理守卫据此确认「这是我们自己建的」。
-const TEMP_PREFIX: &str = "cardbara-bundle-";
+const TEMP_PREFIX: &str = "prismwright-bundle-";
 
 fn unique_suffix() -> String {
     let nanos = std::time::SystemTime::now()
@@ -60,7 +60,7 @@ pub fn extract_to_new_dir(plaintext: &[u8], dest: &Path) -> Result<Vec<String>, 
 
 /// 删除本模块创建的临时目录。
 ///
-/// 只接受「直接位于系统临时目录下、且名字以 `cardbara-bundle-` 开头」的路径，
+/// 只接受「直接位于系统临时目录下、且名字以 `prismwright-bundle-` 开头」的路径，
 /// 防止别处传入任意目录把用户数据删掉。
 pub fn cleanup_temp_dir(dir: &Path) -> Result<(), String> {
     let denied = || "拒绝删除非临时工程目录".to_string();
@@ -97,7 +97,7 @@ mod tests {
     use std::path::PathBuf;
 
     fn temp_dir(tag: &str) -> PathBuf {
-        let dir = std::env::temp_dir().join(format!("cardbara-install-test-{tag}-{}", unique_suffix()));
+        let dir = std::env::temp_dir().join(format!("prismwright-install-test-{tag}-{}", unique_suffix()));
         std::fs::create_dir(&dir).unwrap();
         dir
     }

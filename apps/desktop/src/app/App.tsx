@@ -172,7 +172,7 @@ export default function App() {
     // 故必须 try/catch 包住整句，不能只 `.catch()` 它返回的 Promise（同步抛错时拿不到 Promise）。
     try {
       void getCurrentWindow()
-        .setTitle(pack?.name ?? "Cardbara")
+        .setTitle(pack?.name ?? "Prismwright")
         .catch(() => {})
     } catch {
       // dev:web：无 Tauri，标题保持默认，不影响编辑。

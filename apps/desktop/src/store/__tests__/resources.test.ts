@@ -9,7 +9,7 @@
  * 本模块为纯函数、无副作用、无 IO，故无需 mock 任何依赖。
  */
 import { describe, it, expect } from "vitest"
-import type { Card, Effect, Layer, Pack } from "@cardbara/schema"
+import type { Card, Effect, Layer, Pack } from "@prismwright/schema"
 import { collectCardRels, collectPackRels } from "../resources"
 
 /** 一条启用中的 imageMask 效果（默认 line 模式、不反转）；path 为空即「已添加未选图」。 */

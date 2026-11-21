@@ -8,7 +8,7 @@
  * 扩充方式：往 {@link MASK_PRESETS} 加一条、i18n 各加一条 `maskPreset.preset.<id>`；
  * **无需改着色器**（所有预设共用同一 `shardField`）。
  */
-import { MaskPresetParamsSchema, type MaskPresetParams } from "@cardbara/schema"
+import { MaskPresetParamsSchema, type MaskPresetParams } from "@prismwright/schema"
 
 /** 一个内置预设：id + i18n 键 + 形状默认参数。字段只读——注册表是常量，避免被就地改写。 */
 export interface MaskPreset {

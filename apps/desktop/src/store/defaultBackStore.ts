@@ -9,7 +9,7 @@
  */
 import { create } from "zustand"
 import { appDataDir } from "@tauri-apps/api/path"
-import type { CardFace } from "@cardbara/schema"
+import type { CardFace } from "@prismwright/schema"
 import { join } from "../app/path"
 import { packFs } from "../tauri/pack-fs"
 import {

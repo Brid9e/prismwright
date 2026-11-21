@@ -1,7 +1,7 @@
-# @cardbara/renderer
+# @prismwright/renderer
 
 全息卡牌 WebGL 渲染器（基于 [three.js](https://threejs.org/)）。读取
-`@cardbara/schema` 的 `CardFace`，把卡面图与可排序、可嵌套的全息图层渲染到 canvas。
+`@prismwright/schema` 的 `CardFace`，把卡面图与可排序、可嵌套的全息图层渲染到 canvas。
 
 渲染器只做「把数据画出来」一件事：它不读文件、不认系列结构，图片从哪来由调用方经
 `resolveAsset` 注入。除交互预览外，它还提供一条**离屏逐帧**通路，把同一张卡导出为带
@@ -10,12 +10,12 @@
 ## 安装
 
 ```bash
-pnpm add @cardbara/renderer three
+pnpm add @prismwright/renderer three
 ```
 
 `three` 是 **peerDependency**（`>=0.160.0`），由宿主自带、不随本包打包。
 
-本包按版本分入口：当前只导出 `@cardbara/renderer/v1`，裸 `@cardbara/renderer` 不再可用；
+本包按版本分入口：当前只导出 `@prismwright/renderer/v1`，裸 `@prismwright/renderer` 不再可用；
 将来 v2 以 `/v2` 与 v1 平级并列。
 
 ## 两个入口
@@ -31,7 +31,7 @@ pnpm add @cardbara/renderer three
 ## 交互视图：`createCardView`
 
 ```ts
-import { createCardView } from "@cardbara/renderer/v1";
+import { createCardView } from "@prismwright/renderer/v1";
 
 const view = createCardView({
   container: document.getElementById("preview")!,
@@ -78,7 +78,7 @@ view.dispose();                // 卸载：停渲染、释放 GPU 资源与事�
 异步的（要解析卡面与各层蒙版纹理）。
 
 ```ts
-import { createCardFrameRenderer } from "@cardbara/renderer/v1";
+import { createCardFrameRenderer } from "@prismwright/renderer/v1";
 
 const frames = await createCardFrameRenderer({
   card,
@@ -111,7 +111,7 @@ import {
   EFFECT_REGISTRY, EFFECT_KINDS,
   MASK_PRESETS, materializePreset,
   MIN_ZOOM, MAX_ZOOM,
-} from "@cardbara/renderer/v1";
+} from "@prismwright/renderer/v1";
 
 const def = EFFECT_REGISTRY[kind];
 def.role;          // "phase" | "color" | "alpha"——决定在渲染管线的哪一步生效

@@ -5,7 +5,7 @@
  * sRGB → 线性工作空间换算（与图蒙版拾色同源）。
  */
 import { describe, it, expect } from "vitest"
-import { EffectSchema, type Effect } from "@cardbara/schema"
+import { EffectSchema, type Effect } from "@prismwright/schema"
 import { glossAlphaUniforms, glossColorUniforms } from "../effects/gloss-color"
 import { GLOSS_MAX } from "../effects/registry"
 

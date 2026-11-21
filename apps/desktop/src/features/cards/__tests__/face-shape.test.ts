@@ -5,7 +5,7 @@
  * 换算错了，滑杆拖到头圆角却只有一半。故把夹取与换算钉在这里。
  */
 import { describe, it, expect } from "vitest"
-import { DEFAULT_CARD_ASPECT } from "@cardbara/schema"
+import { DEFAULT_CARD_ASPECT } from "@prismwright/schema"
 import {
   ASPECT_MAX,
   ASPECT_MIN,

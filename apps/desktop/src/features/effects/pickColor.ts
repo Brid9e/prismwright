@@ -8,8 +8,8 @@
  * 与渲染同源很关键：底图片元用的就是同一个 `frontUvTransform`，这里绝不能再手写一份
  * 近似公式，否则吸到的颜色会和画面对不上。
  */
-import { CARD_ASPECT, frontUvTransform, sampleFrontUv } from "@cardbara/renderer/v1"
-import { alphaOf, withAlpha, type ColorStop, type FrontFit } from "@cardbara/schema"
+import { CARD_ASPECT, frontUvTransform, sampleFrontUv } from "@prismwright/renderer/v1"
+import { alphaOf, withAlpha, type ColorStop, type FrontFit } from "@prismwright/schema"
 import type { FaceRef } from "../../store/packStore"
 import { replaceStop } from "../layers/colors"
 

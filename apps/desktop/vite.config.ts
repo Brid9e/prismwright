@@ -26,7 +26,7 @@ export default defineConfig(() => ({
 
   // svgr：把 `import Logo from "./x.svg?react"` 编译成 React 组件。用组件而非 `<img src>` 是
   // 为了让 SVG 内联进 DOM——`<img>` 里的 SVG 自成一体，`fill="currentColor"` 取不到外部的
-  // `color`；内联后 logo 才能跟着主题文字色走（见 StartScreen 的 CardbaraLogo）。
+  // `color`；内联后 logo 才能跟着主题文字色走（见 StartScreen 的 PrismwrightLogo）。
   plugins: [react(), svgr()],
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`

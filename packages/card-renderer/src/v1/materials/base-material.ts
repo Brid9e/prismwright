@@ -9,7 +9,7 @@ import {
   resolveImageMask,
   type Effect,
   type FrontFit,
-} from "@cardbara/schema"
+} from "@prismwright/schema"
 import { frontUvTransform } from "../front-uv"
 import { maskUvParams } from "../mask-uv"
 import { textureAspect } from "../texture-aspect"

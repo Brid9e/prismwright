@@ -2,7 +2,7 @@
  * 编辑器版本清单。
  *
  * 一个版本 = 编辑器 + 渲染器成套发布（类似微信开发者工具的「基础库版本」）：选 vN 意味着
- * 同时使用 vN 的编辑器行为与 `@cardbara/renderer/vN`。当前只有 v1。
+ * 同时使用 vN 的编辑器行为与 `@prismwright/renderer/vN`。当前只有 v1。
  *
  * 新增版本时：往 {@link EDITOR_VERSION_IDS} 加 id、i18n 的 `settings:editorVersion.<id>`
  * 加一条，并在需要分叉的代码处按 id 接入对应实现。

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { CardFaceSchema, createEmptyPack } from "@cardbara/schema"
+import { CardFaceSchema, createEmptyPack } from "@prismwright/schema"
 import {
   createDefaultBackFace,
   isDefaultBackPack,

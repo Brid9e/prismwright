@@ -14,7 +14,7 @@
  * 因此拖动同一个滑块会被合并成一步历史，松手后再拖是新的一步。
  */
 import { useTranslation } from "react-i18next"
-import { findLayerById, type BlendMode, type CardFace, type Layer } from "@cardbara/schema"
+import { findLayerById, type BlendMode, type CardFace, type Layer } from "@prismwright/schema"
 import { usePackStore, type EffectTarget, type FaceRef } from "../../store/packStore"
 import { useUiStore } from "../../store/uiStore"
 import { packFs } from "../../tauri/pack-fs"

@@ -27,7 +27,7 @@ vi.mock("../../../tauri/bundle", () => ({
   BundleInvalidError: class extends Error {},
 }))
 
-import { createCard } from "@cardbara/schema"
+import { createCard } from "@prismwright/schema"
 import { usePackStore } from "../../../store/packStore"
 import { packFs } from "../../../tauri/pack-fs"
 import { bundleFs } from "../../../tauri/bundle"
@@ -35,7 +35,7 @@ import { importCardBundle, remapAssetPaths } from "../importCard"
 import type { BundleManifest } from "../model"
 
 const manifest: BundleManifest = {
-  format: "cardbara-bundle",
+  format: "prismwright-bundle",
   version: 1,
   kind: "card",
   includesHistory: false,

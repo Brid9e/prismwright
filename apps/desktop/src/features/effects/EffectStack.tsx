@@ -31,9 +31,9 @@ import type {
   EffectParams,
   EffectRole,
   MaskPresetParams,
-} from "@cardbara/schema"
-import { EFFECT_REGISTRY, MASK_PRESETS } from "@cardbara/renderer/v1"
-import type { FieldDescriptor } from "@cardbara/renderer/v1"
+} from "@prismwright/schema"
+import { EFFECT_REGISTRY, MASK_PRESETS } from "@prismwright/renderer/v1"
+import type { FieldDescriptor } from "@prismwright/renderer/v1"
 import { PropertyRow } from "../../ui/PropertyRow"
 import { Slider } from "../../ui/Slider"
 import { Select } from "../../ui/Select"

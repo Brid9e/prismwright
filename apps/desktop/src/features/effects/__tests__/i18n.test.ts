@@ -6,7 +6,7 @@
  * 很容易看漏。这里补上这一条：注册表声明的每个键都必须能在对应命名空间里查到。
  */
 import { describe, it, expect } from "vitest"
-import { EFFECT_REGISTRY, EFFECT_KINDS, MASK_PRESETS } from "@cardbara/renderer/v1"
+import { EFFECT_REGISTRY, EFFECT_KINDS, MASK_PRESETS } from "@prismwright/renderer/v1"
 import zhEffect from "../../../i18n/locales/zh-CN/effect.json"
 import enEffect from "../../../i18n/locales/en/effect.json"
 import zhLayer from "../../../i18n/locales/zh-CN/layer.json"

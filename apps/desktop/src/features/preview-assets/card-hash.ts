@@ -7,7 +7,7 @@
  * 序列化用 `JSON.stringify` 即足够确定：字段顺序由 zod schema 的解析顺序固定，同一份数据在
  * 会话之间必然产出同一串文本，故哈希可跨会话比较、写进清单文件。
  */
-import type { Card } from "@cardbara/schema"
+import type { Card } from "@prismwright/schema"
 
 /**
  * 渲染规格版本：帧尺寸 / 帧率 / 帧数这类**规格**变化时升一档。

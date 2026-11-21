@@ -34,7 +34,7 @@ vi.mock("../../features/flatten/compose", () => ({
   composeGroup: vi.fn(async () => "assets/merged.png"),
 }))
 
-import { createLayer, type Effect, type Layer } from "@cardbara/schema"
+import { createLayer, type Effect, type Layer } from "@prismwright/schema"
 import { usePackStore } from "../packStore"
 import { packFs } from "../../tauri/pack-fs"
 import { composeGroup } from "../../features/flatten/compose"

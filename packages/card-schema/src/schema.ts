@@ -1,5 +1,5 @@
 /**
- * @cardbara/schema 的 zod 校验层：以运行时 schema 描述并校验 `pack.json` 的完整结构。
+ * @prismwright/schema 的 zod 校验层：以运行时 schema 描述并校验 `pack.json` 的完整结构。
  *
  * 架构位置：本文件与 `types.ts` 的手写类型互为镜像——手写类型供编译期使用，
  * zod schema 供运行期解析与校验（同时负责缺省值填充）。二者由文件末尾的
@@ -169,7 +169,7 @@ export const MaskArrangementSchema = z.enum(["random", "regular"])
  * 图样空间的方向模式枚举，取值与手写类型 `PatternMode` 一致。
  *
  * 枚举顺序即语义的坐标轴：`parallel`（方向投影）→ `radial`（半径）→ `rays`（极角），
- * 与着色器里的整型码 0/1/2 一一对应（见 `@cardbara/renderer` 的 `patternModeCode`）。
+ * 与着色器里的整型码 0/1/2 一一对应（见 `@prismwright/renderer` 的 `patternModeCode`）。
  */
 export const PatternModeSchema = z.enum(["parallel", "radial", "rays"])
 
@@ -453,7 +453,7 @@ export function evenlySpacedStops(colors: readonly string[]): ColorStop[] {
  * 默认调色板（金 → 蓝 → 紫，沿用早期全息 overlay 的配色）。
  *
  * 只在这一处定义，渲染器侧共用：`colors` 为空时拿 {@link DEFAULT_STOPS} 填满定长 uniform
- * （内容不会被采样，见 `@cardbara/renderer` 的 `palette.ts`——「空色板」现在表示该层不出全息，
+ * （内容不会被采样，见 `@prismwright/renderer` 的 `palette.ts`——「空色板」现在表示该层不出全息，
  * 由 `uHasHolo` 门控）。
  */
 export const DEFAULT_PALETTE: readonly string[] = ["#FFD700", "#0099FF", "#B266FF"]

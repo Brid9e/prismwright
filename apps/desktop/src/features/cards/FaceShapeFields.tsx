@@ -12,7 +12,7 @@
  */
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { DEFAULT_CARD_ASPECT, DEFAULT_CORNER_RADIUS, type CardFace } from "@cardbara/schema"
+import { DEFAULT_CARD_ASPECT, DEFAULT_CORNER_RADIUS, type CardFace } from "@prismwright/schema"
 import { usePackStore, type FaceRef } from "../../store/packStore"
 import { PropertyRow } from "../../ui/PropertyRow"
 import { Slider } from "../../ui/Slider"

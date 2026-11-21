@@ -17,7 +17,7 @@ import {
   type CardFace,
   type Layer,
   type Pack,
-} from "@cardbara/schema"
+} from "@prismwright/schema"
 import type { FaceRef } from "../../store/packStore"
 import { findFlattenGroups, groupFingerprint, imageEffectPath } from "./flatten"
 

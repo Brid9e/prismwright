@@ -5,7 +5,7 @@
  * `rarity-*.png` 徽章同一套——两个前端看到的同一张卡应该是同一个颜色，改色时两边一起改。
  * 类名写成完整字符串（不拼模板），Tailwind 才能静态扫到并生成样式。
  */
-import type { Rarity } from "@cardbara/schema"
+import type { Rarity } from "@prismwright/schema"
 
 export interface RarityTone {
   /** 文字与描边色。 */

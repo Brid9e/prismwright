@@ -1,9 +1,11 @@
 {
-  "name": "cardbara-editor",
+  "name": "prismwright",
   "private": true,
   "version": "0.1.0",
-  "description": "Cardbara 卡牌系列编辑器（本地优先，开源版）",
+  "description": "Prismwright（棱匠）— 本地优先的开源卡牌系列编辑器",
   "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/Brid9e/prismwright.git" },
+  "homepage": "https://github.com/Brid9e/prismwright",
   "packageManager": "pnpm@11.9.0",
   "scripts": {
     "test": "pnpm -r test",
@@ -11,10 +13,10 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "fetch:ffmpeg": "node scripts/fetch-ffmpeg.mjs",
-    "verify:renderer": "pnpm -F @cardbara/renderer test && pnpm -F @cardbara/renderer typecheck && pnpm -F @cardbara/renderer build",
-    "verify:editor": "pnpm -F cardbara test && pnpm -F cardbara typecheck && pnpm -F cardbara build",
-    "dev": "pnpm -F cardbara tauri dev",
-    "dev:web": "pnpm -F cardbara dev",
+    "verify:renderer": "pnpm -F @prismwright/renderer test && pnpm -F @prismwright/renderer typecheck && pnpm -F @prismwright/renderer build",
+    "verify:editor": "pnpm -F @prismwright/desktop test && pnpm -F @prismwright/desktop typecheck && pnpm -F @prismwright/desktop build",
+    "dev": "pnpm -F @prismwright/desktop tauri dev",
+    "dev:web": "pnpm -F @prismwright/desktop dev",
     "build": "pnpm -r build"
   },
   "devDependencies": {

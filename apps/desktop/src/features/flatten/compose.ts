@@ -12,8 +12,8 @@
  * 每层各自的 `opacity` 在这里乘成 `globalAlpha`：组内先按原样叠出像素，产物再以不透明度
  * 1 叠回卡面，效果与逐层叠加一致（`pack-flatten.ts` 因此把新图层的不透明度设为 1）。
  */
-import { resolveImage, type Layer } from "@cardbara/schema"
-import { CARD_ASPECT } from "@cardbara/renderer/v1"
+import { resolveImage, type Layer } from "@prismwright/schema"
+import { CARD_ASPECT } from "@prismwright/renderer/v1"
 import { packFs } from "../../tauri/pack-fs"
 import { imageEffectPath, placementFor, planCanvasSize, sizingOf } from "./flatten"
 

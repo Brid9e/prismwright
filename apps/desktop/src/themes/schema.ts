@@ -8,7 +8,7 @@
  *   兼容、也不给主题作者开放原始色板 `--palette-*`）；**值**接受 `R G B` 三元组或 `#rgb`/`#rrggbb`，
  *   归一为三元组。
  *
- * 未知顶层字段由 `z.object` 默认剥离（与 `@cardbara/schema` 的约定一致）。
+ * 未知顶层字段由 `z.object` 默认剥离（与 `@prismwright/schema` 的约定一致）。
  *
  * 校验失败文案一律用中文：`parseTheme` 的 `message` 会被拼进 `errors.themeInvalid` 直接展示，
  * 不能让 zod 的英文默认串（"Required" / "Invalid input" …）漏进界面。

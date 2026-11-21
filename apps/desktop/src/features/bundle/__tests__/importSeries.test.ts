@@ -16,7 +16,7 @@ vi.mock("../../../tauri/bundle", () => ({
   BundleInvalidError: class extends Error {},
 }))
 
-import { createEmptyPack } from "@cardbara/schema"
+import { createEmptyPack } from "@prismwright/schema"
 import { usePackStore } from "../../../store/packStore"
 import { packFs } from "../../../tauri/pack-fs"
 import { bundleFs } from "../../../tauri/bundle"
@@ -24,7 +24,7 @@ import { importSeriesBundle, nextAvailableDir } from "../importSeries"
 import type { BundleManifest } from "../model"
 
 const manifest: BundleManifest = {
-  format: "cardbara-bundle",
+  format: "prismwright-bundle",
   version: 1,
   kind: "series",
   includesHistory: false,

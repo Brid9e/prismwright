@@ -16,7 +16,7 @@
 - 网格只改色相，不改亮度；`latticeField` 的线族数学保留，刻纹的相位/浮雕集成删除。
 - 旧 pack 里的 `kind: "lattice"` 在解析前过滤掉，不升 schemaVersion；包能打开、刻纹消失。
 - `lattice` 从 EffectKind / 注册表 / uniform / UI / 文案 / 默认效果 / 测试中彻底删除。
-- 每个任务在 `D:\Code\cardbara-editor` 单独提交；小程序 bundle 在 monorepo 单独提交；默认不 push。
+- 每个任务在 `D:\Code\prismwright` 单独提交；小程序 bundle 在 monorepo 单独提交；默认不 push。
 
 ## Review Focus
 
@@ -61,7 +61,7 @@ it("带 lattice 的旧 effects 解析时被丢弃", () => {
 
 - [ ] **Step 2: 跑测试确认失败**
 
-Run: `pnpm -F @cardbara/schema test -- holo-grid`
+Run: `pnpm -F @prismwright/schema test -- holo-grid`
 Expected: FAIL——默认值不是刻纹默认；lattice 仍能解析。
 
 - [ ] **Step 3: 实现**
@@ -73,7 +73,7 @@ Expected: FAIL——默认值不是刻纹默认；lattice 仍能解析。
 
 - [ ] **Step 4: 跑测试确认通过**
 
-Run: `pnpm -F @cardbara/schema typecheck && pnpm -F @cardbara/schema test`
+Run: `pnpm -F @prismwright/schema typecheck && pnpm -F @prismwright/schema test`
 Expected: 全绿。
 
 - [ ] **Step 5: 提交**
@@ -115,7 +115,7 @@ it("网格用 latticeField 的线族数学，且只加色相", () => {
 
 - [ ] **Step 2: 跑测试确认失败**
 
-Run: `pnpm -F @cardbara/renderer test -- effects-registry layer-shader`
+Run: `pnpm -F @prismwright/renderer test -- effects-registry layer-shader`
 Expected: FAIL。
 
 - [ ] **Step 3: 实现**
@@ -129,7 +129,7 @@ Expected: FAIL。
 
 - [ ] **Step 4: 跑测试确认通过**
 
-Run: `pnpm -F @cardbara/renderer typecheck && pnpm -F @cardbara/renderer test && pnpm -F @cardbara/renderer build`
+Run: `pnpm -F @prismwright/renderer typecheck && pnpm -F @prismwright/renderer test && pnpm -F @prismwright/renderer build`
 Expected: 全绿。
 
 - [ ] **Step 5: 提交**
@@ -153,7 +153,7 @@ git commit -m "feat(renderer): 删除刻纹，网格改用 latticeField"
 
 - [ ] **Step 1: 跑失败测试**
 
-Run: `pnpm -F cardbara test -- effects`
+Run: `pnpm -F prismwright test -- effects`
 Expected: FAIL——lattice 字段/文案/默认用例仍存在，网格缺新文案。
 
 - [ ] **Step 2: 实现**
@@ -164,7 +164,7 @@ Expected: FAIL——lattice 字段/文案/默认用例仍存在，网格缺新�
 
 - [ ] **Step 3: 跑测试确认通过**
 
-Run: `pnpm -F cardbara typecheck && pnpm -F cardbara test && pnpm -F cardbara build`
+Run: `pnpm -F prismwright typecheck && pnpm -F prismwright test && pnpm -F prismwright build`
 Expected: 全绿。
 
 - [ ] **Step 4: 提交**
@@ -181,10 +181,10 @@ git commit -m "feat(editor): 删除刻纹，网格继承刻纹参数"
 - [ ] **Step 1: 全量验证**
 
 ```bash
-cd D:/Code/cardbara-editor
-pnpm -F @cardbara/schema typecheck && pnpm -F @cardbara/schema test
-pnpm -F @cardbara/renderer typecheck && pnpm -F @cardbara/renderer test && pnpm -F @cardbara/renderer build
-pnpm -F cardbara typecheck && pnpm -F cardbara test && pnpm -F cardbara build
+cd D:/Code/prismwright
+pnpm -F @prismwright/schema typecheck && pnpm -F @prismwright/schema test
+pnpm -F @prismwright/renderer typecheck && pnpm -F @prismwright/renderer test && pnpm -F @prismwright/renderer build
+pnpm -F prismwright typecheck && pnpm -F prismwright test && pnpm -F prismwright build
 ```
 Expected: 全绿。
 
@@ -195,7 +195,7 @@ cd D:/Code/card-editor
 pnpm -F miniprogram build:lib
 pnpm -F miniprogram test
 ```
-Expected: `built ... (from cardbara-editor source)`；969 测试通过。
+Expected: `built ... (from prismwright source)`；969 测试通过。
 
 - [ ] **Step 3: 手工验收**
 
@@ -206,6 +206,6 @@ Expected: 网格线随参数变化；旧包不报错。
 
 ```bash
 cd D:/Code/card-editor
-git add apps/miniprogram/miniprogram/lib/cardbara.js
+git add apps/miniprogram/miniprogram/lib/prismwright.js
 git commit -m "build(miniprogram): 重建 bundle（刻纹并入网格）"
 ```

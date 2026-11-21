@@ -9,7 +9,7 @@
  * 所有入参都按「非法即恒等」兜底：schema 有默认值，但材质是外部可写的，NaN / Infinity / 0
  * 一旦漏进来会变成 NaN 坐标或除零，症状是整层蒙版静默消失。
  */
-import type { FrontFit } from "@cardbara/schema"
+import type { FrontFit } from "@prismwright/schema"
 import { fitSpan } from "./front-uv"
 
 /** 着色器的蒙版采样参数。 */

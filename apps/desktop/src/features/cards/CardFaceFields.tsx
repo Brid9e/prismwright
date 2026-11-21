@@ -9,7 +9,7 @@
  */
 import { useTranslation } from "react-i18next"
 import { ImagePlus, Trash2 } from "lucide-react"
-import type { Card, CardFace, CardFinish, FrontFit, Rarity } from "@cardbara/schema"
+import type { Card, CardFace, CardFinish, FrontFit, Rarity } from "@prismwright/schema"
 import { usePackStore, type EffectTarget, type FaceRef } from "../../store/packStore"
 import { useUiStore } from "../../store/uiStore"
 import { packFs } from "../../tauri/pack-fs"

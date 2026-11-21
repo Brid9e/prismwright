@@ -6,8 +6,8 @@
  * 画面另一侧的颜色——看起来「能用」，却总取错。
  */
 import { describe, it, expect } from "vitest"
-import { CARD_ASPECT } from "@cardbara/renderer/v1"
-import type { ColorStop } from "@cardbara/schema"
+import { CARD_ASPECT } from "@prismwright/renderer/v1"
+import type { ColorStop } from "@prismwright/schema"
 import {
   applyPickedStopColor,
   faceRefMatches,

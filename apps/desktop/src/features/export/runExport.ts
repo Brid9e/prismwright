@@ -13,13 +13,13 @@
  * 与后台预览流水线共用同一个 WebGL 来源，故两条分支开跑前都先 `waitForPreviewIdle()` 等它跑空，免得
  * 两条流程抢 GPU（帧目录已按路径与预览隔离，见 paths.ts，不存在写到同一处的问题）。
  */
-import type { Card } from "@cardbara/schema"
+import type { Card } from "@prismwright/schema"
 import {
   EXPORT_CAMERA_MARGIN,
   createCardFrameRenderer,
   exportSway,
   type ResolveAsset,
-} from "@cardbara/renderer/v1"
+} from "@prismwright/renderer/v1"
 import { exportFs } from "../../tauri/export-fs"
 import { packFs } from "../../tauri/pack-fs"
 import { EXPORT_FRAMES_DIR, exportFrameRel } from "../preview-assets/paths"

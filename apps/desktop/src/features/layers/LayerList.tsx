@@ -14,7 +14,7 @@ import {
   exceedsNestDepth,
   findLayerById,
   type CardFace,
-} from "@cardbara/schema"
+} from "@prismwright/schema"
 import { IMAGE_EXTENSIONS, usePackStore, type FaceRef } from "../../store/packStore"
 import { useUiStore } from "../../store/uiStore"
 import { packFs } from "../../tauri/pack-fs"

@@ -1,7 +1,7 @@
 /**
  * packStore —— 系列编辑器的全局状态中枢（zustand）。
  *
- * 架构位置：位于 UI（React 组件）与数据/IO 层（`@cardbara/schema` + `pack-fs`）之间，
+ * 架构位置：位于 UI（React 组件）与数据/IO 层（`@prismwright/schema` + `pack-fs`）之间，
  * 是应用唯一的「当前系列」真相来源。组件只通过本 store 读写系列，不直接触碰文件系统，
  * 从而把「状态迁移 + 持久化时机 + 撤销历史」集中到单点，便于测试与推理。
  *
@@ -42,8 +42,8 @@ import {
   type Pack,
   type PackArtStyle,
   type TextParams,
-} from "@cardbara/schema"
-import { EFFECT_REGISTRY } from "@cardbara/renderer/v1"
+} from "@prismwright/schema"
+import { EFFECT_REGISTRY } from "@prismwright/renderer/v1"
 import { join } from "../app/path"
 import { prepareImportImage } from "../features/assets/compress"
 import { composeGroup } from "../features/flatten/compose"

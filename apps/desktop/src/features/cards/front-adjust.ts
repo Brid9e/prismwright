@@ -5,7 +5,7 @@
  * 只有这些可单独调用的常量和函数；而「数值越过边界」恰恰是最容易漏、后果又最明显的一类：
  * 数字框手敲 9 会原样写进 `pack.json`，渲染时整张底图飞出画外或缩到看不见。
  */
-import type { FrontFit } from "@cardbara/schema"
+import type { FrontFit } from "@prismwright/schema"
 
 /** 填充方式的候选项，顺序即下拉框顺序；`cover` 是默认值，故排第一。 */
 export const FRONT_FITS: readonly FrontFit[] = ["cover", "contain", "stretch"]

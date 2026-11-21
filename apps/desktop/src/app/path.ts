@@ -31,7 +31,7 @@ export function basename(path: string): string {
 /**
  * 拼接路径各段，分隔符**跟随首段**。
  *
- * Windows 上 `\` 与 `/` 都能用，但混着拼出来的路径（`C:\Users\me\Documents/Cardbara`）
+ * Windows 上 `\` 与 `/` 都能用，但混着拼出来的路径（`C:\Users\me\Documents/Prismwright`）
  * 显示给用户十分别扭，所以这里统一：首段含 `\` 就一律用 `\`，否则用 `/`。首段自身已有的
  * 异类分隔符也一并规整——用户此前用混着写的版本建过系列，那个目录就是这么存进首选项的。
  *

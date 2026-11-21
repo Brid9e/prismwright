@@ -6,7 +6,7 @@
  * `renderOrder` 保证它排在透明队列最后；两面各自一份，背面组翻过去时由背面剔除。
  */
 import { ShaderMaterial } from "three"
-import { DEFAULT_BUMP_LIGHT_ANGLE } from "@cardbara/schema"
+import { DEFAULT_BUMP_LIGHT_ANGLE } from "@prismwright/schema"
 import { EDGE_BEVEL_FRAGMENT, EDGE_BEVEL_VERTEX } from "../shaders/edge-bevel"
 
 /** 倒角带宽度（卡高单位）。0.012 ≈ 750px 卡高上 9px，够读出圆弧又不会啃掉画面。 */

@@ -25,8 +25,8 @@ vi.mock("../../tauri/pack-fs", () => ({
   },
 }))
 
-import type { Effect } from "@cardbara/schema"
-import { EFFECT_REGISTRY, MASK_PRESET_MAX } from "@cardbara/renderer/v1"
+import type { Effect } from "@prismwright/schema"
+import { EFFECT_REGISTRY, MASK_PRESET_MAX } from "@prismwright/renderer/v1"
 import { usePackStore } from "../packStore"
 
 function reset() {

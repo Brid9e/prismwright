@@ -1,7 +1,7 @@
 /**
  * 颜色控件：系统取色块 + 透明度滑杆 + 百分比。
  *
- * 透明度存在色值本身里（`#rrggbbaa`，见 `@cardbara/schema` 的 `withAlpha` / `alphaOf`），
+ * 透明度存在色值本身里（`#rrggbbaa`，见 `@prismwright/schema` 的 `withAlpha` / `alphaOf`），
  * 而不是另开一个字段——这样渲染器、落盘格式与旧数据都不需要「透明颜色」的特例：不透明色仍然
  * 序列化成 6 位。取色块只认 6 位，故绑值时先过 `toSixDigitHex` 去掉透明度；滑杆按全色值合成。
  *
@@ -9,7 +9,7 @@
  * 会把缺省从「暖白常量」变成白纸黑字的一个值，等于静默改了存量卡的颜色。
  */
 import { useTranslation } from "react-i18next"
-import { alphaOf, withAlpha } from "@cardbara/schema"
+import { alphaOf, withAlpha } from "@prismwright/schema"
 import { toSixDigitHex } from "../features/layers/colors"
 
 export interface ColorFieldProps {

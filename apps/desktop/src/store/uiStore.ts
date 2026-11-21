@@ -97,7 +97,7 @@ export interface UiStoreState {
   /**
    * 预览缩放倍数。
    *
-   * 这里**不夹取**：消费方 `@cardbara/renderer` 的 `zoomToCameraDistance` 会夹到
+   * 这里**不夹取**：消费方 `@prismwright/renderer` 的 `zoomToCameraDistance` 会夹到
    * `[MIN_ZOOM, MAX_ZOOM]`，越界不会渲染出坏画面；而 UI 那侧滑杆与数字框都带边界。
    * 所以本字段不需要再守一道——与「8 色标上限」那条不同，那里的消费方是**拒绝**
    * （`parsePack` 直接判系列无效），越界会变成真实的故障。

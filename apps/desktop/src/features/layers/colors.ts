@@ -10,13 +10,13 @@
  * （着色器累积混合与 CSS 渐变共同的前提），所以越界时夹到左右邻居之间；两个颜色可以
  * 停在同一位置，那表示硬边。
  *
- * 刻意**不** import `@cardbara/renderer`：它的出口指向 `dist`，反向依赖会把
+ * 刻意**不** import `@prismwright/renderer`：它的出口指向 `dist`，反向依赖会把
  * 「先 build 渲染器」变成本模块单测的隐含前置，并在 node 里把 three 拖进来。
  * 因此上限保持本地字面量（见 `MAX_COLOR_STOPS`）。
  */
-import type { ColorStop } from "@cardbara/schema"
+import type { ColorStop } from "@prismwright/schema"
 
-/** 色标数量上限。必须与 `@cardbara/schema` 中 `PaletteParams.colors` 的校验上限保持一致。 */
+/** 色标数量上限。必须与 `@prismwright/schema` 中 `PaletteParams.colors` 的校验上限保持一致。 */
 export const MAX_COLOR_STOPS = 8
 
 /**

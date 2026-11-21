@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { createCard, createEmptyPack, type Pack } from "@cardbara/schema"
+import { createCard, createEmptyPack, type Pack } from "@prismwright/schema"
 import {
   buildCardEntries,
   buildCardManifest,
@@ -24,7 +24,7 @@ describe("bundle model", () => {
   it("系列清单记录卡数与创建时间", () => {
     const { pack } = fixture()
     expect(buildSeriesManifest(pack, "0.1.0", CREATED)).toEqual({
-      format: "cardbara-bundle",
+      format: "prismwright-bundle",
       version: 1,
       kind: "series",
       includesHistory: false,

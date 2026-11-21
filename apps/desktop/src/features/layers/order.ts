@@ -13,7 +13,7 @@
  * 时其子树整体跳过）。每行另外带出结构信息（深度 / 父 id / 同级下标 / 子层数），供缩进渲染与
  * 拖拽落位使用。
  */
-import type { Layer } from "@cardbara/schema"
+import type { Layer } from "@prismwright/schema"
 
 /** 界面上的一个图层行：绘制序列倒序后的一行，附带缩进与落位所需的结构信息。 */
 export interface LayerRow {

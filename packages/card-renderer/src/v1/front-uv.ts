@@ -12,7 +12,7 @@
  * - 旋转在**卡面坐标**（宽窄按真实比例）里做，否则非方形卡面上转出来的图会被斜切；
  * - 矩阵按列主序存放——`[m00, m10, m01, m11]`，与 GLSL `mat2(col0, col1)` 同序。
  */
-import type { FrontFit } from "@cardbara/schema"
+import type { FrontFit } from "@prismwright/schema"
 
 /** 底图采样变换（uv → uv）。 */
 export interface FrontUvTransform {

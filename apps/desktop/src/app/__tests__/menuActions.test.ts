@@ -5,7 +5,7 @@
  * 会发生什么」是纯粹的 store 迁移——把它钉住，两个界面就都测到了。
  */
 import { describe, it, expect, beforeEach } from "vitest"
-import { createEmptyPack } from "@cardbara/schema"
+import { createEmptyPack } from "@prismwright/schema"
 import { dispatch } from "../menuActions"
 import { usePackStore } from "../../store/packStore"
 import { useUiStore } from "../../store/uiStore"

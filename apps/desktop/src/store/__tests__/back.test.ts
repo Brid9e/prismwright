@@ -5,7 +5,7 @@
  * 系列随即回落到全系列共用的默认卡背。整次删除是一步可撤销的历史。
  */
 import { describe, it, expect, beforeEach, vi } from "vitest"
-import { createCardFace } from "@cardbara/schema"
+import { createCardFace } from "@prismwright/schema"
 
 vi.mock("../../tauri/pack-fs", () => ({
   packFs: {

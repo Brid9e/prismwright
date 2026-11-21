@@ -7,7 +7,7 @@
  * 交通灯仍由系统画在左上角，本组件在左侧留出空位让开它们。平台判定与理由见 `app/platform.ts`。
  *
  * 中间显示「卡片名 — 系列名」（无卡时只显系列名）；无系列时（仅设置视图可达）改显品牌锁形
- * 「logo + Cardbara」（见下方中列渲染，文字拼接见 `titlebarText`）。
+ * 「logo + Prismwright」（见下方中列渲染，文字拼接见 `titlebarText`）。
  * 整条是拖拽区：外层栅格与**左右两列的留白**都各自带 `data-tauri-drag-region`。Tauri 的拖拽
  * 脚本只认**命中目标自身**有没有该属性（`hasAttribute`，不回溯祖先），故空白处必须自己带——
  * 只挂在外层栅格上时，落在这两列留白里的按下不会启动拖拽（中列的标题能拖，只因它
@@ -22,7 +22,7 @@
  * 既拖不动、又关不掉。
  */
 import { useTranslation } from "react-i18next"
-import CardbaraLogoSmall from "../../assets/cardbara-logo-small.svg?react"
+import PrismwrightLogoSmall from "../../assets/prismwright-logo-small.svg?react"
 import { findCard, usePackStore } from "../../store/packStore"
 import { useUiStore } from "../../store/uiStore"
 import { hasTauriEnv, type Platform } from "../../app/platform"
@@ -37,12 +37,12 @@ import { titlebarText } from "./titleText"
 const TRAFFIC_LIGHT_GAP = 76
 
 /**
- * 无系列时标题栏显示的**品牌字标**（与下方的 `CardbaraLogoSmall` 并排成锁形）。
+ * 无系列时标题栏显示的**品牌字标**（与下方的 `PrismwrightLogoSmall` 并排成锁形）。
  *
  * 固定为拉丁文、任何语言下都不变，故不进 i18n——要翻译的是应用名（`common:app.name`），
  * 字标不是。StartScreen 现在只放 logo，不再配字标。
  */
-const APP_BRAND = "Cardbara"
+const APP_BRAND = "Prismwright"
 
 /** 标题栏形态。`minimal` 专供起始屏：透明的拖拽条上只留设置图标。 */
 export type TitleBarVariant = "full" | "minimal"
@@ -122,7 +122,7 @@ export function TitleBar({
             // 微调——系统字体的竖直度量因平台而异，写死的偏移会在别的机器上偏掉。
             // 字标尾部的 `-mr` 抵消 tracking 留在末字之后的空隙，否则整行进位会偏左一点。
             <>
-              <CardbaraLogoSmall
+              <PrismwrightLogoSmall
                 className="h-4 w-auto shrink-0"
                 role="img"
                 aria-label={tc("app.name")}

@@ -1,5 +1,5 @@
 /**
- * @cardbara/schema 的版本守卫与加载入口。
+ * @prismwright/schema 的版本守卫与加载入口。
  *
  * 架构位置：位于数据层最外层，负责把任意来源（磁盘 `pack.json`、导入文件）的未知数据校验为
  * 当前版本的 {@link Pack}。

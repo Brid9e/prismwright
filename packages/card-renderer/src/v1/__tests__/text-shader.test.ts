@@ -6,7 +6,7 @@
  * 「图层全部不出图」——这类错配类型层面看不出来，只能在字符串上钉住。
  */
 import { describe, it, expect } from "vitest"
-import { MAX_NEST_DEPTH } from "@cardbara/schema"
+import { MAX_NEST_DEPTH } from "@prismwright/schema"
 import { LAYER_FRAGMENT } from "../shaders/layer"
 
 describe("文字通路的 uniform", () => {

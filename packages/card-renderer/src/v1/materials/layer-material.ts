@@ -13,7 +13,7 @@ import {
   type ImageParams,
   type Layer,
   type MaskImageParams,
-} from "@cardbara/schema"
+} from "@prismwright/schema"
 import { fitSpan, frontUvTransform } from "../front-uv"
 import { maskUvParams } from "../mask-uv"
 import { textureAspect } from "../texture-aspect"

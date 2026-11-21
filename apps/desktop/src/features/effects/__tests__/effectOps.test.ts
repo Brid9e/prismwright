@@ -6,8 +6,8 @@
  * 故用测试把两处的契约固定下来。
  */
 import { describe, it, expect } from "vitest"
-import type { Effect, EffectKind } from "@cardbara/schema"
-import { EFFECT_REGISTRY, GRADIENT_MAX, MASK_PRESET_MAX, MASK_PRESETS } from "@cardbara/renderer/v1"
+import type { Effect, EffectKind } from "@prismwright/schema"
+import { EFFECT_REGISTRY, GRADIENT_MAX, MASK_PRESET_MAX, MASK_PRESETS } from "@prismwright/renderer/v1"
 import {
   groupByRole,
   canAddKind,

@@ -1,7 +1,7 @@
 /**
- * `@cardbara/renderer/v1` 公共出口。
+ * `@prismwright/renderer/v1` 公共出口。
  *
- * 版本分层：本文件即 v1 的全部公共面；裸入口 `@cardbara/renderer` 有意不再导出，
+ * 版本分层：本文件即 v1 的全部公共面；裸入口 `@prismwright/renderer` 有意不再导出，
  * 将来 v2 在 `src/v2/` 平级并列，由子路径 `/v2` 暴露。
  *
  * 只导出「调用方需要」的符号：视图工厂与类型。内部实现（材质、着色器、缓存）不外泄，
@@ -45,7 +45,7 @@ export type {
 // 效果列表 → 分档定长 uniform：材质层据此把目标的 effects 灌进着色器数组 uniform。
 export { toEffectUniforms } from "./effects/uniforms"
 export type { EffectUniformArrays } from "./effects/uniforms"
-export type { CardFace, Layer } from "@cardbara/schema"
+export type { CardFace, Layer } from "@prismwright/schema"
 // 卡面几何与图片摆放：图层「合并成一张图」要在离屏画布上复现同一套换算，故这两个常量/函数
 // 必须是渲染器自己的那一份，不能在桌面端另抄一遍（两份公式漂移 = 合并前后观感不一致）。
 export { CARD_ASPECT, clampCornerRadius } from "./card-scene"

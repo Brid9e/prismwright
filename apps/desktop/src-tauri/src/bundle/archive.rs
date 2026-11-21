@@ -215,7 +215,7 @@ mod tests {
         ZipEntry {
             name: "manifest.json".into(),
             source: ZipSource::Bytes(
-                br#"{"format":"cardbara-bundle","version":1,"kind":"series"}"#.to_vec(),
+                br#"{"format":"prismwright-bundle","version":1,"kind":"series"}"#.to_vec(),
             ),
         }
     }
@@ -225,7 +225,7 @@ mod tests {
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap()
             .as_nanos();
-        let dir = std::env::temp_dir().join(format!("cardbara-archive-test-{tag}-{nanos}"));
+        let dir = std::env::temp_dir().join(format!("prismwright-archive-test-{tag}-{nanos}"));
         std::fs::create_dir_all(&dir).unwrap();
         dir
     }

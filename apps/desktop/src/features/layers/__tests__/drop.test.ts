@@ -5,7 +5,7 @@
  * 注意展示顺序是数组的倒序（顶行 = 最上层 = 数组末位），故「上方」对应数组里更大的下标。
  */
 import { describe, it, expect } from "vitest"
-import { LayerSchema } from "@cardbara/schema"
+import { LayerSchema } from "@prismwright/schema"
 import { toDisplayOrder } from "../order"
 import { resolveDrop } from "../drop"
 

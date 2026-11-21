@@ -18,7 +18,7 @@ import {
 } from "react"
 import { createPortal } from "react-dom"
 import { useTranslation } from "react-i18next"
-import type { Card } from "@cardbara/schema"
+import type { Card } from "@prismwright/schema"
 import { rarityTone } from "../cards/rarity"
 import { usePackStore } from "../../store/packStore"
 import { useUiStore } from "../../store/uiStore"

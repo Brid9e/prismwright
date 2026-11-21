@@ -14,7 +14,7 @@ import {
   type Layer,
   type MaskPresetParams,
   type PatternMode,
-} from "@cardbara/schema"
+} from "@prismwright/schema"
 import { createCardView, createDomHost } from "../src/v1/index"
 import { MASK_PRESETS } from "../src/v1/index"
 import { makeFrontTexture, makeLineMaskTexture, makeFillMaskTexture } from "./sample-textures"

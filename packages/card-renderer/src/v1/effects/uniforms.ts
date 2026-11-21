@@ -7,7 +7,7 @@
  * 相位组的固定类型序（moire → gradient）由着色器保证，本函数只按 kind
  * 分桶、保持同类型内的列表顺序——那正是「同类型多条按列表序累加」的依据。
  */
-import type { Effect } from "@cardbara/schema"
+import type { Effect } from "@prismwright/schema"
 import {
   EFFECT_REGISTRY,
   MOIRE_MAX,

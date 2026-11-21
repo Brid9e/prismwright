@@ -5,7 +5,7 @@
  * 所以数值与字符串都钉死。
  */
 import { describe, expect, it } from "vitest"
-import { DEFAULT_PACK_ART_STYLE } from "@cardbara/schema"
+import { DEFAULT_PACK_ART_STYLE } from "@prismwright/schema"
 import { PACK_ART_BLENDS, PACK_ART_FITS, artLayerCss, packLayerCss } from "../pack-art-style"
 
 describe("图层 CSS", () => {

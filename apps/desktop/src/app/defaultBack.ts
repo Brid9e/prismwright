@@ -7,7 +7,7 @@
  *
  * 与 `packActions` 同一约定：切换前先 `save()`，未落盘的改动不能随系列替换丢掉。
  */
-import { collectFaceAssets } from "@cardbara/schema"
+import { collectFaceAssets } from "@prismwright/schema"
 import i18n from "../i18n/init"
 import { usePackStore } from "../store/packStore"
 import { useDefaultBackStore } from "../store/defaultBackStore"

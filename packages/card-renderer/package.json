@@ -1,9 +1,11 @@
 {
-  "name": "@cardbara/renderer",
+  "name": "@prismwright/renderer",
   "version": "0.0.1",
   "type": "module",
-  "description": "全息卡牌 WebGL 渲染器（three.js）。",
+  "description": "Prismwright 全息卡牌 WebGL 渲染器（three.js）。",
   "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/Brid9e/prismwright.git" },
+  "homepage": "https://github.com/Brid9e/prismwright",
   "sideEffects": false,
   "exports": {
     "./v1": {
@@ -26,7 +28,7 @@
     "three": ">=0.160.0"
   },
   "dependencies": {
-    "@cardbara/schema": "workspace:*"
+    "@prismwright/schema": "workspace:*"
   },
   "devDependencies": {
     "three": "^0.169.0",

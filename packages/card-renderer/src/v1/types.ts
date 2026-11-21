@@ -1,7 +1,7 @@
 /**
- * @cardbara/renderer 的公共类型。
+ * @prismwright/renderer 的公共类型。
  */
-import type { CardFace, Layer } from "@cardbara/schema"
+import type { CardFace, Layer } from "@prismwright/schema"
 import type { Texture } from "three"
 import type { CardViewHost } from "./host"
 

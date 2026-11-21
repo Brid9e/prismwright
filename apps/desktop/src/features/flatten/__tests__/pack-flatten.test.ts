@@ -6,7 +6,7 @@
  * 像素合成由 `compose` 注入，本文件用假实现，只验编排。
  */
 import { describe, it, expect, vi } from "vitest"
-import { createCard, createEmptyPack, createLayer, PaletteParamsSchema, type Effect, type Layer, type Pack } from "@cardbara/schema"
+import { createCard, createEmptyPack, createLayer, PaletteParamsSchema, type Effect, type Layer, type Pack } from "@prismwright/schema"
 import { applyFlatten, planFlatten } from "../pack-flatten"
 import { groupFingerprint } from "../flatten"
 

@@ -6,7 +6,7 @@
  * 在本阶段不做 DOM 测试。
  */
 import type { TFunction } from "i18next"
-import type { Card, Layer } from "@cardbara/schema"
+import type { Card, Layer } from "@prismwright/schema"
 
 /**
  * 卡片的展示名。

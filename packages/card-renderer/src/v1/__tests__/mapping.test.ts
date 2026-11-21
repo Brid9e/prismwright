@@ -8,7 +8,7 @@ import {
   type GradientParams,
   type MaskImageParams,
   type PaletteParams,
-} from "@cardbara/schema"
+} from "@prismwright/schema"
 import {
   toUniforms,
   maskWeight,

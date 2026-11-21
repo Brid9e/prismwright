@@ -4,7 +4,7 @@
  * 与抽卡页同一套做法：底图用原卡包的 alpha 作遮罩，四角被裁成袋子轮廓；上层原卡包
  * 自带高光、折边与锯齿封口，靠 `mix-blend-mode` 与底图合成。没配卡包图时只显示原卡包。
  */
-import type { PackArtStyle } from "@cardbara/schema"
+import type { PackArtStyle } from "@prismwright/schema"
 import packSrc from "./assets/pack.webp"
 import { artLayerCss, packLayerCss } from "./pack-art-style"
 

@@ -1,9 +1,9 @@
-//! Cardbara 桌面端 Rust 宿主入口。
+//! Prismwright 桌面端 Rust 宿主入口。
 //!
 //! 负责装配 Tauri 应用：注册文件系统相关插件（dialog / fs / opener / store），并把
 //! [`commands`] 中的文件系统命令暴露给前端。前端封装见 `apps/desktop/src/tauri/pack-fs.ts`。
 //!
-//! 由 `main.rs` 通过 `cardbara_lib::run()` 调用。
+//! 由 `main.rs` 通过 `prismwright_lib::run()` 调用。
 
 pub mod bundle;
 pub mod commands;

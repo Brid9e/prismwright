@@ -1,5 +1,5 @@
 /**
- * @cardbara/schema 的核心数据模型（手写 TypeScript 类型）。
+ * @prismwright/schema 的核心数据模型（手写 TypeScript 类型）。
  *
  * 架构位置：本文件是数据层的「类型契约」——只描述形状，不含任何运行时代码、
  * 无 UI / IO 依赖。`schema.ts` 中的 zod schema 与之互为镜像，二者的一致性由

@@ -12,7 +12,7 @@
  * 避免触发 `invoke`。测试用手写字面量对象，不经 store 构造。
  */
 import { describe, it, expect, vi } from "vitest"
-import { DEFAULT_PACK_ART_STYLE } from "@cardbara/schema"
+import { DEFAULT_PACK_ART_STYLE } from "@prismwright/schema"
 
 vi.mock("../../tauri/pack-fs", () => ({
   packFs: {
@@ -30,7 +30,7 @@ vi.mock("../../tauri/pack-fs", () => ({
   },
 }))
 
-import type { Card, Pack } from "@cardbara/schema"
+import type { Card, Pack } from "@prismwright/schema"
 import { findCard } from "../packStore"
 
 /** 手写一张最小可用的卡片，仅 id 参与查找断言。 */

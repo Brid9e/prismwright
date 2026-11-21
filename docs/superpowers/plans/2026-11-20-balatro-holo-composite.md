@@ -17,7 +17,7 @@
 - 独立网格效果 `holoGrid`：`role: "color"`、`scope: "layer"`、每层最多 1 条；不新增纹理采样器，uniform 用「定长数组 + 计数」模式。
 - 网格只改色相，不改亮度；蒙版/不透明度/祖先裁切/擦除语义不变。
 - 中英文案同时补；`EFFECT_KINDS` 是效果菜单唯一来源。
-- 每个任务在 `D:\Code\cardbara-editor` 单独提交；小程序 bundle 在 monorepo 单独提交；默认不 push。
+- 每个任务在 `D:\Code\prismwright` 单独提交；小程序 bundle 在 monorepo 单独提交；默认不 push。
 - 工作区已有未提交的草稿（Task 1/2/4 的一部分）：先 `git diff` 核对，按任务收口，不要重写已通过测试的部分。
 
 ## Review Focus
@@ -43,7 +43,7 @@ Expected: 能看到 `PaletteParams` 的 9 个字段、`uPalette*` uniform、`bal
 
 - [ ] **Step 2: 核对是否已过测试**
 
-Run: `pnpm -F @cardbara/renderer test`、`pnpm -F @cardbara/schema test`、`pnpm -F cardbara typecheck`
+Run: `pnpm -F @prismwright/renderer test`、`pnpm -F @prismwright/schema test`、`pnpm -F prismwright typecheck`
 Expected: 全绿；若红，先修到绿再进入 Task 1。
 
 ---
@@ -64,7 +64,7 @@ Expected: 全绿；若红，先修到绿再进入 Task 1。
 
 ```ts
 import { describe, it, expect } from "vitest"
-import { EffectSchema, HoloGridParamsSchema } from "@cardbara/schema"
+import { EffectSchema, HoloGridParamsSchema } from "@prismwright/schema"
 
 describe("HoloGridParamsSchema", () => {
   it("默认 size 0.79 / strength 1", () => {
@@ -81,7 +81,7 @@ describe("HoloGridParamsSchema", () => {
 
 - [ ] **Step 2: 跑测试确认失败**
 
-Run: `pnpm -F @cardbara/schema test -- holo-grid`
+Run: `pnpm -F @prismwright/schema test -- holo-grid`
 Expected: FAIL——`HoloGridParamsSchema` 未导出 / `holoGrid` 不在联合里。
 
 - [ ] **Step 3: 实现 schema/type**
@@ -110,7 +110,7 @@ export const HoloGridParamsSchema = z.object({
 
 - [ ] **Step 4: 跑测试确认通过**
 
-Run: `pnpm -F @cardbara/schema test -- holo-grid`、`pnpm -F @cardbara/schema typecheck`
+Run: `pnpm -F @prismwright/schema test -- holo-grid`、`pnpm -F @prismwright/schema typecheck`
 Expected: PASS。
 
 - [ ] **Step 5: 提交**
@@ -167,7 +167,7 @@ expect(LAYER_FRAGMENT).toContain("mix(hsl.z, 1.0, uPaletteLift)")
 
 - [ ] **Step 2: 跑测试确认失败**
 
-Run: `pnpm -F @cardbara/renderer test -- layer-material layer-shader`
+Run: `pnpm -F @prismwright/renderer test -- layer-material layer-shader`
 Expected: FAIL——uPalette* 未声明/未接线（若草稿已接线则 PASS；那就跳过失败确认，注明草稿已满足）。
 
 - [ ] **Step 3: 收口实现**
@@ -179,7 +179,7 @@ Expected: FAIL——uPalette* 未声明/未接线（若草稿已接线则 PASS�
 
 - [ ] **Step 4: 跑测试确认通过**
 
-Run: `pnpm -F @cardbara/renderer typecheck && pnpm -F @cardbara/renderer test`
+Run: `pnpm -F @prismwright/renderer typecheck && pnpm -F @prismwright/renderer test`
 Expected: 全绿。
 
 - [ ] **Step 5: 提交**
@@ -242,7 +242,7 @@ expect(LAYER_FRAGMENT).toContain("holoHueShift(")
 
 - [ ] **Step 2: 跑测试确认失败**
 
-Run: `pnpm -F @cardbara/renderer test -- effects-uniforms layer-material layer-shader`
+Run: `pnpm -F @prismwright/renderer test -- effects-uniforms layer-material layer-shader`
 Expected: FAIL——未知 kind / uniform 缺失。
 
 - [ ] **Step 3: 实现**
@@ -277,7 +277,7 @@ Expected: FAIL——未知 kind / uniform 缺失。
 
 - [ ] **Step 4: 跑测试确认通过**
 
-Run: `pnpm -F @cardbara/renderer typecheck && pnpm -F @cardbara/renderer test && pnpm -F @cardbara/renderer build`
+Run: `pnpm -F @prismwright/renderer typecheck && pnpm -F @prismwright/renderer test && pnpm -F @prismwright/renderer build`
 Expected: 全绿。
 
 - [ ] **Step 5: 提交**
@@ -302,7 +302,7 @@ git commit -m "feat(renderer): 独立网格效果 holoGrid"
 
 - [ ] **Step 1: 写/跑失败测试**
 
-Run: `pnpm -F cardbara test -- effects/__tests__/i18n`
+Run: `pnpm -F prismwright test -- effects/__tests__/i18n`
 Expected: FAIL——`palette.hue` 或 `holoGrid.label` 缺文案（若草稿已补 palette 文案，holoGrid 仍会缺）。
 
 - [ ] **Step 2: 补文案**
@@ -320,7 +320,7 @@ Expected: FAIL——`palette.hue` 或 `holoGrid.label` 缺文案（若草稿已�
 
 - [ ] **Step 3: 跑测试确认通过**
 
-Run: `pnpm -F cardbara typecheck && pnpm -F cardbara test`
+Run: `pnpm -F prismwright typecheck && pnpm -F prismwright test`
 Expected: 全绿。
 
 - [ ] **Step 4: 提交**
@@ -335,15 +335,15 @@ git commit -m "feat(editor): 小丑牌参数与网格效果文案"
 ### Task 5: 全量验证 + 小程序 bundle
 
 **Files:**
-- Modify: `apps/miniprogram/miniprogram/lib/cardbara.js`（monorepo）
+- Modify: `apps/miniprogram/miniprogram/lib/prismwright.js`（monorepo）
 
 - [ ] **Step 1: 全量验证**
 
 ```bash
-cd D:/Code/cardbara-editor
-pnpm -F @cardbara/schema typecheck && pnpm -F @cardbara/schema test
-pnpm -F @cardbara/renderer typecheck && pnpm -F @cardbara/renderer test && pnpm -F @cardbara/renderer build
-pnpm -F cardbara typecheck && pnpm -F cardbara test && pnpm -F cardbara build
+cd D:/Code/prismwright
+pnpm -F @prismwright/schema typecheck && pnpm -F @prismwright/schema test
+pnpm -F @prismwright/renderer typecheck && pnpm -F @prismwright/renderer test && pnpm -F @prismwright/renderer build
+pnpm -F prismwright typecheck && pnpm -F prismwright test && pnpm -F prismwright build
 ```
 Expected: 全绿；renderer 测试数 ≥ 492。
 
@@ -354,7 +354,7 @@ cd D:/Code/card-editor
 pnpm -F miniprogram build:lib
 pnpm -F miniprogram test
 ```
-Expected: `built miniprogram/lib/cardbara.js (from cardbara-editor source)`；969 测试通过。
+Expected: `built miniprogram/lib/prismwright.js (from prismwright source)`；969 测试通过。
 
 - [ ] **Step 3: 手工验收**
 
@@ -365,6 +365,6 @@ Expected: 亮部不过曝；色带/小丑牌都能叠网格；蒙版与不透明
 
 ```bash
 cd D:/Code/card-editor
-git add apps/miniprogram/miniprogram/lib/cardbara.js
+git add apps/miniprogram/miniprogram/lib/prismwright.js
 git commit -m "build(miniprogram): 重建 bundle（小丑牌参数 + 网格）"
 ```

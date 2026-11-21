@@ -1,5 +1,5 @@
 /**
- * @cardbara/schema 的公共入口：本包对外 API 的唯一聚合点。
+ * @prismwright/schema 的公共入口：本包对外 API 的唯一聚合点。
  *
  * 架构位置：数据层（纯 TypeScript + zod，零 UI / IO 依赖）的门面。
  * 消费方应只从 `.`（即本文件）导入，不直接深入 `types.ts` / `schema.ts` 等内部模块。
@@ -13,7 +13,7 @@
  * - 校验：`HEX_COLOR` 及二十四个 zod schema（含效果栈与文字图层）；
  * - 卡面形状缺省：`DEFAULT_CARD_ASPECT` / `DEFAULT_CORNER_RADIUS`；
  * - 色标工具：`evenlySpacedStops`、默认调色板 `DEFAULT_PALETTE` / `DEFAULT_STOPS` 与
- *   渐变相位默认 `DEFAULT_GRADIENT_PHASE`（渲染器侧共用，见 `@cardbara/renderer` 的 `palette.ts`）；
+ *   渐变相位默认 `DEFAULT_GRADIENT_PHASE`（渲染器侧共用，见 `@prismwright/renderer` 的 `palette.ts`）；
  * - 默认值工厂：`newId` / `createLayer` / `createTextLayer` / `createCard` / `createCardFace` / `createEmptyPack`；
  * - 迁移：`CURRENT_SCHEMA_VERSION` / `migrate` / `parsePack`；
  * - 图层树工具：`flattenLayers` / `findLayerById` / `detachLayer` 等（见 `tree.ts`）；

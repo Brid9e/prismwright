@@ -4,7 +4,7 @@
 import type { MouseEvent } from "react"
 import { useTranslation } from "react-i18next"
 import { Copy, Download, Plus, Trash2 } from "lucide-react"
-import type { Card } from "@cardbara/schema"
+import type { Card } from "@prismwright/schema"
 import { usePackStore } from "../../store/packStore"
 import { useUiStore } from "../../store/uiStore"
 import { cardContextItems } from "../../ui/contextMenuModel"

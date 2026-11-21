@@ -28,7 +28,7 @@ vi.mock("../../tauri/pack-fs", () => ({
   },
 }))
 
-import { findLayerById } from "@cardbara/schema"
+import { findLayerById } from "@prismwright/schema"
 import { usePackStore } from "../packStore"
 import { packFs } from "../../tauri/pack-fs"
 

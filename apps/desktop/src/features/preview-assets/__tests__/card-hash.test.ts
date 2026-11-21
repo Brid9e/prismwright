@@ -9,7 +9,7 @@
  * 均为纯函数，node 环境可直接覆盖。
  */
 import { describe, it, expect } from "vitest"
-import type { Card, Layer } from "@cardbara/schema"
+import type { Card, Layer } from "@prismwright/schema"
 import {
   GENERATE_VIDEO_PREVIEW,
   RENDER_SPEC_VERSION,
@@ -88,7 +88,7 @@ function sampleLayer(): Layer {
 
 describe("hash53", () => {
   it("同输入必同输出（确定性）", () => {
-    expect(hash53("cardbara")).toBe(hash53("cardbara"))
+    expect(hash53("prismwright")).toBe(hash53("prismwright"))
   })
 
   it("不同输入几乎不撞", () => {

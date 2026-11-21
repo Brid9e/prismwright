@@ -5,7 +5,7 @@
  * 空表、0 权重、没有该稀有度的卡，三种情况的分支各不相同。
  */
 import { describe, it, expect } from "vitest"
-import { createCard, createEmptyPack, type Pack } from "@cardbara/schema"
+import { createCard, createEmptyPack, type Pack } from "@prismwright/schema"
 import {
   probabilityIssues,
   probabilityPercents,

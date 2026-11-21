@@ -6,7 +6,7 @@
  */
 import { useTranslation } from "react-i18next"
 import { FolderOpen, Plus } from "lucide-react"
-import CardbaraLogo from "../../assets/cardbara-logo.svg?react"
+import PrismwrightLogo from "../../assets/prismwright-logo.svg?react"
 import { newPackFlow, openPackFlow } from "../../app/packActions"
 import { RecentList } from "./RecentList"
 
@@ -19,7 +19,7 @@ export function StartScreen() {
       {/* logo 单独放，下面不再带字标；外层 gap-5 把标与「最近打开」拉开。 */}
       <div className="select-none">
         {/* aria-label 取本地化的应用名（SVG 文件本身不带 aria-label）。 */}
-        <CardbaraLogo
+        <PrismwrightLogo
           className="h-16 w-auto"
           role="img"
           aria-label={tc("app.name")}

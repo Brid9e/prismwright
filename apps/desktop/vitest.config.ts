@@ -1,7 +1,7 @@
 /**
  * 桌面端单元测试的 Vitest 配置。
  *
- * 架构位置：与 `vite.config.ts` 并列，专供 `pnpm -F cardbara test` 使用。
+ * 架构位置：与 `vite.config.ts` 并列，专供 `pnpm -F prismwright test` 使用。
  * 这里刻意与 Vite 主线配置分离——测试只跑纯逻辑（store / 数据层）与少量
  * `react-dom/server` 冒烟渲染，不需要 React 插件、Tauri 端口约束等构建期能力。
  *

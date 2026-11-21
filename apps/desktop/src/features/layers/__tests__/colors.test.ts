@@ -7,7 +7,7 @@
  * `pack.json` 超出 schema 的 8 个上限，之后这个系列会**整个打不开**。
  */
 import { describe, it, expect } from "vitest"
-import type { ColorStop } from "@cardbara/schema"
+import type { ColorStop } from "@prismwright/schema"
 import {
   DEFAULT_NEW_STOP,
   MAX_COLOR_STOPS,

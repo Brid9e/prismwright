@@ -24,7 +24,7 @@ vi.mock("../../tauri/pack-fs", () => ({
 
 import { usePackStore } from "../packStore"
 import { defaultLayerName } from "../layer-naming"
-import { findLayerById, MAX_NEST_DEPTH } from "@cardbara/schema"
+import { findLayerById, MAX_NEST_DEPTH } from "@prismwright/schema"
 import { toDisplayOrder } from "../../features/layers/order"
 import { resolveDrop } from "../../features/layers/drop"
 

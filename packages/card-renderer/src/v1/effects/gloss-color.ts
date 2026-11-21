@@ -6,7 +6,7 @@
  * 是刻意的，见 `GlossParams.color` 的注释：补了默认值，存量卡的光带颜色就会变。
  */
 import { Color } from "three"
-import { alphaOf, type Effect } from "@cardbara/schema"
+import { alphaOf, type Effect } from "@prismwright/schema"
 import { GLOSS_MAX } from "./registry"
 
 /**
