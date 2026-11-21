@@ -125,13 +125,13 @@ describe("createLayerMaterial", () => {
   it("没有调色板时，颜色类效果不会把 uHasHolo 打开（箔只认调色板）", () => {
     const gloss = EffectSchema.parse({ kind: "gloss", id: "g", enabled: true, params: {} }) as Effect
     expect(build({ effects: [gloss] }).uniforms.uHasHolo.value).toBe(0)
-    const lattice = EffectSchema.parse({
-      kind: "lattice",
+    const grid = EffectSchema.parse({
+      kind: "holoGrid",
       id: "l",
       enabled: true,
       params: {},
     }) as Effect
-    expect(build({ effects: [lattice] }).uniforms.uHasHolo.value).toBe(0)
+    expect(build({ effects: [grid] }).uniforms.uHasHolo.value).toBe(0)
   })
 
   // 内容浮雕只认本层自有的摩尔纹：从卡面继承来的那份是给全息相位和光带切带用的，
@@ -397,38 +397,6 @@ describe("createLayerMaterial", () => {
     const material = build({ effects, inheritedMoire })
     expect(material.uniforms.uMoireCount.value).toBe(1)
     expect(material.uniforms.uMoireMode.value[0]).toBe(0)
-  })
-
-  // 几何刻纹也走同一条接缝：着色器声明了 uLattice*，材质忘了接线时类型上完全看不出来，
-  // 症状是「拖了刻纹滑块，画面不动」。注意 count 是**条数**（1 条效果），族数落在 uLatticeFamilies。
-  it("把 lattice 效果接线到 uLattice* 数组", () => {
-    const effects = [
-      EffectSchema.parse({
-        kind: "lattice",
-        id: "lat",
-        params: {
-          count: 6,
-          angle: 30,
-          density: 55,
-          width: 0.4,
-          strength: 0.8,
-          offsetX: 0,
-          offsetY: 0,
-        },
-      }),
-    ]
-    const material = build({ effects })
-    expect(material.uniforms.uLatticeCount.value).toBe(1)
-    expect(material.uniforms.uLatticeFamilies.value[0]).toBe(6)
-    expect(material.uniforms.uLatticeAngle.value[0]).toBe(30)
-    expect(material.uniforms.uLatticeDensity.value[0]).toBe(55)
-    expect(material.uniforms.uLatticeWidth.value[0]).toBe(0.4)
-    expect(material.uniforms.uLatticeStrength.value[0]).toBe(0.8)
-  })
-
-  // 关闭时族数归零：这是「默认外观 == 改动前」的接线保证。
-  it("无 lattice 效果时 uLatticeCount 为 0", () => {
-    expect(build().uniforms.uLatticeCount.value).toBe(0)
   })
 
   // 内置蒙版也走同一条接缝：着色器声明了 uMaskPreset*，材质忘了接线时类型上完全看不出来，
@@ -944,17 +912,28 @@ describe("createLayerMaterial 叠色参数", () => {
 })
 
 describe("createLayerMaterial holoGrid", () => {
-  it("holoGrid 接线到 uHoloGrid*", () => {
+  it("holoGrid 接线到线族 uniform（count→families）与强度/偏移", () => {
     const effect = EffectSchema.parse({
       kind: "holoGrid",
       id: "g",
       enabled: true,
-      params: { size: 0.6, strength: 0.5, offsetX: 0.1, offsetY: 0.2 },
+      params: {
+        count: 6,
+        angle: 30,
+        density: 55,
+        width: 0.4,
+        strength: 0.8,
+        offsetX: 0.1,
+        offsetY: 0.2,
+      },
     }) as Effect
     const m = build({ effects: [effect] })
     expect(m.uniforms.uHoloGridCount.value).toBe(1)
-    expect(m.uniforms.uHoloGridSize.value[0]).toBe(0.6)
-    expect(m.uniforms.uHoloGridStrength.value[0]).toBe(0.5)
+    expect(m.uniforms.uHoloGridFamilies.value[0]).toBe(6)
+    expect(m.uniforms.uHoloGridAngle.value[0]).toBe(30)
+    expect(m.uniforms.uHoloGridDensity.value[0]).toBe(55)
+    expect(m.uniforms.uHoloGridWidth.value[0]).toBe(0.4)
+    expect(m.uniforms.uHoloGridStrength.value[0]).toBe(0.8)
     expect(m.uniforms.uHoloGridOffsetX.value[0]).toBe(0.1)
     expect(m.uniforms.uHoloGridOffsetY.value[0]).toBe(0.2)
   })

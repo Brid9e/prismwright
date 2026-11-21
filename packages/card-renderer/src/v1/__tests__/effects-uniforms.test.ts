@@ -11,7 +11,6 @@ import { toEffectUniforms } from "../effects/uniforms"
 import {
   MOIRE_MAX,
   GRADIENT_MAX,
-  LATTICE_MAX,
   GLOSS_MAX,
   MASK_PRESET_MAX,
 } from "../effects/registry"
@@ -36,30 +35,24 @@ describe("toEffectUniforms", () => {
   })
 
   it("同类型多条按列表序填入切片（未超上限时逐条入位）", () => {
-    const list = [
-      effect("lattice", { density: 5 }),
-      effect("lattice", { density: 9 }),
-      effect("lattice", { density: 13 }),
-    ]
+    const list = [effect("moire", { density: 5 }), effect("moire", { density: 9 })]
     const u = toEffectUniforms(list, [])
-    expect(u.uLatticeCount).toBe(3)
-    expect(u.uLatticeDensity.slice(0, 3)).toEqual([5, 9, 13])
+    expect(u.uMoireCount).toBe(2)
+    expect(u.uMoireDensity.slice(0, 2)).toEqual([5, 9])
   })
 
-  it("同类型条目超出上限时按列表序截断到 LATTICE_MAX", () => {
-    // 造 LATTICE_MAX + 1 条 lattice，验证 pick() 的 `out.length < max` 截断：计数被封顶，
-    // 数组只有前 LATTICE_MAX 条，末条（density=21）无槽位可放。
+  it("同类型条目超出上限时按列表序截断到 GLOSS_MAX", () => {
+    // 造 GLOSS_MAX + 1 条 gloss，验证 pick() 的 `out.length < max` 截断：计数被封顶，
+    // 数组只有前 GLOSS_MAX 条，末条（intensity=0.3）无槽位可放。
     const list = [
-      effect("lattice", { density: 5 }),
-      effect("lattice", { density: 9 }),
-      effect("lattice", { density: 13 }),
-      effect("lattice", { density: 17 }),
-      effect("lattice", { density: 21 }),
+      effect("gloss", { intensity: 0.1 }),
+      effect("gloss", { intensity: 0.2 }),
+      effect("gloss", { intensity: 0.3 }),
     ]
     const u = toEffectUniforms(list, [])
-    expect(u.uLatticeCount).toBe(LATTICE_MAX)
-    expect(u.uLatticeDensity.slice(0, LATTICE_MAX)).toEqual([5, 9, 13, 17])
-    expect(u.uLatticeDensity).toHaveLength(LATTICE_MAX)
+    expect(u.uGlossCount).toBe(GLOSS_MAX)
+    expect(u.uGlossIntensity.slice(0, GLOSS_MAX)).toEqual([0.1, 0.2])
+    expect(u.uGlossIntensity).toHaveLength(GLOSS_MAX)
   })
 
   it("扭转种子随条目打包进各自的种子数组，未占用的槽位补 0", () => {
@@ -157,10 +150,26 @@ describe("toEffectUniforms", () => {
 })
 
 describe("toEffectUniforms holoGrid", () => {
-  it("holoGrid 打包成 uHoloGridCount / uHoloGridSize / uHoloGridStrength", () => {
-    const u = toEffectUniforms([effect("holoGrid", { size: 0.5, strength: 0.8, offsetX: 0.1, offsetY: -0.2 })], [])
+  it("holoGrid 打包成线族 uniform（count→families）与强度/偏移", () => {
+    const u = toEffectUniforms(
+      [
+        effect("holoGrid", {
+          count: 6,
+          angle: 30,
+          density: 55,
+          width: 0.4,
+          strength: 0.8,
+          offsetX: 0.1,
+          offsetY: -0.2,
+        }),
+      ],
+      [],
+    )
     expect(u.uHoloGridCount).toBe(1)
-    expect(u.uHoloGridSize[0]).toBe(0.5)
+    expect(u.uHoloGridFamilies[0]).toBe(6)
+    expect(u.uHoloGridAngle[0]).toBe(30)
+    expect(u.uHoloGridDensity[0]).toBe(55)
+    expect(u.uHoloGridWidth[0]).toBe(0.4)
     expect(u.uHoloGridStrength[0]).toBe(0.8)
     expect(u.uHoloGridOffsetX[0]).toBe(0.1)
     expect(u.uHoloGridOffsetY[0]).toBe(-0.2)
@@ -169,7 +178,10 @@ describe("toEffectUniforms holoGrid", () => {
   it("没有 holoGrid 时计数 0，数组填 0", () => {
     const u = toEffectUniforms([], [])
     expect(u.uHoloGridCount).toBe(0)
-    expect(u.uHoloGridSize).toEqual([0])
+    expect(u.uHoloGridFamilies).toEqual([0])
+    expect(u.uHoloGridAngle).toEqual([0])
+    expect(u.uHoloGridDensity).toEqual([0])
+    expect(u.uHoloGridWidth).toEqual([0])
     expect(u.uHoloGridStrength).toEqual([0])
     expect(u.uHoloGridOffsetX).toEqual([0])
     expect(u.uHoloGridOffsetY).toEqual([0])

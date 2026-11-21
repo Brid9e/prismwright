@@ -184,9 +184,9 @@ describe("mapping", () => {
 
   // 箔只由调色板给出颜色：没有调色板就不出箔，也不回退默认配色（那等于替用户选了一组颜色）。
   // 颜色类效果照样作用在本层的图片 / 文字上，它们不经过这道门。
-  it("没有调色板时，刻纹 / 光泽 / 摩尔纹都不会凭空造出一层箔", () => {
+  it("没有调色板时，网格 / 光泽 / 摩尔纹都不会凭空造出一层箔", () => {
     const effect = (kind: string) => EffectSchema.parse({ kind, id: kind, enabled: true, params: {} }) as Effect
-    for (const kind of ["gloss", "lattice", "moire", "gradient"]) {
+    for (const kind of ["gloss", "holoGrid", "moire", "gradient"]) {
       expect(toUniforms(layer({ effects: [effect(kind)] })).hasHolo).toBe(false)
     }
     expect(toUniforms(withMask()).hasHolo).toBe(false)

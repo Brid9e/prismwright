@@ -4,7 +4,7 @@
  * 方案按 spec §6.1：每种效果各开一档定长数组 + 一个计数，着色器按**固定类型序**
  * 逐档循环。这里只做纯数据打包，不含任何 three 依赖，故可零依赖单测。
  *
- * 相位组的固定类型序（moire → gradient → lattice）由着色器保证，本函数只按 kind
+ * 相位组的固定类型序（moire → gradient）由着色器保证，本函数只按 kind
  * 分桶、保持同类型内的列表顺序——那正是「同类型多条按列表序累加」的依据。
  */
 import type { Effect } from "@cardbara/schema"
@@ -12,7 +12,6 @@ import {
   EFFECT_REGISTRY,
   MOIRE_MAX,
   GRADIENT_MAX,
-  LATTICE_MAX,
   GLOSS_MAX,
   HOLO_GRID_MAX,
   MASK_PRESET_MAX,
@@ -39,18 +38,12 @@ export interface EffectUniformArrays {
   uGradientTwistSeed: number[]
   /** 整齐度：0 = 保留原有扰动，1 = 只留斜坡本身。全局标量（渐变最多一条），取首条的值。 */
   uGradientStraight: number
-  // 相位：刻纹
-  uLatticeCount: number
-  uLatticeFamilies: number[]
-  uLatticeAngle: number[]
-  uLatticeDensity: number[]
-  uLatticeWidth: number[]
-  uLatticeStrength: number[]
-  uLatticeOffsetX: number[]
-  uLatticeOffsetY: number[]
-  // 颜色：独立网格
+  // 颜色：独立网格（线族参数与刻纹同构，count 打包为 families）
   uHoloGridCount: number
-  uHoloGridSize: number[]
+  uHoloGridFamilies: number[]
+  uHoloGridAngle: number[]
+  uHoloGridDensity: number[]
+  uHoloGridWidth: number[]
   uHoloGridStrength: number[]
   uHoloGridOffsetX: number[]
   uHoloGridOffsetY: number[]
@@ -163,7 +156,6 @@ export function toEffectUniforms(
     moireItems.length > 0 ? moireItems : pick(inheritedMoire, "moire", MOIRE_MAX)
 
   const gradientItems = pick(effects, "gradient", GRADIENT_MAX)
-  const latticeItems = pick(effects, "lattice", LATTICE_MAX)
   const glossItems = pick(effects, "gloss", GLOSS_MAX)
   const gridItems = pick(effects, "holoGrid", HOLO_GRID_MAX)
   const maskItems = pick(effects, "maskPreset", MASK_PRESET_MAX)
@@ -186,15 +178,6 @@ export function toEffectUniforms(
     uGradientTwistSeed: fill(GRADIENT_MAX, pack(gradientItems, "twistSeed")),
     uGradientStraight: pack(gradientItems, "straight")[0] ?? 0,
 
-    uLatticeCount: latticeItems.length,
-    uLatticeFamilies: fill(LATTICE_MAX, pack(latticeItems, "families")),
-    uLatticeAngle: fill(LATTICE_MAX, pack(latticeItems, "angle")),
-    uLatticeDensity: fill(LATTICE_MAX, pack(latticeItems, "density")),
-    uLatticeWidth: fill(LATTICE_MAX, pack(latticeItems, "width")),
-    uLatticeStrength: fill(LATTICE_MAX, pack(latticeItems, "strength")),
-    uLatticeOffsetX: fill(LATTICE_MAX, pack(latticeItems, "offsetX")),
-    uLatticeOffsetY: fill(LATTICE_MAX, pack(latticeItems, "offsetY")),
-
     uGlossCount: glossItems.length,
     uGlossMode: fill(GLOSS_MAX, pack(glossItems, "mode")),
     uGlossBands: fill(GLOSS_MAX, pack(glossItems, "bands")),
@@ -210,7 +193,10 @@ export function toEffectUniforms(
     uGlossSoftness: fill(GLOSS_MAX, pack(glossItems, "softness")),
 
     uHoloGridCount: gridItems.length,
-    uHoloGridSize: fill(HOLO_GRID_MAX, pack(gridItems, "size")),
+    uHoloGridFamilies: fill(HOLO_GRID_MAX, pack(gridItems, "families")),
+    uHoloGridAngle: fill(HOLO_GRID_MAX, pack(gridItems, "angle")),
+    uHoloGridDensity: fill(HOLO_GRID_MAX, pack(gridItems, "density")),
+    uHoloGridWidth: fill(HOLO_GRID_MAX, pack(gridItems, "width")),
     uHoloGridStrength: fill(HOLO_GRID_MAX, pack(gridItems, "strength")),
     uHoloGridOffsetX: fill(HOLO_GRID_MAX, pack(gridItems, "offsetX")),
     uHoloGridOffsetY: fill(HOLO_GRID_MAX, pack(gridItems, "offsetY")),

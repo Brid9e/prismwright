@@ -130,9 +130,12 @@ uniform float uPaletteTint;
 uniform float uPaletteDeltaBase;
 uniform float uPaletteDeltaContrast;
 uniform float uPaletteDeltaBright;
-// 独立网格效果：最多一条，只贡献色相。
+// 独立网格效果：最多一条，只贡献色相（线族数学沿用 latticeField）。
 uniform float uHoloGridCount;
-uniform float uHoloGridSize[1];
+uniform float uHoloGridFamilies[1];
+uniform float uHoloGridAngle[1];
+uniform float uHoloGridDensity[1];
+uniform float uHoloGridWidth[1];
 uniform float uHoloGridStrength[1];
 uniform float uHoloGridOffsetX[1];
 uniform float uHoloGridOffsetY[1];
@@ -367,9 +370,11 @@ void main() {
   float phase = holoPhase(V, N, bUv, uOffset, uDistortionStrength, uNoiseStrength, poleView, poleSoft, uGradientStraight);
   vec4 holo4 = holoColor(phase, grazing, uPhaseSpeed, uTime);
   vec3 holo = holo4.rgb;
-  // 独立网格：色相加量；色带合成在 holoColor 之后偏移色相，叠色合成作为 extraGrid。
+  // 独立网格：刻纹线族数学 + 色相加量；色带合成在 holoColor 之后偏移色相，叠色合成作为 extraGrid。
   float independentGrid = uHoloGridCount > 0.5
-    ? holoGridValue(vUv - vec2(uHoloGridOffsetX[0], uHoloGridOffsetY[0]), uHoloGridSize[0]) * uHoloGridStrength[0]
+    ? latticeField(vUv - vec2(uHoloGridOffsetX[0], uHoloGridOffsetY[0]),
+        uHoloGridFamilies[0], uHoloGridAngle[0], uHoloGridDensity[0], uHoloGridWidth[0])
+      * uHoloGridStrength[0]
     : 0.0;
 
   // 颜色组：光泽往图层全息色上叠加光带（与卡面共用 GLSL_COMMON.glossBands，主色换成 holo）。

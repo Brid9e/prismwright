@@ -38,7 +38,7 @@ describe("蒙版整场变换的 uniform", () => {
     expect(GLSL_COMMON).not.toContain("(uv - vec2(0.5))")
   })
 
-  // 旋转与 gradient.angle / lattice.angle 同口径（度），换算弧度交给着色器。
+  // 旋转与 gradient.angle / holoGrid.angle 同口径（度），换算弧度交给着色器。
   it("旋转取度并换算弧度（与其它角度参数同口径）", () => {
     expect(GLSL_COMMON).toContain("radians(rotation)")
   })

@@ -14,7 +14,6 @@ import type {
   EffectKind,
   EffectRole,
   GradientParams,
-  LatticeParams,
   MaskPresetParams,
   MaskImageParams,
   MaskEraseParams,
@@ -35,7 +34,6 @@ import { patternModeCode } from "../mapping"
 export const MOIRE_MAX = 2
 /** 渐变每层一条：相位全局项是图层级的单份设置，多条会为「听谁的」制造歧义（见设计方案 §3）。 */
 export const GRADIENT_MAX = 1
-export const LATTICE_MAX = 4
 export const GLOSS_MAX = 2
 export const MASK_PRESET_MAX = 2
 /** 图蒙版（自定义蒙版）单目标上限：固定 1 张（一个目标最多一张图蒙版）。 */
@@ -69,7 +67,7 @@ export type FieldType =
 /**
  * 效果可挂载的目标范围。
  *
- * `gradient` / `lattice` / `palette` 只对图层有意义（卡面片元不跑 `holoPhase` / `holoColor`，三者
+ * `gradient` / `holoGrid` / `palette` 只对图层有意义（卡面片元不跑 `holoPhase` / `holoColor`，三者
  * 在卡面上空转）；`moire` / `gloss` / `maskPreset` / `imageMask` 卡面确实会渲染。UI 据此过滤
  * 「＋ 添加效果」菜单（只在新增加时过滤，已存在的条目仍照常渲染）。
  */
@@ -135,7 +133,7 @@ export interface EffectDef<K extends EffectKind = EffectKind> {
    * `packUniforms` 收错参数类型会在 {@link EFFECT_REGISTRY} 的 `satisfies` 处报错，而非被
    * 方法的双变（bivariance）悄悄放过。
    *
-   * 注意 uniform 键名**不必**等于参数键名：如刻纹把 `count` 打成 `families`、光泽打成 `bands`，
+   * 注意 uniform 键名**不必**等于参数键名：如网格把 `count` 打成 `families`、光泽打成 `bands`，
    * 那是着色器侧的契约名（见 `effects/uniforms.ts`）。
    */
   packUniforms: (params: EffectParamsOf<K>) => PackedUniforms
@@ -151,8 +149,8 @@ export interface EffectDef<K extends EffectKind = EffectKind> {
  */
 type EffectParamsOf<K extends EffectKind> = K extends "gradient"
   ? GradientParams
-  : K extends "lattice"
-    ? LatticeParams
+  : K extends "holoGrid"
+    ? HoloGridParams
     : K extends "moire"
       ? MoireParams
       : K extends "gloss"
@@ -362,88 +360,6 @@ export const EFFECT_REGISTRY = {
       twist: p.twist,
       twistSeed: p.twistSeed,
       straight: p.straight,
-    }),
-  },
-  lattice: {
-    kind: "lattice",
-    role: "phase",
-    scope: "layer",
-    maxPerTarget: LATTICE_MAX,
-    defaultParams: () => parseParams("lattice", {}),
-    labelKey: "lattice.label",
-    fields: [
-      {
-        key: "count",
-        labelKey: "lattice.count",
-        type: "slider",
-        min: 1,
-        max: 8,
-        step: 1,
-        precision: 0,
-      },
-      {
-        key: "angle",
-        labelKey: "lattice.angle",
-        type: "slider",
-        min: 0,
-        max: 360,
-        step: 1,
-        precision: 0,
-      },
-      {
-        key: "density",
-        labelKey: "lattice.density",
-        type: "slider",
-        min: 1,
-        max: 100,
-        step: 1,
-        precision: 0,
-      },
-      {
-        key: "width",
-        labelKey: "lattice.width",
-        type: "slider",
-        min: 0.02,
-        max: 0.6,
-        step: 0.01,
-        precision: 2,
-      },
-      {
-        key: "strength",
-        labelKey: "lattice.strength",
-        type: "slider",
-        min: 0,
-        max: 1,
-        step: 0.01,
-        precision: 2,
-      },
-      {
-        key: "offsetX",
-        labelKey: "lattice.offsetX",
-        type: "slider",
-        min: -1,
-        max: 1,
-        step: 0.01,
-        precision: 2,
-      },
-      {
-        key: "offsetY",
-        labelKey: "lattice.offsetY",
-        type: "slider",
-        min: -1,
-        max: 1,
-        step: 0.01,
-        precision: 2,
-      },
-    ],
-    packUniforms: (p: LatticeParams): PackedUniforms => ({
-      families: p.count,
-      angle: p.angle,
-      density: p.density,
-      width: p.width,
-      strength: p.strength,
-      offsetX: p.offsetX,
-      offsetY: p.offsetY,
     }),
   },
   moire: {
@@ -761,11 +677,38 @@ export const EFFECT_REGISTRY = {
     labelKey: "holoGrid.label",
     fields: [
       {
-        key: "size",
-        labelKey: "holoGrid.size",
+        key: "count",
+        labelKey: "holoGrid.count",
         type: "slider",
-        min: 0.1,
-        max: 2,
+        min: 1,
+        max: 8,
+        step: 1,
+        precision: 0,
+      },
+      {
+        key: "angle",
+        labelKey: "holoGrid.angle",
+        type: "slider",
+        min: 0,
+        max: 360,
+        step: 1,
+        precision: 0,
+      },
+      {
+        key: "density",
+        labelKey: "holoGrid.density",
+        type: "slider",
+        min: 1,
+        max: 100,
+        step: 1,
+        precision: 0,
+      },
+      {
+        key: "width",
+        labelKey: "holoGrid.width",
+        type: "slider",
+        min: 0.02,
+        max: 0.6,
         step: 0.01,
         precision: 2,
       },
@@ -797,9 +740,12 @@ export const EFFECT_REGISTRY = {
         precision: 2,
       },
     ],
-    // 与叠色一样只贡献色相：size/strength/offset 进定长数组。
+    // 与叠色一样只贡献色相：线族参数进定长数组。
     packUniforms: (p: HoloGridParams): PackedUniforms => ({
-      size: p.size,
+      families: p.count,
+      angle: p.angle,
+      density: p.density,
+      width: p.width,
       strength: p.strength,
       offsetX: p.offsetX,
       offsetY: p.offsetY,
@@ -1201,7 +1147,6 @@ export const EFFECT_REGISTRY = {
  */
 export const EFFECT_KINDS: readonly EffectKind[] = [
   "gradient",
-  "lattice",
   "moire",
   "gloss",
   "palette",

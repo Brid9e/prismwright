@@ -12,7 +12,6 @@ import {
   EFFECT_KINDS,
   MOIRE_MAX,
   GRADIENT_MAX,
-  LATTICE_MAX,
   GLOSS_MAX,
   MASK_PRESET_MAX,
   IMAGE_MASK_MAX,
@@ -25,7 +24,6 @@ import type { FieldDescriptor } from "../effects/registry"
 describe("EFFECT_REGISTRY", () => {
   it("每种 kind 都有定义且 role 与设计一致", () => {
     expect(EFFECT_REGISTRY.gradient.role).toBe("phase")
-    expect(EFFECT_REGISTRY.lattice.role).toBe("phase")
     expect(EFFECT_REGISTRY.moire.role).toBe("phase")
     expect(EFFECT_REGISTRY.gloss.role).toBe("color")
     expect(EFFECT_REGISTRY.holoGrid.role).toBe("color")
@@ -48,7 +46,7 @@ describe("EFFECT_REGISTRY", () => {
     expect(EFFECT_REGISTRY.image.scope).toBe("layer")
   })
 
-  it("EFFECT_KINDS 覆盖全部十种（含 image）", () => {
+  it("EFFECT_KINDS 覆盖全部九种（含 image，刻纹已并入网格）", () => {
     expect([...EFFECT_KINDS].sort()).toEqual(
       [
         "gradient",
@@ -56,7 +54,6 @@ describe("EFFECT_REGISTRY", () => {
         "holoGrid",
         "image",
         "imageMask",
-        "lattice",
         "maskErase",
         "maskPreset",
         "moire",
@@ -68,7 +65,6 @@ describe("EFFECT_REGISTRY", () => {
   it("每个 kind 的 scope 与设计一致（scope 决定卡面菜单是否列出）", () => {
     const EXPECTED: Record<string, string> = {
       gradient: "layer",
-      lattice: "layer",
       palette: "layer",
       holoGrid: "layer",
       moire: "both",
@@ -97,7 +93,6 @@ describe("EFFECT_REGISTRY", () => {
 
   it("槽位上限与着色器定长数组一致", () => {
     expect(EFFECT_REGISTRY.gradient.maxPerTarget).toBe(GRADIENT_MAX)
-    expect(EFFECT_REGISTRY.lattice.maxPerTarget).toBe(LATTICE_MAX)
     expect(EFFECT_REGISTRY.moire.maxPerTarget).toBe(MOIRE_MAX)
     expect(EFFECT_REGISTRY.gloss.maxPerTarget).toBe(GLOSS_MAX)
     expect(EFFECT_REGISTRY.maskPreset.maxPerTarget).toBe(MASK_PRESET_MAX)
@@ -154,6 +149,28 @@ describe("EFFECT_REGISTRY", () => {
     )
     expect([byKey.offsetX.min, byKey.offsetX.max, byKey.offsetX.step]).toEqual([-3, 3, 0.01])
     expect([byKey.offsetY.min, byKey.offsetY.max, byKey.offsetY.step]).toEqual([-3, 3, 0.01])
+  })
+
+  it("holoGrid 的字段继承刻纹七项，量程与 schema 一致", () => {
+    type SliderField = FieldDescriptor & { min: number; max: number; step: number }
+    const fields = EFFECT_REGISTRY.holoGrid.fields as readonly FieldDescriptor[]
+    expect(fields.map((f) => f.key)).toEqual([
+      "count",
+      "angle",
+      "density",
+      "width",
+      "strength",
+      "offsetX",
+      "offsetY",
+    ])
+    const byKey = Object.fromEntries(fields.map((f) => [f.key, f as SliderField]))
+    expect([byKey.count.min, byKey.count.max, byKey.count.step]).toEqual([1, 8, 1])
+    expect([byKey.angle.min, byKey.angle.max, byKey.angle.step]).toEqual([0, 360, 1])
+    expect([byKey.density.min, byKey.density.max, byKey.density.step]).toEqual([1, 100, 1])
+    expect([byKey.width.min, byKey.width.max, byKey.width.step]).toEqual([0.02, 0.6, 0.01])
+    expect([byKey.strength.min, byKey.strength.max, byKey.strength.step]).toEqual([0, 1, 0.01])
+    expect([byKey.offsetX.min, byKey.offsetX.max, byKey.offsetX.step]).toEqual([-1, 1, 0.01])
+    expect([byKey.offsetY.min, byKey.offsetY.max, byKey.offsetY.step]).toEqual([-1, 1, 0.01])
   })
 
   it("image 字段为 path + 跟随卡面 + 填充方式 + 四个变换滑块 + 法线贴图与四个法线控件，范围与 schema 一致", () => {
@@ -235,11 +252,10 @@ describe("EFFECT_REGISTRY", () => {
   })
 
   it("packUniforms 的键集与着色器 uniform 契约一致（Task 4 / 8 的依据）", () => {
-    // 键名不必等于参数键名（如刻纹 count→families、光泽 count→bands）——这里钉的是
+    // 键名不必等于参数键名（如网格 count→families、光泽 count→bands）——这里钉的是
     // 消费方真正依赖的 uniform 键集合，改动它会静默改坏画面，故逐个写死。
     const EXPECTED: Record<string, readonly string[]> = {
       gradient: ["mode", "density", "angle", "twist", "twistSeed", "straight"],
-      lattice: ["families", "angle", "density", "width", "strength", "offsetX", "offsetY"],
       moire: ["mode", "angle", "density", "depth", "twist", "twistSeed", "faceStrength"],
       gloss: [
         "mode",
@@ -275,7 +291,7 @@ describe("EFFECT_REGISTRY", () => {
       imageMask: [],
       maskErase: [],
       palette: [],
-      holoGrid: ["size", "strength", "offsetX", "offsetY"],
+      holoGrid: ["families", "angle", "density", "width", "strength", "offsetX", "offsetY"],
       image: [],
     }
     for (const kind of EFFECT_KINDS) {

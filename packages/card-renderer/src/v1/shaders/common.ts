@@ -87,7 +87,6 @@ uniform float uTransition;
 // 故长度取各类型的编译期上界，运行时只有前 uXxxCount 条有效（循环体以 float(i) < count 守卫）。
 const int MOIRE_MAX = 2;
 const int GRADIENT_MAX = 1;
-const int LATTICE_MAX = 4;
 const int GLOSS_MAX = 2;
 const int MASK_PRESET_MAX = 2;
 
@@ -114,16 +113,6 @@ uniform float uGradientTwistSeed[GRADIENT_MAX];
 // 整齐度（0–1）：0 = 保留骑在斜坡上的方向项 / 固定正弦 / 像素位移，1 = 只留斜坡本身。
 // 它是相位全局项（散装标量），取首条渐变的值；无渐变时恒为 0。
 uniform float uGradientStraight;
-
-// 相位③ 几何刻纹（相位加项）。uLatticeFamilies = 条纹族数（原 count）。
-uniform float uLatticeCount;
-uniform float uLatticeFamilies[LATTICE_MAX];
-uniform float uLatticeAngle[LATTICE_MAX];
-uniform float uLatticeDensity[LATTICE_MAX];
-uniform float uLatticeWidth[LATTICE_MAX];
-uniform float uLatticeStrength[LATTICE_MAX];
-uniform float uLatticeOffsetX[LATTICE_MAX];
-uniform float uLatticeOffsetY[LATTICE_MAX];
 
 // 颜色 光泽（往 RGB 加光带）。uGlossBands = 光带数（原 count）。见各片元。
 uniform float uGlossCount;
@@ -284,15 +273,9 @@ float gradientRamp(vec2 uvw, float mode, float angle, float twist, float twistSe
   return ramp + twistPhase(uvw, twist, twistSeed);
 }
 
-// 几何刻纹 → 相位偏移的换算系数。
-//
-// holoColor 里 t1 = phase * 0.036，故 strength=1 时点阵把色板取样位置推开约
-// 7 * 0.036 ≈ 0.25（色板的四分之一圈）。这是唯一不可自动化验证的系数，取值靠人工对照。
-const float LATTICE_PHASE_SCALE = 7.0;
-
 // 几何刻纹场：N 族等角余弦条纹各取峰后求和，clamp 到 [0,1]。
 //
-// 参数化：族数 / 角 / 频率 / 线宽 / 偏移全为入参（holoPhase 逐条循环求值），strength 仍在调用处乘。
+// 参数化：族数 / 角 / 频率 / 线宽 / 偏移全为入参（网格在片元里按当前参数求值），strength 仍在调用处乘。
 //
 // 每条族是「法向为 dir_i、彼此平行的一组线」——即 dot(uv - 0.5, dir) 的等值线（只有取值为 0
 // 的那条过卡心）。取 |cos| 的波峰：只有 |cos| 高于 1 - width 的那一段被照亮，平滑波因此锐化
@@ -610,18 +593,6 @@ float holoPhase(vec3 V, vec3 N, vec2 uv, vec2 offset, float distortionStrength, 
   phase += keep * sin(length(uvw - vec2(0.5)) * 21.0 - grazing * 5.0 + rndB * 3.3) * 0.62;
   phase += keep * sin(dot(uvw, vec2(11.7, 8.3)) + snR * 6.2) * 0.42;
 
-  // ③ 几何刻纹：加在相位上 → 色相偏移。用**真实 uv**（不是 uv0），故不随**图层** offset 平移、
-  // 也不受 distortion/noise 影响（那些作用在 uv0/uvw 上）；点阵因此钉在卡面上，只有它自己
-  // 的 uLatticeOffsetX/Y 能挪动它（在 latticeField 里减）。固定序最后一档。
-  float lat = 0.0;
-  for (int i = 0; i < LATTICE_MAX; i++) {
-    if (float(i) < uLatticeCount) {
-      lat += latticeField(uv, uLatticeFamilies[i], uLatticeAngle[i], uLatticeDensity[i],
-                          uLatticeWidth[i], uLatticeOffsetX[i], uLatticeOffsetY[i]) * uLatticeStrength[i];
-    }
-  }
-  phase += lat * LATTICE_PHASE_SCALE;
-
   return phase;
 }
 
@@ -799,20 +770,20 @@ vec2 normalMapSlope(vec2 uv, float flipY, float invert) {
 // ── 卡面浮雕（摩尔纹）──
 //
 // 把摩尔纹场当作卡面的一层「高度场」，沿一束**固定斜向**光照取它的方向导数（沿光向走一小步再作
-// 差），得到明暗——刻纹于是以凸起 / 凹陷的浮雕显在卡面上。要点有三：
+// 差），得到明暗——纹样于是以凸起 / 凹陷的浮雕显在卡面上。要点有三：
 //  - 为什么必须用**斜**光而不能用视线 V：V 近似垂直于卡面、正落在高度曲线顶部，扰动后 N·V 的
 //    一阶项相互抵消、只剩二阶的微弱变化——这与被替换掉的「折射」一样肉眼看不见。换成一束斜向的
-//    L，一阶项（∝ 沿 L 的方向导数）不再抵消，刻纹立刻显出明暗。
+//    L，一阶项（∝ 沿 L 的方向导数）不再抵消，纹样立刻显出明暗。
 //  - 步长 STEP 定义在 **UV 空间**、与画布像素无关：浮雕深度因此不随缩放 / 导出分辨率变化（若改用
 //    屏幕空间导数 dFdx/dFdy，同一张卡放大导出会变浅）。
-//  - 三个常量皆与 LATTICE_PHASE_SCALE 同类——不可自动化验证、靠人工对照的视觉系数。
+//  - 三个常量皆属不可自动化验证、靠人工对照的视觉系数。
 const vec2 MOIRE_RELIEF_LIGHT = vec2(-0.6, 0.8); // 固定斜向光（UV 平面内的单位向量）
 const float MOIRE_RELIEF_STEP = 0.004;           // 沿光向的取样步长（UV 单位）
 const float MOIRE_RELIEF_GAIN = 1.5;             // 高度差 → 明暗幅度的换算系数
 
 // 法线高度场的明暗因子：slope 是图片亮度差的斜率（见 bumpSlope），与一束斜光做点积。这是场景里
 // 唯一的光——材质用的是裸 ShaderMaterial，不参与 three 的光照，故明暗只能这样内嵌。
-//  - angle 是光的方向（度，UV 平面内、+x 为 0 逆时针）。缺省 127° 与刻纹浮雕的固定斜光
+//  - angle 是光的方向（度，UV 平面内、+x 为 0 逆时针）。缺省 127° 与摩尔纹浮雕的固定斜光
 //    MOIRE_RELIEF_LIGHT（≈126.87°）同向，两者凸起处的亮暗不打架；用户改了方向后视觉上分道扬镳，
 //    这是刻意的取舍：浮雕的系数是人工对照定的，不随滑块变。
 //  - tint 只染亮侧（白 = 中性），暗侧按灰度压暗：彩色光因此不会把影子染成补色块。
@@ -849,19 +820,13 @@ float layerContentHeight(vec2 uv) {
            * uMoireDepth[m];
     }
   }
-  for (int i = 0; i < LATTICE_MAX; i++) {
-    if (float(i) < uLatticeCount) {
-      s += latticeField(uv, uLatticeFamilies[i], uLatticeAngle[i], uLatticeDensity[i],
-                        uLatticeWidth[i], uLatticeOffsetX[i], uLatticeOffsetY[i]) * uLatticeStrength[i];
-    }
-  }
   return s;
 }
 
 // 内容浮雕的明暗因子：与 moireRelief 同构，只是高度场换成 layerContentHeight。
 // 没有自有相位效果时直接返回 1：图片 / 文字层不为此多付两次高度场计算，逐像素不变。
 float layerContentRelief(vec2 uv) {
-  if (uOwnMoireCount < 0.5 && uLatticeCount < 0.5) return 1.0;
+  if (uOwnMoireCount < 0.5) return 1.0;
   float h0 = layerContentHeight(uv);
   float hL = layerContentHeight(uv + MOIRE_RELIEF_LIGHT * MOIRE_RELIEF_STEP);
   return clamp(1.0 + (hL - h0) * MOIRE_RELIEF_GAIN, 0.25, 1.75);
@@ -990,15 +955,6 @@ vec4 rgbToHsl(vec4 c) {
   else hsl.x = (c.r - c.g) / delta + 4.0;
   hsl.x = mod(hsl.x / 6.0, 1.0);
   return hsl;
-}
-
-// 交叉网纹（叠色 holo.fs 的 fac）：x 向 + 两条 ±45° 的细线，返回 0..~0.5 的色相加量。
-// 调色板的叠色合成与独立的「网格」效果共用这一份。
-float holoGridValue(vec2 uv, float size) {
-  return 0.5 * max(
-    max(0.0, abs(cos(uv.x * size * 20.0)) * 7.0 - 6.0),
-    max(max(0.0, cos(uv.y * size * 45.0 + uv.x * size * 20.0) * 7.0 - 6.0),
-        max(0.0, cos(uv.y * size * 45.0 - uv.x * size * 20.0) * 7.0 - 6.0)));
 }
 
 // 只改色相的偏移：独立网格叠到色带全息上时用（不动亮度）。

@@ -138,31 +138,21 @@ describe("LAYER_FRAGMENT 材质参数", () => {
     expect(LAYER_FRAGMENT).toContain("poleSoft, uGradientStraight)")
   })
 
-  // holoPhase 末尾叠加 latticeField(uv, uLatticeFamilies[i], …)：名字对不上或调用被删，刻纹都会静默不生效。
-  it("声明了几何刻纹 uniform 并在相位末尾叠加 latticeField", () => {
-    for (const name of [
-      "uLatticeCount",
-      "uLatticeAngle",
-      "uLatticeDensity",
-      "uLatticeWidth",
-      "uLatticeStrength",
-      "uLatticeOffsetX",
-      "uLatticeOffsetY",
-    ]) {
-      expect(LAYER_FRAGMENT).toContain(`uniform float ${name}`)
-    }
-    expect(LAYER_FRAGMENT).toMatch(/latticeField\(uv, uLatticeFamilies\[/)
+  // 网格 = 刻纹线族数学 + 色相加量：调用被删或退回旧的交叉网纹，滑块都会静默失效。
+  it("网格用 latticeField 的线族数学，且不再有刻纹相位 uniform", () => {
+    expect(LAYER_FRAGMENT).toContain("latticeField(")
+    expect(LAYER_FRAGMENT).not.toContain("uLatticeCount")
   })
 
   // 线宽是**除数**又是阈值：写反了画面会朝反方向变（越调越细 / 越调越粗），
   // 而屏幕上只看到「滑块方向不对」，很容易被当成口味问题放过。故把式子钉住。
-  it("刻纹线宽同时进阈值与除数（width 越大线越粗）", () => {
-    expect(LAYER_FRAGMENT).toContain("uLatticeWidth")
-    expect(LAYER_FRAGMENT).toContain("abs(cos(")
+  it("网格线宽同时进阈值与除数（width 越大线越粗）", () => {
+    expect(LAYER_FRAGMENT).toContain("uHoloGridWidth[0]")
+    expect(GLSL_COMMON).toContain("abs(cos(")
     // 老式子的 6/7 阈值不该再有残留：宽度参数接管之后，硬编码阈值就等于把它废掉。
-    expect(LAYER_FRAGMENT).not.toContain("7.0 * abs(cos(")
+    expect(GLSL_COMMON).not.toContain("7.0 * abs(cos(")
     // 除数必须兜底：schema 下限虽然大于 0，但入参由外部写入，别让 0 除进去。
-    expect(LAYER_FRAGMENT).toContain("max(width, 0.01)")
+    expect(GLSL_COMMON).toContain("max(width, 0.01)")
   })
 
   // 声明 + 分支两件事都要钉：uniform 名对不上或分支被删，内置蒙版都会静默不生效 / 静默变回图蒙版。
@@ -352,13 +342,12 @@ describe("图层内容吃同一套颜色效果链", () => {
     expect(LAYER_FRAGMENT).toContain("textC = glossBands(textC, bUv, moireSum, R.x);")
   })
 
-  it("浮雕高度场只吃本层自有的摩尔纹与刻纹", () => {
+  it("浮雕高度场只吃本层自有的摩尔纹", () => {
     // 自带摩尔纹可能来自卡面继承（见 toEffectUniforms 的 inheritedMoire）：只按自有条数取。
     expect(GLSL_COMMON).toContain("float(m) < uOwnMoireCount")
     expect(GLSL_COMMON).toContain("* uMoireDepth[m]")
-    expect(GLSL_COMMON).toContain("* uLatticeStrength[i]")
     // 没有自有相位效果时直接返回 1，图片 / 文字不额外付出高度场计算。
-    expect(GLSL_COMMON).toContain("if (uOwnMoireCount < 0.5 && uLatticeCount < 0.5) return 1.0;")
+    expect(GLSL_COMMON).toContain("if (uOwnMoireCount < 0.5) return 1.0;")
   })
 })
 
@@ -391,10 +380,11 @@ describe("LAYER_FRAGMENT 叠色参数", () => {
 })
 
 describe("LAYER_FRAGMENT 独立网格", () => {
-  it("声明并使用 uHoloGrid* / holoHueShift", () => {
+  it("声明并使用线族 uniform / latticeField / holoHueShift", () => {
     expect(LAYER_FRAGMENT).toContain("uniform float uHoloGridCount;")
-    expect(LAYER_FRAGMENT).toContain("uHoloGridSize[0]")
+    expect(LAYER_FRAGMENT).toContain("uHoloGridFamilies[0]")
     expect(LAYER_FRAGMENT).toContain("uHoloGridOffsetX[0]")
+    expect(LAYER_FRAGMENT).toContain("latticeField(")
     expect(LAYER_FRAGMENT).toContain("holoHueShift(")
     expect(GLSL_COMMON).toContain("vec3 holoHueShift(")
   })

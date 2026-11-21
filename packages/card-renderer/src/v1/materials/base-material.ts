@@ -199,7 +199,7 @@ export function createBaseMaterial(p: BaseMaterialParams): ShaderMaterial {
       uBumpLightColor: { value: new Color(bump.lightColor) },
       uBumpLightAlpha: { value: alphaOf(bump.lightColor) },
       uBumpInvert: { value: bump.invert ? 1 : 0 },
-      // 效果栈的定长数组（uMoire* / uGradient* / uLattice* / uGloss* / uMaskPreset*）整批绑入。
+      // 效果栈的定长数组（uMoire* / uGradient* / uGloss* / uMaskPreset*）整批绑入。
       ...toEffectUniformObjects(fx),
       // 光带颜色不走 packUniforms（它不是标量 / vec2）：与调色板同理，在这里直接解析成
       // Color。缺省槽位填老的暖白常量（见 effects/gloss-color.ts）。
