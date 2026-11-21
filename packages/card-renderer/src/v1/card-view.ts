@@ -65,7 +65,7 @@ import {
   GLASS_OVERLAY_RENDER_ORDER,
   createGlassOverlayMaterial,
 } from "./materials/glass-overlay-material"
-import { createStudioEnvironmentTexture } from "./environment"
+import { createEnvironmentTexture } from "./environment"
 import { glossMaskParams } from "./effects/gloss-mask"
 import { createMysteryFace, type MysteryFace } from "./mystery-face"
 import { capVelocity, dragTilt, idleSway, springStep, type Tilt } from "./tilt"
@@ -130,7 +130,7 @@ export function createCardView(opts: CardViewOptions): CardView {
 
   const geometry = new PlaneGeometry(aspect, 1)
   // 玻璃卡的内置环境贴图：两张卡面共用一份，随视图销毁。
-  const envMap = createStudioEnvironmentTexture()
+  const envMap = createEnvironmentTexture()
 
   const cache = new TextureCache(resolveAsset)
   /** 文字纹理缓存：按「面 + 图层 id」+ 参数键复用，删层时经 `retain` 释放。 */

@@ -1,11 +1,11 @@
 /**
- * 内置摄影棚环境（等距全景）。
+ * 内置天空盒（等距全景，柏林波茨坦广场）。
  *
- * 玻璃卡按反射向量采样它：不依赖任何资源文件，桌面端与小程序都能直接生成；尺寸固定为
- * 256×128（2 的幂），可生成 mipmap，粗糙度就用 mip 偏移来近似模糊反射。
+ * 贴图以 RGB565 的 base64 形式随源码分发（见 `environment-photo.ts`）：桌面端与小程序都
+ * 不需要图片解码、资源路径或网络请求，运行时直接展开成 DataTexture，两端的场景完全同源。
  *
- * 画面是一间很简的摄影棚：上暗下亮的垂直渐变（地面 / 地平线 / 顶棚）+ 一块暖色主光、
- * 一块冷色补光、一条靠近地平线的窄轮廓光。冷暖对比让玻璃卡在转动时有可读的明暗走势。
+ * 玻璃卡按反射向量采样它；地平线在等距图 v = 0.5，平卡正对相机时反射正好落在建筑带，
+ * 倾斜后反射会扫过天空与地面。
  */
 import {
   ClampToEdgeWrapping,
@@ -17,67 +17,54 @@ import {
   SRGBColorSpace,
   UnsignedByteType,
 } from "three"
+import { SKYBOX_HEIGHT, SKYBOX_RGB565_BASE64, SKYBOX_WIDTH } from "./environment-photo"
 
-const WIDTH = 256
-const HEIGHT = 128
+const B64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+const B64_LOOKUP = (() => {
+  const table = new Int16Array(256).fill(-1)
+  for (let i = 0; i < B64_CHARS.length; i++) table[B64_CHARS.charCodeAt(i)] = i
+  return table
+})()
 
-const clamp255 = (v: number): number => Math.min(255, Math.max(0, Math.round(v)))
-
-/** 横向环绕距离（0..0.5）：等距图在经度 ±π 处接缝，光的中心越过接缝也能连续。 */
-function wrapDist(a: number, b: number): number {
-  const d = Math.abs(a - b)
-  return Math.min(d, 1 - d)
+/**
+ * 纯 TS 的 base64 解码。
+ *
+ * 不依赖 `atob`：小程序基础库不一定提供；这段只在建纹理时跑一次，长度也只有几十 KB。
+ */
+function decodeBase64(input: string): Uint8Array {
+  const pad = input.endsWith("==") ? 2 : input.endsWith("=") ? 1 : 0
+  const out = new Uint8Array((input.length / 4) * 3 - pad)
+  let o = 0
+  for (let i = 0; i < input.length; i += 4) {
+    const a = B64_LOOKUP[input.charCodeAt(i)]
+    const b = B64_LOOKUP[input.charCodeAt(i + 1)]
+    const c = B64_LOOKUP[input.charCodeAt(i + 2)]
+    const d = B64_LOOKUP[input.charCodeAt(i + 3)]
+    const n = (a << 18) | (b << 12) | ((c < 0 ? 0 : c) << 6) | (d < 0 ? 0 : d)
+    if (o < out.length) out[o++] = (n >> 16) & 255
+    if (o < out.length) out[o++] = (n >> 8) & 255
+    if (o < out.length) out[o++] = n & 255
+  }
+  return out
 }
 
-/** 高斯光斑：d 是到中心的距离，sigma 是柔和半径。 */
-function gauss(d: number, sigma: number): number {
-  return Math.exp(-(d * d) / (2 * sigma * sigma))
-}
-
-/** 生成一份内置摄影棚等距环境纹理。每次调用返回新纹理，由消费方负责 dispose。 */
-export function createStudioEnvironmentTexture(): DataTexture {
-  const data = new Uint8Array(WIDTH * HEIGHT * 4)
-
-  for (let y = 0; y < HEIGHT; y++) {
-    const v = y / (HEIGHT - 1)
-    // 垂直渐变：地面暗 → 地平线中间调 → 顶棚亮。
-    let baseR: number
-    let baseG: number
-    let baseB: number
-    if (v < 0.5) {
-      const t = v / 0.5
-      baseR = 20 + (72 - 20) * t
-      baseG = 22 + (80 - 22) * t
-      baseB = 27 + (94 - 27) * t
-    } else {
-      const t = (v - 0.5) / 0.5
-      baseR = 72 + (176 - 72) * t
-      baseG = 80 + (186 - 80) * t
-      baseB = 94 + (202 - 94) * t
-    }
-
-    for (let x = 0; x < WIDTH; x++) {
-      const u = x / (WIDTH - 1)
-      // 暖色主光（左上方）+ 冷色补光（右下方）+ 地平线附近的窄轮廓光。
-      const key = 0.9 * gauss(wrapDist(u, 0.3), 0.13) * gauss(v - 0.62, 0.18)
-      const fill = 0.38 * gauss(wrapDist(u, 0.78), 0.16) * gauss(v - 0.55, 0.22)
-      const rim = 0.5 * gauss(wrapDist(u, 0.68), 0.03) * gauss(v - 0.5, 0.08)
-      // 环绕地平线的一圈亮带：平卡正对相机时反射到的就是这一圈，保证静看也有环境感。
-      const horizon = 0.35 * gauss(v - 0.5, 0.10)
-
-      const r = baseR + 255 * key + 150 * fill + 255 * rim + 120 * horizon
-      const g = baseG + 238 * key + 180 * fill + 255 * rim + 120 * horizon
-      const b = baseB + 214 * key + 230 * fill + 255 * rim + 120 * horizon
-
-      const i = (y * WIDTH + x) * 4
-      data[i] = clamp255(r)
-      data[i + 1] = clamp255(g)
-      data[i + 2] = clamp255(b)
-      data[i + 3] = 255
-    }
+/** 生成一份内置天空盒纹理。每次调用返回新纹理，由消费方负责 dispose。 */
+export function createEnvironmentTexture(): DataTexture {
+  const packed = decodeBase64(SKYBOX_RGB565_BASE64)
+  const data = new Uint8Array(SKYBOX_WIDTH * SKYBOX_HEIGHT * 4)
+  for (let i = 0; i < SKYBOX_WIDTH * SKYBOX_HEIGHT; i++) {
+    const v = packed[i * 2] | (packed[i * 2 + 1] << 8)
+    const r5 = (v >> 11) & 31
+    const g6 = (v >> 5) & 63
+    const b5 = v & 31
+    // 位复制展开到 8 位：比直接乘 255/31 少一点偏移。
+    data[i * 4] = (r5 << 3) | (r5 >> 2)
+    data[i * 4 + 1] = (g6 << 2) | (g6 >> 4)
+    data[i * 4 + 2] = (b5 << 3) | (b5 >> 2)
+    data[i * 4 + 3] = 255
   }
 
-  const texture = new DataTexture(data, WIDTH, HEIGHT, RGBAFormat, UnsignedByteType)
+  const texture = new DataTexture(data, SKYBOX_WIDTH, SKYBOX_HEIGHT, RGBAFormat, UnsignedByteType)
   texture.colorSpace = SRGBColorSpace
   texture.wrapS = RepeatWrapping
   texture.wrapT = ClampToEdgeWrapping

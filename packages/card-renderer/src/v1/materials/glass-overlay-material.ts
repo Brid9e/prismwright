@@ -1,10 +1,11 @@
 /**
  * 玻璃卡反射覆盖层的材质。
  *
- * 与边缘倒角一样是覆盖在全部图层之上的透明平面：只在加法混合里加反射光，不改卡片内容。
+ * 与边缘倒角一样是覆盖在全部图层之上的透明平面：以正常混合叠一层天空盒反射，
+ * 建筑与天空会直接「盖」在卡面上，而不是只加一点光。
  * `depthTest = false` + 很高的 renderOrder 让它排在图层之后、边缘倒角之下。
  */
-import { AdditiveBlending, Color, ShaderMaterial, Vector3, type Texture } from "three"
+import { Color, ShaderMaterial, Vector3, type Texture } from "three"
 import { GLASS_OVERLAY_FRAGMENT, GLASS_OVERLAY_VERTEX } from "../shaders/glass-overlay"
 
 /** 渲染序：高于所有图层，低于边缘倒角（100000）。 */
@@ -40,7 +41,6 @@ export function createGlassOverlayMaterial(opts: GlassOverlayOptions): ShaderMat
     vertexShader: GLASS_OVERLAY_VERTEX,
     fragmentShader: GLASS_OVERLAY_FRAGMENT,
     transparent: true,
-    blending: AdditiveBlending,
     depthTest: false,
     depthWrite: false,
   })

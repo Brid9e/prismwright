@@ -2,8 +2,8 @@
  * 玻璃卡的反射覆盖层。
  *
  * 卡面是平的，但相机有透视：每个像素的视线方向不同，`reflect(-V, N)` 因此扫过环境贴图的
- * 不同区域——倾斜卡片时反射会跟着移动，这就是「映射场景」的来源。片元只加反射光
- * （材质用加法混合），不改变卡片本身的颜色；Fresnel 让正对时很淡、侧看时更强。
+ * 不同区域——倾斜卡片时反射会跟着移动，这就是「映射场景」的来源。材质用正常混合，
+ * 天空盒里的建筑 / 天空直接叠在卡面上；Fresnel 让正对时淡、侧看时更强。
  */
 export const GLASS_OVERLAY_VERTEX = /* glsl */ `
 varying vec3 vWorldPos;
@@ -72,7 +72,7 @@ void main() {
   // 玻璃的 Fresnel：正对时约 10%，越斜越强；再给一点恒定底值，避免完全正对时消失。
   float fres = 0.10 + 0.90 * pow(1.0 - clamp(dot(N, V), 0.0, 1.0), 5.0);
   float card = roundedRectMask(vUv, uAspect, uCornerRadius);
-  float alpha = clamp((fres + 0.20) * uStrength, 0.0, 1.0) * card;
+  float alpha = clamp((fres + 0.30) * uStrength, 0.0, 1.0) * card;
   if (alpha < 0.001) discard;
 
   // 一道随反射方向移动的高光：环境图偏暗时也能读出「玻璃在反光」，倾斜时扫过卡面。

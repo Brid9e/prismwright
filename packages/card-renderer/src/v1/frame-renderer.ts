@@ -48,7 +48,7 @@ import {
   GLASS_OVERLAY_RENDER_ORDER,
   createGlassOverlayMaterial,
 } from "./materials/glass-overlay-material"
-import { createStudioEnvironmentTexture } from "./environment"
+import { createEnvironmentTexture } from "./environment"
 import { glossMaskParams } from "./effects/gloss-mask"
 import { BASE_DISTANCE } from "./zoom"
 import {
@@ -153,7 +153,7 @@ export async function createCardFrameRenderer(
 
   const geometry = new PlaneGeometry(aspect, 1)
   // 玻璃卡的内置环境贴图（与交互视图同一份生成逻辑）。
-  const envMap = createStudioEnvironmentTexture()
+  const envMap = createEnvironmentTexture()
   const cache = new TextureCache(resolveAsset)
   /** 文字纹理缓存：导出与预览走同一份缓存规则。 */
   const textCache = new TextTextureCache({ aspect })
