@@ -19,8 +19,8 @@ describe("玻璃卡环境", () => {
     expect(tex).toBeInstanceOf(DataTexture)
     expect(tex.wrapS).toBe(RepeatWrapping)
     expect(tex.generateMipmaps).toBe(true)
-    expect(tex.image.width).toBe(256)
-    expect(tex.image.height).toBe(128)
+    expect(tex.image.width).toBe(512)
+    expect(tex.image.height).toBe(256)
     const data = tex.image.data as Uint8Array
     let min = 255
     let max = 0
