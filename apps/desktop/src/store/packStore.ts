@@ -566,6 +566,10 @@ export interface PackStoreState {
         | "frontBumpInvert"
         | "frontNormalPath"
         | "frontNormalFlipY"
+        | "finish"
+        | "glassStrength"
+        | "glassRoughness"
+        | "glassTint"
         | "cornerRadius"
       >
     >,

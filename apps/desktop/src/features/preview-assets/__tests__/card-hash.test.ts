@@ -44,6 +44,10 @@ function sampleCard(): Card {
     frontBumpInvert: false,
     frontNormalPath: "",
     frontNormalFlipY: false,
+    finish: "standard",
+    glassStrength: 0.6,
+    glassRoughness: 0.15,
+    glassTint: "#ffffff",
     cornerRadius: 0.06,
     effects: [
       {
@@ -245,5 +249,16 @@ describe("卡面形状也进哈希", () => {
   it("改圆角必变", () => {
     const changed = { ...sampleCard(), cornerRadius: 0.2 }
     expect(cardRenderHash(changed, ASPECT)).not.toBe(cardRenderHash(sampleCard(), ASPECT))
+  })
+
+  it("改玻璃表面参数必变", () => {
+    for (const changed of [
+      { ...sampleCard(), finish: "glass" as const },
+      { ...sampleCard(), glassStrength: 0.9 },
+      { ...sampleCard(), glassRoughness: 0.5 },
+      { ...sampleCard(), glassTint: "#88ccff" },
+    ]) {
+      expect(cardRenderHash(changed, ASPECT)).not.toBe(cardRenderHash(sampleCard(), ASPECT))
+    }
   })
 })

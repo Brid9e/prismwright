@@ -9,7 +9,7 @@
  */
 import { useTranslation } from "react-i18next"
 import { ImagePlus, Trash2 } from "lucide-react"
-import type { Card, CardFace, FrontFit, Rarity } from "@cardbara/schema"
+import type { Card, CardFace, CardFinish, FrontFit, Rarity } from "@cardbara/schema"
 import { usePackStore, type EffectTarget, type FaceRef } from "../../store/packStore"
 import { useUiStore } from "../../store/uiStore"
 import { packFs } from "../../tauri/pack-fs"
@@ -39,6 +39,8 @@ import {
 
 /** 与 `card.rarity.*` 的 i18n key 一一对应的稀有度取值，顺序即由低到高。 */
 const RARITIES = ["common", "rare", "epic", "legendary"] as const
+/** 卡面表面材质，顺序即下拉展示序。 */
+const FINISHES = ["standard", "glass"] as const
 
 export interface CardFaceFieldsProps {
   face: CardFace
@@ -151,6 +153,50 @@ export function CardFaceFields({ face, faceRef, card, showSeriesAspect = true }:
 
       {/* 形状：宽高比决定整张卡的几何、圆角决定边缘弧度；正反面各自独立。 */}
       <FaceShapeFields face={face} faceRef={faceRef} showSeriesAspect={showSeriesAspect} />
+
+      {/* 表面材质：玻璃会叠一层内置环境反射（见渲染器 glass-overlay），参数只在这一档出现。 */}
+      <PropertyRow label={t("field.finish")}>
+        <Select
+          value={face.finish}
+          onChange={(value) => updateFace(faceRef, { finish: value as CardFinish })}
+          options={FINISHES.map((value) => ({ value, label: t(`finish.${value}`) }))}
+        />
+      </PropertyRow>
+      {face.finish === "glass" && (
+        <>
+          <PropertyRow label={t("field.glassStrength")} grow>
+            <Slider
+              value={face.glassStrength}
+              onChange={(value) => updateFace(faceRef, { glassStrength: value })}
+              min={0}
+              max={1}
+              step={0.01}
+              precision={2}
+              defaultValue={0.6}
+              resetLabel={t("field.resetOffset")}
+            />
+          </PropertyRow>
+          <PropertyRow label={t("field.glassRoughness")} grow>
+            <Slider
+              value={face.glassRoughness}
+              onChange={(value) => updateFace(faceRef, { glassRoughness: value })}
+              min={0}
+              max={1}
+              step={0.01}
+              precision={2}
+              defaultValue={0.15}
+              resetLabel={t("field.resetOffset")}
+            />
+          </PropertyRow>
+          <PropertyRow label={t("field.glassTint")}>
+            <ColorField
+              value={face.glassTint}
+              onChange={(glassTint) => updateFace(faceRef, { glassTint })}
+              ariaLabel={t("field.glassTint")}
+            />
+          </PropertyRow>
+        </>
+      )}
 
       {/* 卡面图：已设置时给「替换」与「删除」两个动作，未设置时只给「上传」。
           删除即清空引用（`front = ""`），原图文件留在系列目录里不删——与 importAsset 的

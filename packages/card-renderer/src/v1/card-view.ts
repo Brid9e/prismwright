@@ -61,6 +61,11 @@ import {
   EDGE_BEVEL_RENDER_ORDER,
   createEdgeBevelMaterial,
 } from "./materials/edge-bevel-material"
+import {
+  GLASS_OVERLAY_RENDER_ORDER,
+  createGlassOverlayMaterial,
+} from "./materials/glass-overlay-material"
+import { createStudioEnvironmentTexture } from "./environment"
 import { glossMaskParams } from "./effects/gloss-mask"
 import { createMysteryFace, type MysteryFace } from "./mystery-face"
 import { capVelocity, dragTilt, idleSway, springStep, type Tilt } from "./tilt"
@@ -124,6 +129,8 @@ export function createCardView(opts: CardViewOptions): CardView {
   cornerRadius = clampCornerRadius(aspect, cornerRadius)
 
   const geometry = new PlaneGeometry(aspect, 1)
+  // 玻璃卡的内置环境贴图：两张卡面共用一份，随视图销毁。
+  const envMap = createStudioEnvironmentTexture()
 
   const cache = new TextureCache(resolveAsset)
   /** 文字纹理缓存：按「面 + 图层 id」+ 参数键复用，删层时经 `retain` 释放。 */
@@ -208,6 +215,35 @@ export function createCardView(opts: CardViewOptions): CardView {
   backEdgeMesh.renderOrder = EDGE_BEVEL_RENDER_ORDER
   backEdgeMesh.raycast = () => {}
   backGroup.add(backEdgeMesh)
+
+  // 玻璃反射层：与倒角同属覆盖层，renderOrder 略低（倒角压在最上面）。
+  const frontGlassMat = createGlassOverlayMaterial({
+    envMap,
+    aspect,
+    cornerRadius,
+    strength: card.glassStrength,
+    roughness: card.glassRoughness,
+    tint: card.glassTint,
+  })
+  const frontGlassMesh = new Mesh(geometry, frontGlassMat)
+  frontGlassMesh.renderOrder = GLASS_OVERLAY_RENDER_ORDER
+  frontGlassMesh.raycast = () => {}
+  frontGlassMesh.visible = card.finish === "glass"
+  frontGroup.add(frontGlassMesh)
+
+  const backGlassMat = createGlassOverlayMaterial({
+    envMap,
+    aspect,
+    cornerRadius,
+    strength: back?.glassStrength ?? 0.6,
+    roughness: back?.glassRoughness ?? 0.15,
+    tint: back?.glassTint ?? "#ffffff",
+  })
+  const backGlassMesh = new Mesh(geometry, backGlassMat)
+  backGlassMesh.renderOrder = GLASS_OVERLAY_RENDER_ORDER
+  backGlassMesh.raycast = () => {}
+  backGlassMesh.visible = back?.finish === "glass"
+  backGroup.add(backGlassMesh)
 
   const frontStack: FaceStack = {
     group: frontGroup,
@@ -510,6 +546,8 @@ export function createCardView(opts: CardViewOptions): CardView {
    * update 走重建路径保证参数落地。这里只负责每帧都变、且与几何无关的相机位置。
    */
   function updateUniforms(): void {
+    frontGlassMat.uniforms.uCameraPosition.value.copy(camera.position)
+    backGlassMat.uniforms.uCameraPosition.value.copy(camera.position)
     for (const stack of [frontStack, backStack]) {
       if (stack.baseMat) {
         stack.baseMat.uniforms.uCameraPosition.value.copy(camera.position)
@@ -784,6 +822,10 @@ export function createCardView(opts: CardViewOptions): CardView {
       // 参数级更新可增量；图层数量/顺序变化则重建（此处简化：始终重建，正确优先）。
       card = next
       frontEdgeMat.uniforms.uLightAngle.value = next.frontBumpLightAngle
+      frontGlassMat.uniforms.uStrength.value = next.glassStrength
+      frontGlassMat.uniforms.uRoughness.value = next.glassRoughness
+      frontGlassMat.uniforms.uTint.value.set(next.glassTint)
+      frontGlassMesh.visible = next.finish === "glass"
       // 与初次构建一致地兜住失败，避免资源解析异常变成未处理的 rejection。
       void rebuild().catch((err) => console.error("[card-renderer] 重建失败", err))
     },
@@ -811,6 +853,8 @@ export function createCardView(opts: CardViewOptions): CardView {
       }
       frontEdgeMat.uniforms.uCornerRadius.value = radius
       backEdgeMat.uniforms.uCornerRadius.value = radius
+      frontGlassMat.uniforms.uCornerRadius.value = radius
+      backGlassMat.uniforms.uCornerRadius.value = radius
       if (mystery) mystery.material.uniforms.uCornerRadius.value = radius
       // 侧壁是几何：整块重建。旧的那块立刻释放，滑杆连续拖动不至于堆积。
       const nextSlab = createCardSlab(aspect, radius)
@@ -871,8 +915,13 @@ export function createCardView(opts: CardViewOptions): CardView {
       flipSubs.clear()
       frontGroup.remove(frontEdgeMesh)
       backGroup.remove(backEdgeMesh)
+      frontGroup.remove(frontGlassMesh)
+      backGroup.remove(backGlassMesh)
       frontEdgeMat.dispose()
       backEdgeMat.dispose()
+      frontGlassMat.dispose()
+      backGlassMat.dispose()
+      envMap.dispose()
       cardGroup.remove(slab)
       disposeSlab(slab)
       geometry.dispose()

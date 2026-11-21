@@ -30,10 +30,18 @@
     "frontBumpLightAngle": "Light angle",
     "frontBumpLightColor": "Light color",
     "frontBumpInvert": "Invert bump",
+    "finish": "Finish",
+    "glassStrength": "Glass strength",
+    "glassRoughness": "Glass roughness",
+    "glassTint": "Glass tint",
     "aspect": "Aspect (series)",
     "cornerRadius": "Corner radius",
     "resetShape": "Reset",
     "resetOffset": "Reset"
+  },
+  "finish": {
+    "standard": "Standard",
+    "glass": "Glass"
   },
   "rarity": {
     "common": "Common",

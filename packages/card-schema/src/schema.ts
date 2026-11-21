@@ -666,6 +666,9 @@ export const LayerSchema: z.ZodType<Layer, z.ZodTypeDef, unknown> = z.object({
 })
 
 /** 卡面校验 schema（正面与系列级背面共用）。 */
+/** 卡面表面材质：标准 / 玻璃。 */
+export const CardFinishSchema = z.enum(["standard", "glass"])
+
 export const CardFaceSchema = z.object({
   front: z.string().default(""),
   // 底图调整字段：新增字段带默认值（additive default），故不必升 schemaVersion；
@@ -694,6 +697,11 @@ export const CardFaceSchema = z.object({
   frontNormalPath: z.string().default(""),
   // 绿通道翻转（DirectX ↔ OpenGL 约定）。默认关。
   frontNormalFlipY: z.boolean().default(false),
+  // 表面材质：玻璃会叠一层环境反射（见渲染器的玻璃 overlay）。默认标准，旧数据逐像素不变。
+  finish: CardFinishSchema.default("standard"),
+  glassStrength: z.number().min(0).max(1).default(0.6),
+  glassRoughness: z.number().min(0).max(1).default(0.15),
+  glassTint: z.string().regex(HEX_COLOR).default("#ffffff"),
   // 卡面形状：只剩圆角（卡高单位，0.5 = 完全圆头）。每张卡各自持有，同一系列里的卡片
   // 因此可以圆角不同——卡背不单独做形状，它跟着正面的几何走，不受圆角影响。
   // 宽高比不在这里：它由系列统一持有，见 `PackSchema.aspect`（v8 起）。

@@ -84,6 +84,11 @@ export function cardRenderHash(card: Card, aspect: number): string {
     // 法线贴图与其绿通道方向同样直接改画面（贴图接管亮度法线，见 bump.ts）。
     frontNormalPath: card.frontNormalPath,
     frontNormalFlipY: card.frontNormalFlipY,
+    // 表面材质与玻璃参数直接改画面（反射叠加），漏掉会让预览停在哑光画面。
+    finish: card.finish,
+    glassStrength: card.glassStrength,
+    glassRoughness: card.glassRoughness,
+    glassTint: card.glassTint,
     // 卡面形状直接决定输出画幅与圆角，漏掉它换比例后预览 / 缩略图会停在旧画面。
     aspect,
     cornerRadius: card.cornerRadius,

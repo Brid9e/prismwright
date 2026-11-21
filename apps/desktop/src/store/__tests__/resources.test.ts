@@ -87,6 +87,10 @@ const card: Card = {
     frontBumpInvert: false,
     frontNormalPath: "",
     frontNormalFlipY: false,
+    finish: "standard",
+    glassStrength: 0.6,
+    glassRoughness: 0.15,
+    glassTint: "#ffffff",
   cornerRadius: 0.06,
   // 卡面自身不挂图蒙版；本测试只收集资源路径。
   effects: [],

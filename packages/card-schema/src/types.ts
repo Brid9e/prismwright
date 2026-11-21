@@ -690,6 +690,9 @@ export interface Layer {
  * 卡面**不持有**宽高比：一个系列只有一种比例（见 {@link Pack.aspect}），否则系列级卡背
  * 无法定框——卡背是整系列共用的一张，正面各卡比例不同时它跟谁都不对齐。
  */
+/** 卡面表面材质：标准（哑光）或玻璃（反射内置环境）。 */
+export type CardFinish = "standard" | "glass"
+
 export interface CardFace {
   /** 卡面图相对系列根的路径；空串表示未设置。默认 `""`。 */
   front: string
@@ -741,6 +744,14 @@ export interface CardFace {
   frontNormalPath: string
   /** 翻转卡面法线贴图的绿通道（DirectX ↔ OpenGL 约定相反时打开）。默认 false。 */
   frontNormalFlipY: boolean
+  /** 卡面表面材质（见 {@link CardFinish}）。默认 `"standard"`。 */
+  finish: CardFinish
+  /** 玻璃强度（反射覆盖，0–1）。默认 0.6；仅 `finish = "glass"` 时生效。 */
+  glassStrength: number
+  /** 玻璃粗糙度（0–1，0 = 镜面，1 = 模糊反射）。默认 0.15。 */
+  glassRoughness: number
+  /** 玻璃染色（hex）。默认 `#ffffff`。 */
+  glassTint: string
   /**
    * 圆角半径，单位是卡高（0–0.5）。默认 0.06；0.5 即完全圆头（再大与 0.5 无区别）。
    * 窄卡的可用上限还受卡宽一半限制，渲染器会按 min(值, 宽/2, 0.5) 夹取。

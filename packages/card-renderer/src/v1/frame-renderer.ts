@@ -44,6 +44,11 @@ import {
   EDGE_BEVEL_RENDER_ORDER,
   createEdgeBevelMaterial,
 } from "./materials/edge-bevel-material"
+import {
+  GLASS_OVERLAY_RENDER_ORDER,
+  createGlassOverlayMaterial,
+} from "./materials/glass-overlay-material"
+import { createStudioEnvironmentTexture } from "./environment"
 import { glossMaskParams } from "./effects/gloss-mask"
 import { BASE_DISTANCE } from "./zoom"
 import {
@@ -147,6 +152,8 @@ export async function createCardFrameRenderer(
   camera.position.set(0, 0, distance)
 
   const geometry = new PlaneGeometry(aspect, 1)
+  // 玻璃卡的内置环境贴图（与交互视图同一份生成逻辑）。
+  const envMap = createStudioEnvironmentTexture()
   const cache = new TextureCache(resolveAsset)
   /** 文字纹理缓存：导出与预览走同一份缓存规则。 */
   const textCache = new TextTextureCache({ aspect })
@@ -175,6 +182,22 @@ export async function createCardFrameRenderer(
   edgeMesh.visible = true
   edgeMat.uniforms.uTilt.value = 0.25
   scene.add(edgeMesh)
+
+  // 玻璃反射层：平视也保留，倾斜时反射随视角扫过环境图。
+  const glassMat = createGlassOverlayMaterial({
+    envMap,
+    aspect,
+    cornerRadius,
+    strength: card.glassStrength,
+    roughness: card.glassRoughness,
+    tint: card.glassTint,
+  })
+  const glassMesh = new Mesh(geometry, glassMat)
+  glassMesh.renderOrder = GLASS_OVERLAY_RENDER_ORDER
+  glassMesh.raycast = () => {}
+  glassMesh.visible = card.finish === "glass"
+  scene.add(glassMesh)
+  glassMat.uniforms.uCameraPosition.value.copy(camera.position)
 
   const layerGroup: Mesh[] = []
   const layerMats: ShaderMaterial[] = []
@@ -303,6 +326,9 @@ export async function createCardFrameRenderer(
     baseMat?.dispose()
     scene.remove(edgeMesh)
     edgeMat.dispose()
+    scene.remove(glassMesh)
+    glassMat.dispose()
+    envMap.dispose()
     scene.remove(slab)
     slab.geometry.dispose()
     for (const mat of slab.material as unknown[]) (mat as { dispose(): void }).dispose()
@@ -327,6 +353,7 @@ export async function createCardFrameRenderer(
       edgeMesh.visible = true
       edgeMat.uniforms.uTilt.value = slab.visible ? 1 : 0.25
       edgeMesh.rotation.set(t.x, t.y, 0)
+      glassMesh.rotation.set(t.x, t.y, 0)
       for (const m of layerGroup) m.rotation.set(t.x, t.y, 0)
       // 只有图层随时间流动；卡面底图不含相位项，不接 uTime。
       for (const mat of layerMats) mat.uniforms.uTime.value = time
@@ -338,6 +365,7 @@ export async function createCardFrameRenderer(
       slab.visible = false
       edgeMesh.rotation.set(0, 0, 0)
       edgeMesh.visible = true
+      glassMesh.rotation.set(0, 0, 0)
       edgeMat.uniforms.uTilt.value = 0.25
       for (const m of layerGroup) m.rotation.set(0, 0, 0)
       return new Promise<Blob>((resolve, reject) => {

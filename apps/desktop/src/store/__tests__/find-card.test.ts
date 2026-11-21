@@ -57,6 +57,10 @@ function card(id: string): Card {
     frontBumpInvert: false,
     frontNormalPath: "",
     frontNormalFlipY: false,
+    finish: "standard",
+    glassStrength: 0.6,
+    glassRoughness: 0.15,
+    glassTint: "#ffffff",
     cornerRadius: 0.06,
     // 效果栈列表默认为空；本测试仅断言 id 查找，不涉及效果。
     effects: [],

@@ -30,10 +30,18 @@
     "frontBumpLightAngle": "光照方向",
     "frontBumpLightColor": "光照颜色",
     "frontBumpInvert": "反转法线",
+    "finish": "表面",
+    "glassStrength": "玻璃强度",
+    "glassRoughness": "玻璃粗糙度",
+    "glassTint": "玻璃颜色",
     "aspect": "宽高比（全系列）",
     "cornerRadius": "圆角",
     "resetShape": "复位",
     "resetOffset": "复位"
+  },
+  "finish": {
+    "standard": "标准",
+    "glass": "玻璃"
   },
   "rarity": {
     "common": "普通",
