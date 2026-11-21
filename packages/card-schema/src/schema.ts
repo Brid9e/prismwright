@@ -13,7 +13,7 @@
  * 对外暴露：`HEX_COLOR` 正则、二十四个 schema（`RaritySchema` / `BlendModeSchema` /
  * `MaskModeSchema` / `MaskArrangementSchema` / `PatternModeSchema` / `ColorStopSchema` /
  * `LayerSchema` / `CardFaceSchema` / `CardSchema` / `PackSchema`，及效果栈的 `EffectSchema` 与
- * `GradientParamsSchema` / `LatticeParamsSchema` / `MoireParamsSchema` / `GlossParamsSchema` /
+ * `GradientParamsSchema` / `MoireParamsSchema` / `GlossParamsSchema` /
  * `PaletteParamsSchema` / `MaskPresetParamsSchema` / `MaskImageParamsSchema` / `ImageParamsSchema`，
  * 以及文字图层的 `LayerKindSchema` / `TextAlignSchema` / `TextStrokeParamsSchema` /
  * `TextShadowParamsSchema` / `TextParamsSchema`），以及 `evenlySpacedStops`、默认调色板
@@ -30,7 +30,6 @@ import type {
   GradientParams,
   HoloGridParams,
   ImageParams,
-  LatticeParams,
   Layer,
   MaskEraseParams,
   MaskImageParams,
@@ -237,27 +236,7 @@ export const GradientParamsSchema = z.object({
   straight: z.number().min(0).max(1).default(0),
 })
 
-/** 几何刻纹参数 schema（无 enabled——开关上提到效果条目自身）。 */
-export const LatticeParamsSchema = z.object({
-  // 上限 8 已确认：GLSL 里的定长循环上界即取这个数（见 common.ts 的 latticeField）。
-  count: z.number().int().min(1).max(8).default(3),
-  angle: z.number().min(0).max(360).default(0),
-  density: z.number().int().min(1).max(100).default(30),
-  // 下限 0.02 是「再细就没线了」的经验值（波峰只剩不到 2% 的周期）；上限 0.6 时亮线已宽到
-  // 接近「一条粗带」，再粗不卒看。默认 1/7 见 types.ts 的说明——必须恰好等于老阈值。
-  width: z
-    .number()
-    .min(0.02)
-    .max(0.6)
-    .default(1 / 7),
-  strength: z.number().min(0).max(1).default(0.5),
-  // 偏移取 ±1（同为 UV 域，但比 GradientParams 的 ±3 窄：刻纹是周期图案，频率 30 时一个
-  // 周期只有约 0.10，滑块大部分行程落在重复的格子上。仍取 ±1 是因为收窄更糟——频率 1 时
-  // 周期长达 3.14，范围一小就彻底看不出变化，±1 是整条频率范围 1–100 里都有效的固定范围。
-  // 默认 0 = 点阵不动，存量系列解析后画面逐像素不变。
-  offsetX: z.number().min(-1).max(1).default(0),
-  offsetY: z.number().min(-1).max(1).default(0),
-})
+
 
 /** 摩尔纹参数 schema（无 enabled）。 */
 export const MoireParamsSchema = z.object({
@@ -333,7 +312,7 @@ export const MaskPresetParamsSchema = z.object({
   // 默认 random：这正是加该参数之前的画面（中心抖动 ±0.3 格、逐块随机自转与尺寸），
   // 存量系列解析后逐像素不变。regular 见 types.ts 的 MaskArrangement。
   arrangement: MaskArrangementSchema.default("random"),
-  // 位移取 ±1，与 LatticeParams / GradientParams 的 offsetX 同口径（UV 域），进网格前按 uAspect 换算成
+  // 位移取 ±1，与网格 / GradientParams 的 offsetX 同口径（UV 域），进网格前按 uAspect 换算成
   // 等比坐标（故 ±1 仍是「一整幅宽 / 高」）。默认 0 = 不位移。
   offsetX: z.number().min(-1).max(1).default(0),
   offsetY: z.number().min(-1).max(1).default(0),
@@ -341,7 +320,7 @@ export const MaskPresetParamsSchema = z.object({
   // 参数之前的画面逐像素一致（着色器里以「乘 1 加 0」入场）。
   flipX: z.boolean().default(false),
   flipY: z.boolean().default(false),
-  // 整场旋转（度）：与 GradientParams.angle / LatticeParams.angle 同口径，换算弧度交给着色器。默认 0；
+  // 整场旋转（度）：与 GradientParams.angle / 网格.angle 同口径，换算弧度交给着色器。默认 0；
   // 着色器里写成 R*iso + (c - R*c)，故 0° 时采样点逐位不动（而非差 1 ulp）。在等比坐标里转
   // ⇒ 屏幕上就是真旋转（转 90° 后碎片与格子的朝向也真差 90°）。
   rotation: z.number().min(0).max(360).default(0),
@@ -528,8 +507,11 @@ export const PaletteParamsSchema = z.object({
 
 /** 独立网格效果（holoGrid）：交叉网纹的密度 + 色相加量强度。 */
 export const HoloGridParamsSchema = z.object({
-  size: z.number().min(0.1).max(2).default(0.79),
-  strength: z.number().min(0).max(1).default(1),
+  count: z.number().int().min(1).max(8).default(3),
+  angle: z.number().min(0).max(360).default(0),
+  density: z.number().int().min(1).max(100).default(30),
+  width: z.number().min(0.02).max(0.6).default(1 / 7),
+  strength: z.number().min(0).max(1).default(0.5),
   offsetX: z.number().min(-1).max(1).default(0),
   offsetY: z.number().min(-1).max(1).default(0),
 })
@@ -593,12 +575,6 @@ export const EffectSchema = z.discriminatedUnion("kind", [
     params: GradientParamsSchema,
   }),
   z.object({
-    kind: z.literal("lattice"),
-    id: z.string().min(1),
-    enabled: z.boolean().default(true),
-    params: LatticeParamsSchema,
-  }),
-  z.object({
     kind: z.literal("moire"),
     id: z.string().min(1),
     enabled: z.boolean().default(true),
@@ -657,6 +633,20 @@ export const EffectSchema = z.discriminatedUnion("kind", [
  * 类型循环（否则 TS 报「隐式 any」）；(2) 把**输入**放宽为 `unknown`，从而保留「只喂入
  * `{ id, name }` 也能解析」的宽松种子（默认值工厂 `createLayer` 依赖它）。输出仍是精确的 `Layer`。
  */
+/** 旧数据里的刻纹已并入网格：解析前丢弃，包照常打开。 */
+const EffectsSchema: z.ZodType<Effect[], z.ZodTypeDef, unknown> = z
+  .preprocess(
+    (v) =>
+      Array.isArray(v)
+        ? v.filter(
+            (e) =>
+              !(e && typeof e === "object" && (e as { kind?: unknown }).kind === "lattice")
+          )
+        : v,
+    z.array(EffectSchema),
+  )
+  .default([]) as z.ZodType<Effect[], z.ZodTypeDef, unknown>
+
 export const LayerSchema: z.ZodType<Layer, z.ZodTypeDef, unknown> = z.object({
   id: z.string().min(1),
   name: z.string().default(""),
@@ -670,7 +660,7 @@ export const LayerSchema: z.ZodType<Layer, z.ZodTypeDef, unknown> = z.object({
   kind: LayerKindSchema.default("normal"),
   text: TextParamsSchema.nullable().default(null),
   // 效果栈列表：渐变 / 调色板 / 几何刻纹 / 蒙版等效果都以此挂载。
-  effects: z.array(EffectSchema).default([]),
+  effects: EffectsSchema,
   // 子图层（递归）：任意图层都可作父层。默认 []。
   children: z.array(z.lazy(() => LayerSchema)).default([]),
 })
@@ -708,7 +698,7 @@ export const CardFaceSchema = z.object({
   // 因此可以圆角不同——卡背不单独做形状，它跟着正面的几何走，不受圆角影响。
   // 宽高比不在这里：它由系列统一持有，见 `PackSchema.aspect`（v8 起）。
   cornerRadius: z.number().min(0).max(0.5).default(DEFAULT_CORNER_RADIUS),
-  effects: z.array(EffectSchema).default([]),
+  effects: EffectsSchema,
   layers: z.array(LayerSchema).default([]),
 })
 
@@ -798,8 +788,6 @@ const _assertPatternMode: PatternMode = {} as z.infer<typeof PatternModeSchema>
 const _assertPatternModeBack: z.infer<typeof PatternModeSchema> = {} as PatternMode
 const _assertGradientParams: GradientParams = {} as z.infer<typeof GradientParamsSchema>
 const _assertGradientParamsBack: z.infer<typeof GradientParamsSchema> = {} as GradientParams
-const _assertLatticeParams: LatticeParams = {} as z.infer<typeof LatticeParamsSchema>
-const _assertLatticeParamsBack: z.infer<typeof LatticeParamsSchema> = {} as LatticeParams
 const _assertMoireParams: MoireParams = {} as z.infer<typeof MoireParamsSchema>
 const _assertMoireParamsBack: z.infer<typeof MoireParamsSchema> = {} as MoireParams
 const _assertGlossParams: GlossParams = {} as z.infer<typeof GlossParamsSchema>
@@ -856,8 +844,6 @@ void [
   _assertPatternModeBack,
   _assertGradientParams,
   _assertGradientParamsBack,
-  _assertLatticeParams,
-  _assertLatticeParamsBack,
   _assertMoireParams,
   _assertMoireParamsBack,
   _assertGlossParams,

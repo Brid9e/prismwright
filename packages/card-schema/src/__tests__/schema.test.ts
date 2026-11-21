@@ -8,7 +8,7 @@ import {
   GlossParamsSchema,
   MoireParamsSchema,
   GradientParamsSchema,
-  LatticeParamsSchema,
+  HoloGridParamsSchema,
   MaskPresetParamsSchema,
   PaletteParamsSchema,
   evenlySpacedStops,
@@ -352,9 +352,9 @@ describe("PackSchema", () => {
   })
 })
 
-describe("LatticeParamsSchema", () => {
+describe("HoloGridParamsSchema", () => {
   it("缺省时补默认（3 族、0°、频率 30、粗细 1/7、强度 0.5、位移 0）", () => {
-    expect(LatticeParamsSchema.parse({})).toEqual({
+    expect(HoloGridParamsSchema.parse({})).toEqual({
       count: 3,
       angle: 0,
       density: 30,
@@ -368,49 +368,49 @@ describe("LatticeParamsSchema", () => {
   })
 
   it("count 接受端点 1 与 8、拒绝越界与非整数", () => {
-    expect(LatticeParamsSchema.parse({ count: 1 }).count).toBe(1)
-    expect(LatticeParamsSchema.parse({ count: 8 }).count).toBe(8)
-    expect(() => LatticeParamsSchema.parse({ count: 0 })).toThrow()
-    expect(() => LatticeParamsSchema.parse({ count: 9 })).toThrow()
-    expect(() => LatticeParamsSchema.parse({ count: 2.5 })).toThrow()
+    expect(HoloGridParamsSchema.parse({ count: 1 }).count).toBe(1)
+    expect(HoloGridParamsSchema.parse({ count: 8 }).count).toBe(8)
+    expect(() => HoloGridParamsSchema.parse({ count: 0 })).toThrow()
+    expect(() => HoloGridParamsSchema.parse({ count: 9 })).toThrow()
+    expect(() => HoloGridParamsSchema.parse({ count: 2.5 })).toThrow()
   })
 
   it("density 接受端点 1 与 100、拒绝越界与非整数", () => {
-    expect(LatticeParamsSchema.parse({ density: 1 }).density).toBe(1)
-    expect(LatticeParamsSchema.parse({ density: 100 }).density).toBe(100)
-    expect(() => LatticeParamsSchema.parse({ density: 0 })).toThrow()
-    expect(() => LatticeParamsSchema.parse({ density: 101 })).toThrow()
-    expect(() => LatticeParamsSchema.parse({ density: 30.5 })).toThrow()
+    expect(HoloGridParamsSchema.parse({ density: 1 }).density).toBe(1)
+    expect(HoloGridParamsSchema.parse({ density: 100 }).density).toBe(100)
+    expect(() => HoloGridParamsSchema.parse({ density: 0 })).toThrow()
+    expect(() => HoloGridParamsSchema.parse({ density: 101 })).toThrow()
+    expect(() => HoloGridParamsSchema.parse({ density: 30.5 })).toThrow()
   })
 
   it("angle / strength 接受端点、拒绝越界", () => {
-    expect(LatticeParamsSchema.parse({ angle: 360 }).angle).toBe(360)
-    expect(LatticeParamsSchema.parse({ strength: 1 }).strength).toBe(1)
-    expect(() => LatticeParamsSchema.parse({ angle: -1 })).toThrow()
-    expect(() => LatticeParamsSchema.parse({ angle: 361 })).toThrow()
-    expect(() => LatticeParamsSchema.parse({ strength: -0.01 })).toThrow()
-    expect(() => LatticeParamsSchema.parse({ strength: 1.01 })).toThrow()
+    expect(HoloGridParamsSchema.parse({ angle: 360 }).angle).toBe(360)
+    expect(HoloGridParamsSchema.parse({ strength: 1 }).strength).toBe(1)
+    expect(() => HoloGridParamsSchema.parse({ angle: -1 })).toThrow()
+    expect(() => HoloGridParamsSchema.parse({ angle: 361 })).toThrow()
+    expect(() => HoloGridParamsSchema.parse({ strength: -0.01 })).toThrow()
+    expect(() => HoloGridParamsSchema.parse({ strength: 1.01 })).toThrow()
   })
 
   it("width 接受端点、拒绝越界与 0（着色器里要拿它做除数）", () => {
-    expect(LatticeParamsSchema.parse({ width: 0.02 }).width).toBe(0.02)
-    expect(LatticeParamsSchema.parse({ width: 0.6 }).width).toBe(0.6)
-    expect(() => LatticeParamsSchema.parse({ width: 0 })).toThrow()
-    expect(() => LatticeParamsSchema.parse({ width: 0.019 })).toThrow()
-    expect(() => LatticeParamsSchema.parse({ width: 0.61 })).toThrow()
+    expect(HoloGridParamsSchema.parse({ width: 0.02 }).width).toBe(0.02)
+    expect(HoloGridParamsSchema.parse({ width: 0.6 }).width).toBe(0.6)
+    expect(() => HoloGridParamsSchema.parse({ width: 0 })).toThrow()
+    expect(() => HoloGridParamsSchema.parse({ width: 0.019 })).toThrow()
+    expect(() => HoloGridParamsSchema.parse({ width: 0.61 })).toThrow()
   })
 
   it("offsetX / offsetY 默认为 0（点阵不动）", () => {
-    expect(LatticeParamsSchema.parse({}).offsetX).toBe(0)
-    expect(LatticeParamsSchema.parse({}).offsetY).toBe(0)
+    expect(HoloGridParamsSchema.parse({}).offsetX).toBe(0)
+    expect(HoloGridParamsSchema.parse({}).offsetY).toBe(0)
   })
 
   it("offsetX / offsetY 接受端点 -1 与 1、拒绝越界", () => {
-    const out = LatticeParamsSchema.parse({ offsetX: -1, offsetY: 1 })
+    const out = HoloGridParamsSchema.parse({ offsetX: -1, offsetY: 1 })
     expect(out.offsetX).toBe(-1)
     expect(out.offsetY).toBe(1)
-    expect(() => LatticeParamsSchema.parse({ offsetX: -1.01 })).toThrow()
-    expect(() => LatticeParamsSchema.parse({ offsetY: 1.01 })).toThrow()
+    expect(() => HoloGridParamsSchema.parse({ offsetX: -1.01 })).toThrow()
+    expect(() => HoloGridParamsSchema.parse({ offsetY: 1.01 })).toThrow()
   })
 })
 

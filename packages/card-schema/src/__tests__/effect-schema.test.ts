@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest"
 import { EffectSchema, LayerSchema, CardFaceSchema } from "../schema.js"
+import type { Effect } from "../types.js"
 
 describe("EffectSchema", () => {
   it("解析合法的 gloss 条目并给 enabled 默认 true", () => {
@@ -36,8 +37,8 @@ describe("EffectSchema", () => {
     })
   })
 
-  it("lattice 参数不再含 enabled（未知字段被 strip）", () => {
-    const e = EffectSchema.parse({ kind: "lattice", id: "e1", params: { enabled: false } })
+  it("holoGrid 参数不含 enabled（未知字段被 strip）", () => {
+    const e = EffectSchema.parse({ kind: "holoGrid", id: "e1", params: { enabled: false } }) as Effect
     expect("enabled" in e.params).toBe(false)
   })
 

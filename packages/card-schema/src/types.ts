@@ -7,7 +7,7 @@
  *
  * 对外暴露：`Rarity` / `BlendMode` / `MaskMode` / `MaskArrangement` / `PatternMode` 五个字面量联合，`ColorStop` /
  * `Layer` / `CardFace` / `Card` / `Pack` 五个数据接口，以及效果栈的 `EffectRole` / `EffectKind` /
- * `EffectBase` / `Effect` / `EffectParams` 与八种效果参数接口（`GradientParams` / `LatticeParams` /
+ * `EffectBase` / `Effect` / `EffectParams` 与八种效果参数接口（`GradientParams` /
  * `MoireParams` / `GlossParams` / `PaletteParams` / `MaskPresetParams` / `MaskImageParams` / `ImageParams`）。
  * 所有符号统一由 `index.ts` 再导出。
  */
@@ -174,45 +174,7 @@ export interface GradientParams {
   straight: number
 }
 
-/**
- * 几何刻纹参数：N 族等角条纹取峰后叠加成的多边形点阵，作为色相偏移叠在全息上。
- *
- * 与「渐变」的关键区别：点阵是**卡面 UV 的纯函数**——不随视角、不随扭曲 / 噪声动，
- * 因此形状钉在卡面上（「常驻」）；颜色仍随视角相位流动（相位里本就有视角项）。
- */
-export interface LatticeParams {
-  /** 条纹族数（整数 1–8），等角分布在 180° 上。默认 3。 */
-  count: number
-  /** 整幅相对角（度，0–360）。默认 0。 */
-  angle: number
-  /** 条纹频率（1–100），越大格越密。默认 30。 */
-  density: number
-  /**
-   * 刻纹线宽（0.02–0.6）。默认 `1/7`。
-   *
-   * 口径是「波峰被照亮的半个周期占比」：着色器取 `|cos|` 的波峰，超过 `1 - width` 的部分
-   * 才算亮线（见 `card-renderer` 的 `latticeField`）。值越大线越粗，越小越细锐。
-   *
-   * 默认取 `1 / 7` 而不是凑整的 0.14：老版本的阈值写死为 `6/7 = 1 - 1/7`，只有这个值能让
-   * 存量系列在加了本参数之后画面逐像素不变。
-   */
-  width: number
-  /** 色相偏移强度（0–1）。默认 0.5。 */
-  strength: number
-  /**
-   * 点阵偏移 X（UV 域，−1–1）。默认 0。
-   *
-   * 与 {@link GradientParams.offsetX} 是两回事：那个平移的是**整幅全息图案**（色带、逐像素噪声、
-   * 视线方向那个奇点一起走），刻纹当初刻意不跟它走——点阵钉在卡面。现在给刻纹自己一个
-   * 偏移，两个参数各管各的。
-   *
-   * 偏移加在**真实 UV 上、旋转之前**，因此整幅点阵刚性平移，X 永远指卡面的水平方向，
-   * 与 `angle` 无关（转 90° 再拉 X，点阵仍然横着走）。
-   */
-  offsetX: number
-  /** 点阵偏移 Y。语义见 {@link offsetX}。 */
-  offsetY: number
-}
+
 
 /**
  * 摩尔纹参数：一层「刻上去」的刻蚀微纹，本身很淡，但会切开光带与渐变、并可在卡面上浮出浮雕。
@@ -557,13 +519,19 @@ export interface PaletteParams {
 
 /** 独立网格效果（holoGrid）参数：交叉网纹的密度与色相加量强度。 */
 export interface HoloGridParams {
-  /** 网纹密度；默认 0.79（与 palette 内置网格同密度）。 */
-  size: number
-  /** 色相加量强度 0–1；默认 1。 */
+  /** 线族数（1–8），等角分布在 180° 上。默认 3（继承自原刻纹）。 */
+  count: number
+  /** 整幅相对角（度，0–360）。默认 0。 */
+  angle: number
+  /** 线频率（1–100），越大越密。默认 30。 */
+  density: number
+  /** 线宽（0.02–0.6），默认 1/7（latticeField 的历史阈值）。 */
+  width: number
+  /** 色相加量强度 0–1。默认 0.5。 */
   strength: number
-  /** 网纹水平偏移（卡面 UV，-1..1，默认 0）。 */
+  /** 卡面 UV 水平偏移（-1..1）。默认 0。 */
   offsetX: number
-  /** 网纹垂直偏移（卡面 UV，-1..1，默认 0）。 */
+  /** 卡面 UV 垂直偏移（-1..1）。默认 0。 */
   offsetY: number
 }
 
@@ -575,7 +543,6 @@ export interface HoloGridParams {
  */
 export type Effect =
   | (EffectBase & { kind: "gradient"; params: GradientParams })
-  | (EffectBase & { kind: "lattice"; params: LatticeParams })
   | (EffectBase & { kind: "moire"; params: MoireParams })
   | (EffectBase & { kind: "gloss"; params: GlossParams })
   | (EffectBase & { kind: "palette"; params: PaletteParams })

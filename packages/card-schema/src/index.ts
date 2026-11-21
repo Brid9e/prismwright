@@ -7,7 +7,7 @@
  * 对外暴露七组符号：
  * - 类型：`Rarity` / `BlendMode` / `MaskMode` / `MaskArrangement` / `PatternMode` / `ColorStop` / `Layer` /
  *   `CardFace` / `Card` / `Pack`，以及效果栈的 `EffectRole` / `EffectKind` / `EffectBase` / `Effect` /
- *   `EffectParams` / `GradientParams` / `LatticeParams` / `MoireParams` / `GlossParams` / `PaletteParams` /
+ *   `EffectParams` / `GradientParams` / `MoireParams` / `GlossParams` / `PaletteParams` /
  *   `MaskPresetParams` / `MaskImageParams` / `ImageParams`，以及文字图层的 `LayerKind` / `TextAlign` /
  *   `TextStrokeParams` / `TextShadowParams` / `TextParams`；
  * - 校验：`HEX_COLOR` 及二十四个 zod schema（含效果栈与文字图层）；
@@ -37,7 +37,6 @@ export type {
   Effect,
   EffectParams,
   GradientParams,
-  LatticeParams,
   MoireParams,
   GlossParams,
   PaletteParams,
@@ -89,7 +88,6 @@ export {
   DEFAULT_GRADIENT_PHASE,
   EffectSchema,
   GradientParamsSchema,
-  LatticeParamsSchema,
   MoireParamsSchema,
   GlossParamsSchema,
   PaletteParamsSchema,
