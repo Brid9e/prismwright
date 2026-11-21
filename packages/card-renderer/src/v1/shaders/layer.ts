@@ -33,7 +33,7 @@
  */
 import { MAX_NEST_DEPTH } from "@cardbara/schema"
 import { GLOSS_MAX } from "../effects/registry"
-import { GLSL_COMMON, HOLO_POLE_SOFTEN_UV } from "./common"
+import { GLSL_COMMON } from "./common"
 
 /**
  * 生成「祖先擦除」的片元代码：每段用字面量下标，理由同 {@link ancestorClipGLSL}
@@ -315,8 +315,8 @@ vec2 normalMapUv(vec2 uv) {
 void main() {
   vec3 V = normalize(uCameraPosition - vWorldPos);
   vec3 N = normalize(vWorldNormal);
-  // 倾斜灵敏度：把法线相对「正对相机」的偏离按 uTiltGain 放大再归一化，于是转卡时方向项
-  // （snR/csR/snV/csV）、grazing 与反射 R 一起走得更远——图案扫得更快或更慢。
+  // 倾斜灵敏度：把法线相对「正对相机」的偏离按 uTiltGain 放大再归一化，于是转卡时 grazing
+  // 与反射 R 一起走得更远——明暗变化更明显或更迟钝（基场是纯 UV 的，不再随视线扫动）。
   // 只缩放法线：卡面是平面，平卡时 N 恒为 (0,0,1)，任何增益都退回原样，静止画面逐像素不变。
   // 视线 V 不能缩——卡边像素的 V.xy 在平卡时也不为零，缩它会把静止画面也改掉。
   // 默认 1 时整段跳过：多算一次 normalize 会在末位抖，存量系列的画面对不上。
@@ -355,19 +355,8 @@ void main() {
   // UV：摩尔纹跟着法线起伏走。
   float moireSum = moireSliceSum(bUv);
 
-  // 同一个偏移作用在两处，图案才是「整幅」平移（推导见 common.ts 的 holoPhase）：
-  // - UV 域：交给 holoPhase，色带、同心环、逐像素噪声一起挪；
-  // - 视线域：V.xy 归零的那一点是「相机正对着的卡点」，减去 poleView 后它落到 0.5 + 偏移，
-  //   那个奇点（卡心那个尖）于是跟着图案走。相机在 +z 轴上且卡面在原点附近，所以把 |C| 当
-  //   距离；除以它，推拉相机时偏移仍钉在同一个 UV 上。
-  vec2 offsetWorld = uOffset * vec2(uAspect, 1.0);
-  float invDist = 1.0 / max(length(uCameraPosition), 1e-3);
-  vec2 poleView = offsetWorld * invDist;
-  // 极点软化半径（方向单位）：|V.xy| ≈ 卡面 UV 距离 / 相机距离，故除以距离后视觉上恒为
-  // 卡高的 HOLO_POLE_SOFTEN_UV——推拉相机（缩放）时软化的视觉大小不变。
-  float poleSoft = ${HOLO_POLE_SOFTEN_UV} * invDist;
-
-  float phase = holoPhase(V, N, bUv, uOffset, uDistortionStrength, uNoiseStrength, poleView, poleSoft, uGradientStraight);
+  // 图案偏移在 holoPhase 的 uv0 里统一处理：小丑牌基场、色带、同心环、噪声一起挪。
+  float phase = holoPhase(V, N, bUv, uOffset, uDistortionStrength, uNoiseStrength, uGradientStraight);
   // 网格（相位加项）：线族数学沿用 latticeField，系数与旧刻纹一致；默认参数即旧刻纹观感。
   float grid = uHoloGridCount > 0.5
     ? latticeField(bUv - vec2(uHoloGridOffsetX[0], uHoloGridOffsetY[0]),

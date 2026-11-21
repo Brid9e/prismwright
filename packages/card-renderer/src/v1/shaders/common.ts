@@ -37,18 +37,6 @@ void main() {
  * 切勿重复声明（会导致 GLSL 重定义错误）；其余 uniform 按各片元需要自行声明。
  */
 /**
- * 全息相位的「极点软化」半径，单位是卡高（UV 的 y 方向）。
- *
- * `holoPhase` 里四个归一化方向分量（`R.xy / |R.xy|`、`V.xy / |V.xy|`）在「相机正对着的
- * 卡点」没有定义：方向绕它转一整圈，色带就收成一个尖。这个尖与渐变模式无关（平行模式同样
- * 有），倾斜也不会挪走它（`V` 的奇点恒在卡心），只能在极点附近把方向项平滑压掉。
- *
- * 半径取卡高的 5%：2% 会留一个小结，10% 会明显吃掉卡心的细节。着色器里按方向长度取门控，
- * `layer.ts` 用相机距离把它换算成方向单位（见 `poleSoft`）。
- */
-export const HOLO_POLE_SOFTEN_UV = 0.05
-
-/**
  * 圆角矩形遮盖的单独片段。
  *
  * 从 {@link GLSL_COMMON} 拆出来，是为了让**不参与全息**的片元（未揭晓底纹，见
@@ -493,83 +481,66 @@ float presetMaskWeight(vec2 uv) {
 // 想要「颗粒」而不是「沙」，正确做法是先把噪声量化到可见网格（约 2px）再取 hash，而不是
 // 动这里的幅度。
 //
-// 相位里有两处「点」——2026-10-11 用离线复刻（按 card-view 的真实相机/卡面几何把本函数原样
-// 搬到 JS 里逐项渲染）验过，结论如下：
+// 全息基场：**小丑牌式纯 UV 场**（holoField），不含归一化视线 / 反射方向。
+// 旧版用归一化视线 / 反射方向驱动相位：相机正对的卡点就是方向的零点，方向绕它转一圈，
+// 色带在卡心被压成一块密集区——2026-10-31 的极点软化只是把尖磨圆，密集圈仍在。
+// 现在整幅基场只吃 uv，没有方向零点；倾斜仍通过 grazing 影响明暗 / 色板混合，但不再扫动色带。
 //
-// 1) 肉眼看到的那个尖，来自视线方向这一项：snR/csR/snV/csV 是归一化后的方向，方向在 V.xy/R.xy
-//    归零处没有定义，而相机正挂在卡前面，「相机正对着的那一点」就落在卡面正中。把同心环推到卡外、
-//    或干脆删掉 sin(length(...)) 那一项，这个尖纹丝不动；关掉方向项，它立刻消失。
-//    poleView 是搬它的偏移（换算见 layer.ts）：偏移到半个卡面，尖就下卡。
+// 圆心涟漪 sin(length(uvw - vec2(0.5)) * 21.0) 仍保留：它只是叠在基场上的低频纹理，
+// 圆心在 uvw = 卡面中心，不产生极点。
 //
-//    **2026-10-31 起尖还多了一层就地压制**：四个方向分量各自乘上按方向长度取的平滑门控
-//    （见下面 gateR / gateV）。极点还在，但相位场在它附近线性化了，色带不再收口。
-//    poleView 保留原职责（把整幅图案连同极点一起平移），不再指望靠它「消尖」。
-// 2) 同心环的圆心只是 sin(length(uvw - vec2(0.5)) * 21.0) 自己的圆心，即 uvw = 卡面中心那一处。
-//    它是一层 0.62 幅度的涟漪叠在主导斜坡上（色带周期约 28 相位单位），那一点并不比别处更尖——
-//    它是圆心，不是 1) 里的尖。uvw 取长度之前已经吃过 distortion 的逐像素噪声，所以环心是
-//    **平均**位置：拉高扭曲强度，圆心自己会抖。
-//
-// 参数 offset（UV 域）把整幅图案平移：uv0 减掉它，色带、同心环、逐像素噪声一起挪。同一时刻调用
-// 方用 poleView 把 1) 的奇点搬到同一个落点（0.5 + offset）——两处必须同步，否则尖会钉在卡面
-// 正中、与挪走的图案分家。唯一不参与平移的是 rndA/rndB 散列**种子**里的真实方向：那是白噪声，
-// 挪不挪只是换一片噪声，不移动任何可见结构。
+// 参数 offset（UV 域）把整幅图案平移：uv0 减掉它，小丑牌场、色带、同心环、逐像素噪声一起挪。
 //
 // 主空间项（原为一条钉死的平行斜坡）改由 gradientRamp 提供：逐条循环 uGradientMode[i] /
 // uGradientAngle[i] / uGradientDensity[i] / uGradientTwist[i] / uGradientTwistSeed[i]（条数由
-// uGradientCount 门控），
-// 每条在平行斜坡、光环、射线间切换，默认参数（平行）下与原来那条斜坡逐项等价（角度/频率由
-// mapping 换算，见 layer.ts）。三条相位加项（摩尔纹折射 / 渐变斜坡 / 几何刻纹）各自按「类型序」
-// 循环：这是一份固定顺序——同一效果列表下多条叠加的结果与顺序无关（同一批乘法/加法），
-// 但跨类型的相对次序会影响画面（摩尔纹改的是 uvw，渐变吃它，刻纹用真实 uv）。
-float holoPhase(vec3 V, vec3 N, vec2 uv, vec2 offset, float distortionStrength, float noiseStrength, vec2 poleView, float poleSoft, float straight) {
-  // 整齐：把骑在渐变斜坡上的扰动按比例淡出，straight = 1 时只剩斜坡本身（色带笔直等距）。
-  // 只影响这两类「额外相位」——斜坡本身、摩尔纹折射、几何刻纹都不归它管。
+// uGradientCount 门控），每条在平行斜坡、光环、射线间切换，默认参数（平行）下与原来那条斜坡
+// 逐项等价（角度 / 频率由 mapping 换算，见 layer.ts）。
+// 相位加项（摩尔纹折射 / 渐变斜坡 / 网格）按固定类型序叠加：同一效果列表下多条叠加与顺序无关，
+// 但跨类型的相对次序会影响画面（摩尔纹改的是 uvw，渐变吃它，网格在 holoPhase 之后加进 phase）。
+
+// 小丑牌 holo.fs 的基场：纯 UV 空间的三组漂移径向余弦 + 一个混合项，不含任何视线 / 反射方向。
+// 尺度沿用 holo.fs：uv 乘 250，三组圆心各沿半径 50 的圆漂移。时间由 holoColor 的 phase 平移
+// 统一推进（预览 uTime = 0 即静止）。返回值约 0..1，外层乘 HOLO_FIELD_PHASE 进入相位。
+float holoField(vec2 uv) {
+  vec2 p = (uv - 0.5) * 250.0;
+  float t = 0.0;
+  vec2 p1 = p + 50.0 * vec2(sin(-t / 143.6340), cos(-t / 99.4324));
+  vec2 p2 = p + 50.0 * vec2(cos(t / 53.1532), cos(t / 61.4532));
+  vec2 p3 = p + 50.0 * vec2(sin(-t / 87.53218), sin(-t / 49.0000));
+  return 0.5 * (1.0 + (
+    cos(length(p1) / 19.483) +
+    sin(length(p2) / 33.155) * cos(p2.y / 15.73) +
+    cos(length(p3) / 27.193) * sin(p3.x / 21.92)));
+}
+
+// 小丑牌场 → 相位的换算：holoColor 的 t1 = phase * 0.036，28 * 0.036 ≈ 1，即整幅场走完一圈色板。
+const float HOLO_FIELD_PHASE = 28.0;
+
+float holoPhase(vec3 V, vec3 N, vec2 uv, vec2 offset, float distortionStrength, float noiseStrength, float straight) {
+  // 整齐：把骑在渐变斜坡上的扰动（小丑牌场 / 固定正弦 / 逐像素噪声）按比例淡出，
+  // straight = 1 时只剩斜坡本身（色带笔直等距）。斜坡与摩尔纹折射不归它管。
   float keep = clamp(1.0 - straight, 0.0, 1.0);
   float nd = clamp(dot(N, V), 0.0, 1.0);
   float grazing = 1.0 - nd;
-  vec3 R = reflect(-V, N);
-  // 先减去 poleView 再归一化：方向在它归零处没有定义，那个奇点于是从「相机正前方」挪到
-  // 0.5 + offset（换算见 layer.ts）。V.xy 与 R.xy 在平卡时互为相反数，所以两侧偏移符号相反，
-  // 奇点才落在同一个卡点上。
-  vec2 Rxy = R.xy - poleView;
-  vec2 Vxy = V.xy + poleView;
-  float rLen = length(Rxy) + 1e-4;
-  float snR = Rxy.y / rLen;
-  float csR = Rxy.x / rLen;
-  float vLen = length(Vxy) + 1e-4;
-  float snV = Vxy.y / vLen;
-  float csV = Vxy.x / vLen;
 
-  // 极点软化：四个方向分量在极点处没有定义（见 HOLO_POLE_SOFTEN_UV 的说明）。门控按方向
-  // 向量自身的长度取，跟着极点走——偏移 / 倾斜后极点会沿卡边漂移，按 UV 圆取会盖不住。
-  // smoothstep 在 0 处的斜率为 0，相位场在极点附近二次型地平滑，色带收口随之消失。
-  float gateR = smoothstep(0.0, max(poleSoft, 1e-5), length(Rxy));
-  float gateV = smoothstep(0.0, max(poleSoft, 1e-5), length(Vxy));
-  snR *= gateR;
-  csR *= gateR;
-  snV *= gateV;
-  csV *= gateV;
-  float elev = R.z * 1.15 + rLen * 0.85;
-
-  // 平移在这里发生：uv0 一挪，色带（uvw）、同心环、四路 noise 与 rndA/rndB 全都跟着走。
+  // 平移在这里发生：uv0 一挪，基场、色带（uvw）、同心环与噪声全都跟着走。
   // 只有卡片轮廓相关的取样（蒙版、圆角）留在真实 uv 上，图案挪到卡外不会把卡片本身挪走。
   vec2 uv0 = uv - offset;
   vec2 uvw = uv0;
-  float angWarp = snR * 4.2 + csR * 3.1;
   // 幅度在这里乘进去，三处用法就都不必再写一遍——noiseStrength 是 uniform，乘在哪一层等价。
-  float rndA = (hash21(uv0 * 7.3 + V.xy * 2.1) - 0.5) * noiseStrength;
-  float rndB = (hash21(uv0.yx * 5.9 + R.xy * 1.7) - 0.5) * noiseStrength;
+  float rndA = (hash21(uv0 * 7.3) - 0.5) * noiseStrength;
+  float rndB = (hash21(uv0.yx * 5.9) - 0.5) * noiseStrength;
 
-  float nW = noise(uv0 * 5.0 + V.xy * 1.2);
-  float nX = noise(uv0 * 5.0 + V.xy * 1.2 + vec2(33.0, 57.0));
-  float nY = noise(uv0 * 11.0 + V.xy * 2.4);
-  float nZ = noise(uv0 * 11.0 + V.xy * 2.4 + vec2(71.0, 43.0));
+  float nW = noise(uv0 * 5.0);
+  float nX = noise(uv0 * 5.0 + vec2(33.0, 57.0));
+  float nY = noise(uv0 * 11.0);
+  float nZ = noise(uv0 * 11.0 + vec2(71.0, 43.0));
 
   uvw += keep * 0.15 * distortionStrength * vec2(nW - 0.5, nX - 0.5);
   uvw += keep * 0.07 * distortionStrength * vec2(nY - 0.5, nZ - 0.5);
 
   // ① 摩尔纹折射：多条把取样坐标整体偏折（gradient 会吃这个 uvw）。固定序第一档。
-  // 刻纹把取样坐标整体偏折一个微小量，颜色于是沿刻纹跳变。
+  // 摩尔纹把取样坐标整体偏折一个微小量，颜色于是沿纹路跳变。
   float moireSum = 0.0;
   for (int i = 0; i < MOIRE_MAX; i++) {
     if (float(i) < uMoireCount) {
@@ -578,11 +549,7 @@ float holoPhase(vec3 V, vec3 N, vec2 uv, vec2 offset, float distortionStrength, 
   }
   uvw += moireSum * 0.02;
 
-  float phase = keep * (
-    snR * 5.5 + csR * 4.2 + snV * 4.6 + csV * 3.5 + elev * 1.05
-    // 用平移过的 Vxy：这是一条横跨卡面的平滑相位斜坡，它的中心就是图案的中心，不跟着挪的话
-    // 「整幅平移」就不成立（偏移为 0 时 Vxy 恒等于 V.xy，观感不变）。
-    + dot(Vxy, vec2(10.0, 6.8)) + (rndA + rndB) * 3.4);
+  float phase = keep * ((holoField(uv0) - 0.5) * HOLO_FIELD_PHASE + (rndA + rndB) * 3.4);
 
   // ② 渐变主斜坡：多条相加，用被折射过的 uvw；整组再乘视线因子。
   float grad = 0.0;
@@ -593,9 +560,9 @@ float holoPhase(vec3 V, vec3 N, vec2 uv, vec2 offset, float distortionStrength, 
   }
   phase += grad * (0.22 + 0.78 * nd);
 
-  phase += keep * sin(uvw.x * 7.2 + uvw.y * 5.9 + angWarp * 0.55 + rndA * 2.1) * 0.88;
+  phase += keep * sin(uvw.x * 7.2 + uvw.y * 5.9 + rndA * 2.1) * 0.88;
   phase += keep * sin(length(uvw - vec2(0.5)) * 21.0 - grazing * 5.0 + rndB * 3.3) * 0.62;
-  phase += keep * sin(dot(uvw, vec2(11.7, 8.3)) + snR * 6.2) * 0.42;
+  phase += keep * sin(dot(uvw, vec2(11.7, 8.3))) * 0.42;
 
   return phase;
 }

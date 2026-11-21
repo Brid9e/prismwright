@@ -6,7 +6,7 @@
  */
 import { describe, it, expect } from "vitest"
 import { MAX_NEST_DEPTH } from "@cardbara/schema"
-import { HOLO_POLE_SOFTEN_UV, GLSL_COMMON } from "../shaders/common"
+import { GLSL_COMMON } from "../shaders/common"
 import { LAYER_FRAGMENT } from "../shaders/layer"
 
 describe("LAYER_FRAGMENT 祖先裁切", () => {
@@ -135,7 +135,7 @@ describe("LAYER_FRAGMENT 材质参数", () => {
     expect(GLSL_COMMON).toContain("uvw += keep * 0.07 * distortionStrength")
     expect(GLSL_COMMON).toContain("float phase = keep * (")
     expect(GLSL_COMMON).toContain("phase += keep * sin(")
-    expect(LAYER_FRAGMENT).toContain("poleSoft, uGradientStraight)")
+    expect(LAYER_FRAGMENT).toContain("uNoiseStrength, uGradientStraight)")
   })
 
   // 网格 = 刻纹线族数学 + 相位加项：调用被删或退回旧的交叉网纹，滑块都会静默失效。
@@ -308,27 +308,23 @@ describe("LAYER_FRAGMENT 蒙版擦除", () => {
   })
 })
 
-describe("holoPhase 极点软化", () => {
-  // 「相机正对着的那一点」上，归一化方向 R.xy / V.xy 没有定义，方向绕它转 2π，色带于是收成
-  // 一个尖。这个尖与渐变模式无关（平行模式同样有），倾斜也不挪位置（V 奇点恒在卡心），
-  // 只能就地压掉：四种方向分量各自乘上按方向长度取的 smoothstep 门控。
-  it("角向分量乘上按方向长度取的平滑门控", () => {
-    expect(GLSL_COMMON).toContain("smoothstep(0.0, max(poleSoft, 1e-5), length(Rxy))")
-    expect(GLSL_COMMON).toContain("smoothstep(0.0, max(poleSoft, 1e-5), length(Vxy))")
-    for (const name of ["snR", "csR", "snV", "csV"]) {
-      expect(GLSL_COMMON).toMatch(new RegExp(`${name} \\*= gate[RV]`))
+describe("holoPhase 小丑牌式 UV 场（无极点）", () => {
+  // 旧版用归一化视线 / 反射方向，卡心就是方向零点，色带在那里被压缩。小丑牌式场只吃 UV，
+  // 没有方向零点，因此不会再出现中心密集区。
+  it("用 UV 空间的漂移径向场，不再有归一化视线 / 反射方向项", () => {
+    expect(GLSL_COMMON).toContain("float holoField(vec2 uv)")
+    expect(GLSL_COMMON).toContain("cos(length(p1) / 19.483)")
+    for (const name of ["snR", "csR", "snV", "csV", "Rxy", "Vxy", "poleSoft", "poleView"]) {
+      expect(GLSL_COMMON).not.toContain(name)
     }
   })
 
-  // 门控半径按相机距离换算：|V.xy| ≈ (卡面 UV 距离) / |C|，所以「卡高 5%」在方向单位里是
-  // 固定的 UV 半径除以相机距离——缩放时视觉大小不变。
-  it("软化半径按相机距离换算，并传进 holoPhase", () => {
-    expect(HOLO_POLE_SOFTEN_UV).toBe(0.05)
-    expect(LAYER_FRAGMENT).toContain("invDist = 1.0 / max(length(uCameraPosition), 1e-3)")
-    expect(LAYER_FRAGMENT).toContain(`float poleSoft = ${HOLO_POLE_SOFTEN_UV} * invDist`)
+  it("holoPhase 不再接收极点参数", () => {
     expect(LAYER_FRAGMENT).toContain(
-      "holoPhase(V, N, bUv, uOffset, uDistortionStrength, uNoiseStrength, poleView, poleSoft, uGradientStraight)",
+      "holoPhase(V, N, bUv, uOffset, uDistortionStrength, uNoiseStrength, uGradientStraight)",
     )
+    expect(LAYER_FRAGMENT).not.toContain("poleSoft")
+    expect(LAYER_FRAGMENT).not.toContain("poleView")
   })
 })
 
