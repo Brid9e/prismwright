@@ -37,6 +37,7 @@ describe("玻璃卡环境", () => {
     expect(GLASS_OVERLAY_FRAGMENT).toContain("uRoughness")
     expect(GLASS_OVERLAY_FRAGMENT).toContain("pow(1.0 - clamp(dot(N, V)")
     expect(GLASS_OVERLAY_FRAGMENT).toContain("roundedRectMask(vUv, uAspect, uCornerRadius)")
+    expect(GLASS_OVERLAY_FRAGMENT).toContain("vWorldTangent * ripple.x")
   })
 
   it("材质：加法混合、透明、不写深度、在倒角之下", () => {

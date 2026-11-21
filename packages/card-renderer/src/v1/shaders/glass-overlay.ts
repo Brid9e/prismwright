@@ -8,6 +8,8 @@
 export const GLASS_OVERLAY_VERTEX = /* glsl */ `
 varying vec3 vWorldPos;
 varying vec3 vWorldNormal;
+varying vec3 vWorldTangent;
+varying vec3 vWorldBitangent;
 varying vec2 vUv;
 
 void main() {
@@ -15,6 +17,8 @@ void main() {
   vec4 wp = modelMatrix * vec4(position, 1.0);
   vWorldPos = wp.xyz;
   vWorldNormal = normalize(normalMatrix * normal);
+  vWorldTangent = normalize((modelMatrix * vec4(1.0, 0.0, 0.0, 0.0)).xyz);
+  vWorldBitangent = normalize((modelMatrix * vec4(0.0, 1.0, 0.0, 0.0)).xyz);
   gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
 `
@@ -30,6 +34,8 @@ uniform vec3 uTint;
 
 varying vec3 vWorldPos;
 varying vec3 vWorldNormal;
+varying vec3 vWorldTangent;
+varying vec3 vWorldBitangent;
 varying vec2 vUv;
 
 // 与 common.ts 的 roundedRectMask 同一套圆角遮罩：玻璃反射也必须被卡面轮廓裁掉。
@@ -52,19 +58,29 @@ vec2 equirectUv(vec3 d) {
 
 void main() {
   vec3 V = normalize(uCameraPosition - vWorldPos);
-  vec3 N = normalize(vWorldNormal);
+  // 很轻的一层波纹法线：平卡也需要一点起伏，环境才会「铺」在卡面上，而不是整片一个颜色。
+  vec2 ripple = vec2(
+    sin(vUv.x * 9.0 + vUv.y * 4.0),
+    cos(vUv.y * 8.0 - vUv.x * 3.0)
+  ) * 0.10;
+  vec3 N = normalize(normalize(vWorldNormal) + vWorldTangent * ripple.x + vWorldBitangent * ripple.y);
   vec3 R = reflect(-V, N);
 
   // 粗糙度 → mip 偏移：0 = 清晰的镜面反射，1 = 几乎只取平均色。
   vec3 env = texture2D(uEnvMap, equirectUv(R), uRoughness * 5.0).rgb;
 
-  // 玻璃的 Fresnel：正对时约 4%，越斜越强；再给一点恒定底值，避免完全正对时消失。
-  float fres = 0.04 + 0.96 * pow(1.0 - clamp(dot(N, V), 0.0, 1.0), 5.0);
+  // 玻璃的 Fresnel：正对时约 10%，越斜越强；再给一点恒定底值，避免完全正对时消失。
+  float fres = 0.10 + 0.90 * pow(1.0 - clamp(dot(N, V), 0.0, 1.0), 5.0);
   float card = roundedRectMask(vUv, uAspect, uCornerRadius);
-  float alpha = clamp((fres + 0.06) * uStrength, 0.0, 1.0) * card;
+  float alpha = clamp((fres + 0.20) * uStrength, 0.0, 1.0) * card;
   if (alpha < 0.001) discard;
 
-  gl_FragColor = vec4(env * uTint, alpha);
+  // 一道随反射方向移动的高光：环境图偏暗时也能读出「玻璃在反光」，倾斜时扫过卡面。
+  const vec3 LIGHT = normalize(vec3(cos(radians(127.0)), sin(radians(127.0)), 0.58));
+  float spec = pow(max(dot(R, LIGHT), 0.0), 32.0);
+  vec3 col = env * uTint + vec3(1.0, 0.98, 0.94) * spec * 0.6;
+
+  gl_FragColor = vec4(col, alpha);
   #include <colorspace_fragment>
 }
 `

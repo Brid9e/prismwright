@@ -62,10 +62,12 @@ export function createStudioEnvironmentTexture(): DataTexture {
       const key = 0.9 * gauss(wrapDist(u, 0.3), 0.13) * gauss(v - 0.62, 0.18)
       const fill = 0.38 * gauss(wrapDist(u, 0.78), 0.16) * gauss(v - 0.55, 0.22)
       const rim = 0.5 * gauss(wrapDist(u, 0.68), 0.03) * gauss(v - 0.5, 0.08)
+      // 环绕地平线的一圈亮带：平卡正对相机时反射到的就是这一圈，保证静看也有环境感。
+      const horizon = 0.35 * gauss(v - 0.5, 0.10)
 
-      const r = baseR + 255 * key + 150 * fill + 255 * rim
-      const g = baseG + 238 * key + 180 * fill + 255 * rim
-      const b = baseB + 214 * key + 230 * fill + 255 * rim
+      const r = baseR + 255 * key + 150 * fill + 255 * rim + 120 * horizon
+      const g = baseG + 238 * key + 180 * fill + 255 * rim + 120 * horizon
+      const b = baseB + 214 * key + 230 * fill + 255 * rim + 120 * horizon
 
       const i = (y * WIDTH + x) * 4
       data[i] = clamp255(r)
