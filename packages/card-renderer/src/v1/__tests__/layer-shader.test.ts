@@ -138,9 +138,11 @@ describe("LAYER_FRAGMENT 材质参数", () => {
     expect(LAYER_FRAGMENT).toContain("poleSoft, uGradientStraight)")
   })
 
-  // 网格 = 刻纹线族数学 + 色相加量：调用被删或退回旧的交叉网纹，滑块都会静默失效。
-  it("网格用 latticeField 的线族数学，且不再有刻纹相位 uniform", () => {
-    expect(LAYER_FRAGMENT).toContain("latticeField(")
+  // 网格 = 刻纹线族数学 + 相位加项：调用被删或退回旧的交叉网纹，滑块都会静默失效。
+  it("网格用 latticeField 的线族数学并加进相位，且不再有刻纹相位 uniform", () => {
+    expect(LAYER_FRAGMENT).toContain("latticeField(bUv - vec2(")
+    expect(LAYER_FRAGMENT).toContain("phase += grid * LATTICE_PHASE_SCALE")
+    expect(GLSL_COMMON).toContain("const float LATTICE_PHASE_SCALE = 7.0;")
     expect(LAYER_FRAGMENT).not.toContain("uLatticeCount")
   })
 
@@ -366,6 +368,7 @@ describe("LAYER_FRAGMENT 叠色合成", () => {
   it("声明并使用了 uPaletteComposite / hslTint", () => {
     expect(LAYER_FRAGMENT).toContain("uniform float uPaletteComposite;")
     expect(LAYER_FRAGMENT).toContain("vec3 hslTint(")
+    expect(LAYER_FRAGMENT).toContain("hslTint(content, phase)")
     expect(LAYER_FRAGMENT).toContain("if (uPaletteComposite > 0.5")
     expect(GLSL_COMMON).toContain("vec4 rgbToHsl(")
     expect(GLSL_COMMON).toContain("vec4 hslToRgb(")
@@ -379,14 +382,16 @@ describe("LAYER_FRAGMENT 叠色参数", () => {
   })
 })
 
-describe("LAYER_FRAGMENT 独立网格", () => {
-  it("声明并使用线族 uniform / latticeField / holoHueShift", () => {
+describe("LAYER_FRAGMENT 网格（相位）", () => {
+  it("声明线族 uniform，并把 latticeField 加进相位", () => {
     expect(LAYER_FRAGMENT).toContain("uniform float uHoloGridCount;")
     expect(LAYER_FRAGMENT).toContain("uHoloGridFamilies[0]")
     expect(LAYER_FRAGMENT).toContain("uHoloGridOffsetX[0]")
     expect(LAYER_FRAGMENT).toContain("latticeField(")
-    expect(LAYER_FRAGMENT).toContain("holoHueShift(")
-    expect(GLSL_COMMON).toContain("vec3 holoHueShift(")
+    expect(LAYER_FRAGMENT).toContain("phase += grid * LATTICE_PHASE_SCALE")
+    // 相位通路之后不再需要事后色相偏移。
+    expect(LAYER_FRAGMENT).not.toContain("holoHueShift")
+    expect(GLSL_COMMON).not.toContain("vec3 holoHueShift(")
   })
 
   // GLSL 没有默认参数：声明 7 参、调用 5 参是硬编译错误，整段图层片元都会失效。
@@ -396,7 +401,7 @@ describe("LAYER_FRAGMENT 独立网格", () => {
     expect(decl).not.toBeNull()
     const declArity = decl![1].split(",").length
 
-    const start = LAYER_FRAGMENT.indexOf("latticeField(vUv")
+    const start = LAYER_FRAGMENT.indexOf("latticeField(bUv")
     expect(start).toBeGreaterThan(-1)
     const callStart = start + "latticeField(".length
     let depth = 1

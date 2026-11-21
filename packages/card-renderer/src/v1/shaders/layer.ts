@@ -130,7 +130,7 @@ uniform float uPaletteTint;
 uniform float uPaletteDeltaBase;
 uniform float uPaletteDeltaContrast;
 uniform float uPaletteDeltaBright;
-// 独立网格效果：最多一条，只贡献色相（线族数学沿用 latticeField）。
+// 网格效果：最多一条，作为相位加项（线族数学沿用 latticeField）。
 uniform float uHoloGridCount;
 uniform float uHoloGridFamilies[1];
 uniform float uHoloGridAngle[1];
@@ -283,11 +283,11 @@ vec4 faceFrontSample(vec2 uv) {
   return texture2D(uFrontMap, m);
 }
 
-// 叠色 holo.fs 的合成：内容自身 HSL 加相位/网纹，提饱和提亮，再按内容对比度做 delta lerp。
+// 叠色 holo.fs 的合成：内容自身 HSL 加相位，提饱和提亮，再按内容对比度做 delta lerp。
 // 不读调色板；delta 乘 holoMix / holoAlpha，保留图层的强度滑块。
-vec3 hslTint(vec3 tex, float phase, float extraGrid) {
+vec3 hslTint(vec3 tex, float phase) {
   vec4 hsl = rgbToHsl(vec4(0.5 * tex + 0.5 * vec3(0.0, 0.0, 1.0), 1.0));
-  hsl.x = fract(hsl.x + fract(phase * uPaletteHue) + extraGrid);
+  hsl.x = fract(hsl.x + fract(phase * uPaletteHue));
   hsl.y = clamp(hsl.y * uPaletteSat, 0.0, 1.0);
   hsl.z = mix(hsl.z, 1.0, uPaletteLift);
   float hi = max(tex.r, max(tex.g, tex.b));
@@ -368,20 +368,20 @@ void main() {
   float poleSoft = ${HOLO_POLE_SOFTEN_UV} * invDist;
 
   float phase = holoPhase(V, N, bUv, uOffset, uDistortionStrength, uNoiseStrength, poleView, poleSoft, uGradientStraight);
-  vec4 holo4 = holoColor(phase, grazing, uPhaseSpeed, uTime);
-  vec3 holo = holo4.rgb;
-  // 独立网格：刻纹线族数学 + 色相加量；色带合成在 holoColor 之后偏移色相，叠色合成作为 extraGrid。
-  float independentGrid = uHoloGridCount > 0.5
-    ? latticeField(vUv - vec2(uHoloGridOffsetX[0], uHoloGridOffsetY[0]),
+  // 网格（相位加项）：线族数学沿用 latticeField，系数与旧刻纹一致；默认参数即旧刻纹观感。
+  float grid = uHoloGridCount > 0.5
+    ? latticeField(bUv - vec2(uHoloGridOffsetX[0], uHoloGridOffsetY[0]),
         uHoloGridFamilies[0], uHoloGridAngle[0], uHoloGridDensity[0], uHoloGridWidth[0])
       * uHoloGridStrength[0]
     : 0.0;
+  phase += grid * LATTICE_PHASE_SCALE;
+  vec4 holo4 = holoColor(phase, grazing, uPhaseSpeed, uTime);
+  vec3 holo = holo4.rgb;
 
   // 颜色组：光泽往图层全息色上叠加光带（与卡面共用 GLSL_COMMON.glossBands，主色换成 holo）。
   // 切带取本目标的有效摩尔纹——uMoire* 数组已由 host 侧按「自身，为空则继承卡面」填好（§6.4）。
   // 该步在蒙版权重之前：光带随 holo 一起被下面的 alpha（含 mw）相乘，故光泽自动跟随图层蒙版。
   holo = glossBands(holo, bUv, moireSum, R.x);
-  holo = holoHueShift(holo, independentGrid);
 
   // 内置蒙版启用时就不必采图：门控在前，省一次纹理取样。
   // 图蒙版按位移 / 缩放 / 旋转变换后采样；蒙版图没盖到的地方视为不裁切（maskInside = 0）。
@@ -490,7 +490,7 @@ ${ancestorEraseGLSL()}
     float contentA = uHasImage > 0.5
       ? imgA
       : (uHasText > 0.5 ? textA : mw * uOpacity * card * ancestorClip * erase * front.a);
-    outC = hslTint(content, phase, independentGrid);
+    outC = hslTint(content, phase);
     outA = contentA;
   }
   // 暗部颜色：只取图层的色相 / 饱和度，把它的亮度换成卡面底图的亮度，再按「暗度」给 alpha。

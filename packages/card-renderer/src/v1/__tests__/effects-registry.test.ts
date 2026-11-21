@@ -25,8 +25,8 @@ describe("EFFECT_REGISTRY", () => {
   it("每种 kind 都有定义且 role 与设计一致", () => {
     expect(EFFECT_REGISTRY.gradient.role).toBe("phase")
     expect(EFFECT_REGISTRY.moire.role).toBe("phase")
+    expect(EFFECT_REGISTRY.holoGrid.role).toBe("phase")
     expect(EFFECT_REGISTRY.gloss.role).toBe("color")
-    expect(EFFECT_REGISTRY.holoGrid.role).toBe("color")
     expect(EFFECT_REGISTRY.maskPreset.role).toBe("alpha")
     expect(EFFECT_REGISTRY.imageMask.role).toBe("alpha")
   })

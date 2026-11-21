@@ -34,7 +34,7 @@ describe("groupByRole", () => {
     expect(groups.every((g) => g.effects.length === 0)).toBe(true)
   })
 
-  it("条目按角色落到对应组：渐变/摩尔纹 → 相位，光泽/网格 → 颜色，两类蒙版 → alpha", () => {
+  it("条目按角色落到对应组：渐变/摩尔纹/网格 → 相位，光泽 → 颜色，两类蒙版 → alpha", () => {
     const effects = [
       fx("gradient", "g"),
       fx("moire", "m"),
@@ -47,8 +47,8 @@ describe("groupByRole", () => {
       groupByRole(effects).map((g) => [g.role, g.effects.map((e) => e.kind)]),
     )
 
-    expect(byRole.phase).toEqual(["gradient", "moire"])
-    expect(byRole.color).toEqual(["gloss", "holoGrid"])
+    expect(byRole.phase).toEqual(["gradient", "moire", "holoGrid"])
+    expect(byRole.color).toEqual(["gloss"])
     // 程序化蒙版与图蒙版并列在 alpha 组，顺序按列表序。
     expect(byRole.alpha).toEqual(["maskPreset", "imageMask"])
   })

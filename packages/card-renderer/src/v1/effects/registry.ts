@@ -670,7 +670,7 @@ export const EFFECT_REGISTRY = {
   },
   holoGrid: {
     kind: "holoGrid",
-    role: "color",
+    role: "phase",
     scope: "layer",
     maxPerTarget: HOLO_GRID_MAX,
     defaultParams: () => parseParams("holoGrid", {}),
@@ -740,7 +740,7 @@ export const EFFECT_REGISTRY = {
         precision: 2,
       },
     ],
-    // 与叠色一样只贡献色相：线族参数进定长数组。
+    // 网格是相位加项：线族参数进定长数组。
     packUniforms: (p: HoloGridParams): PackedUniforms => ({
       families: p.count,
       angle: p.angle,

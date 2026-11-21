@@ -273,6 +273,12 @@ float gradientRamp(vec2 uvw, float mode, float angle, float twist, float twistSe
   return ramp + twistPhase(uvw, twist, twistSeed);
 }
 
+// 网格 → 相位偏移的换算系数。
+//
+// holoColor 里 t1 = phase * 0.036，故 strength=1 时线族把色板取样位置推开约
+// 7 * 0.036 ≈ 0.25（色板的四分之一圈）。这是唯一不可自动化验证的系数，取值靠人工对照。
+const float LATTICE_PHASE_SCALE = 7.0;
+
 // 线族场（网格）：N 族等角余弦条纹各取峰后求和，clamp 到 [0,1]。
 //
 // 参数化：族数 / 角 / 频率 / 线宽全为入参（网格在片元里按当前参数求值），strength 仍在调用处乘；
@@ -955,11 +961,4 @@ vec4 rgbToHsl(vec4 c) {
   return hsl;
 }
 
-// 只改色相的偏移：独立网格叠到色带全息上时用（不动亮度）。
-vec3 holoHueShift(vec3 c, float amount) {
-  if (abs(amount) < 1e-4) return c;
-  vec4 h = rgbToHsl(vec4(c, 1.0));
-  h.x = fract(h.x + amount);
-  return hslToRgb(h).rgb;
-}
 `
