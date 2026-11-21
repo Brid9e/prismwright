@@ -15,7 +15,7 @@
  *
  * 镜像：GitHub 在部分网络下连不上，所以官方地址失败后会再试一组转发前缀
  * （`DEFAULT_MIRRORS`）。镜像只负责传输，sha256 才是权威——校验不过就整体失败，
- * 所以任何镜像都改不了最终落盘的内容。想换/关掉镜像：`CARDBARA_FFMPEG_MIRROR`
+ * 所以任何镜像都改不了最终落盘的内容。想换/关掉镜像：`PRISMWRIGHT_FFMPEG_MIRROR`
  * 设成逗号分隔的前缀，或设成 `none` 只用官方地址。
  */
 import { createHash } from "node:crypto"
@@ -37,7 +37,7 @@ export const DEFAULT_MIRRORS = ["https://gh-proxy.com/"]
  * 排出去重后的候选地址。
  *
  * 默认「官方优先、镜像其次」——镜像只是 GitHub 连不上时的备胎。但用户显式设了
- * `CARDBARA_FFMPEG_MIRROR` 就等于在说「我这网络就走镜像」，此时镜像放前面：
+ * `PRISMWRIGHT_FFMPEG_MIRROR` 就等于在说「我这网络就走镜像」，此时镜像放前面：
  * 有些网络官方地址连得上却慢到 3KB/s，排在前面能把整次下载拖成几小时。
  *
  * @param {string} url - lock 里的官方下载地址。
@@ -58,7 +58,7 @@ export function candidateUrls(url, mirrors, { mirrorFirst = false } = {}) {
 }
 
 /**
- * 解析 `CARDBARA_FFMPEG_MIRROR`。未设置（或全空白）用默认值，`none` 表示不加镜像。
+ * 解析 `PRISMWRIGHT_FFMPEG_MIRROR`。未设置（或全空白）用默认值，`none` 表示不加镜像。
  *
  * @param {string | undefined} value - 环境变量原文。
  * @param {string[]} defaults - 未设置时的前缀列表。
@@ -256,7 +256,7 @@ async function download(urls, dest, lock, target) {
     [
       "下载失败，所有地址都不可用：",
       ...failures.map((f) => `  - ${f}`),
-      "如果所在网络访问不了 GitHub，可设 CARDBARA_FFMPEG_MIRROR=https://<转发前缀>/ 换一个镜像；",
+      "如果所在网络访问不了 GitHub，可设 PRISMWRIGHT_FFMPEG_MIRROR=https://<转发前缀>/ 换一个镜像；",
       `已经下了一部分的包留在 ${dest}，重跑本命令会接着下。`,
       `或者手动下载压缩包，解出其中的 bin/ 放到 ${target}（会跳过 sha256 校验，请自行确认版本）。`,
     ].join("\n"),
@@ -278,7 +278,7 @@ async function main() {
     return
   }
 
-  const mirrorEnv = process.env.CARDBARA_FFMPEG_MIRROR
+  const mirrorEnv = process.env.PRISMWRIGHT_FFMPEG_MIRROR
   const mirrors = mirrorPrefixesFromEnv(mirrorEnv)
   const urls = candidateUrls(lock.url, mirrors, { mirrorFirst: !!mirrorEnv })
   // 半成品放在产物目录旁边（`binaries/` 已 git 忽略）：重跑能续传，临时目录做不到这点。

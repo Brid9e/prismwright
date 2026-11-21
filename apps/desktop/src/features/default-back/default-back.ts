@@ -47,7 +47,7 @@ export function createDefaultBackFace(): CardFace {
       params: EFFECT_REGISTRY.gradient.defaultParams(),
     }),
   ]
-  const text = createTextLayer("", "CARDBARA")
+  const text = createTextLayer("", "PRISMWRIGHT")
   if (text.text) {
     text.text.fontSize = 0.09
     text.text.letterSpacing = 0.08

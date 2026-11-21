@@ -24,7 +24,7 @@ describe("createDefaultBackFace", () => {
     expect(holo.kind).toBe("normal")
     expect(holo.effects.map((e) => e.kind)).toEqual(["palette", "gradient"])
     expect(text.kind).toBe("text")
-    expect(text.text?.content).toBe("CARDBARA")
+    expect(text.text?.content).toBe("PRISMWRIGHT")
   })
 
   it("两层都启用且正常叠加，文字压在全息之上", () => {

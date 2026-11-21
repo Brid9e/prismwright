@@ -211,7 +211,7 @@ pub fn write_file_at(request: tauri::ipc::Request<'_>) -> Result<(), String> {
 /// 决定，前端只给「帧目录 / 输出路径 / 帧率」三个语义参数——避免把「任意进程执行」的口子
 /// 开给前端。`pack_root` 与两个相对路径经 [`safe_join`] 校验，帧与产物都落在系列之内。
 ///
-/// ffmpeg 的定位：先看 `CARDBARA_FFMPEG` 环境变量，缺省用 PATH 上的 `ffmpeg`。之所以留这个
+/// ffmpeg 的定位：先看 `PRISMWRIGHT_FFMPEG` 环境变量，缺省用 PATH 上的 `ffmpeg`。之所以留这个
 /// 变量——macOS 上由 Finder 启动的 GUI 进程其 PATH 往往不含 Homebrew，届时用绝对路径兜底。
 ///
 /// 编码参数里 `-pix_fmt yuva420p` 与 `-auto-alt-ref 0` 是透明通道的关键：VP9 的 alpha 平面
@@ -298,12 +298,12 @@ fn pick_ffmpeg(env: Option<&str>, candidates: &[PathBuf], exists: impl Fn(&Path)
     "ffmpeg".to_string()
 }
 
-/// ffmpeg 的可执行路径/名：`CARDBARA_FFMPEG` → 内置二进制 → PATH 上的 `ffmpeg`。
+/// ffmpeg 的可执行路径/名：`PRISMWRIGHT_FFMPEG` → 内置二进制 → PATH 上的 `ffmpeg`。
 ///
 /// 内置二进制是随安装包带出来的 LGPL 构建（见 `scripts/fetch-ffmpeg.mjs`），用户不必自己装；
-/// `CARDBARA_FFMPEG` 仍保留最高优先级，方便临时换成别的构建（取舍见 [`encode_webm`]）。
+/// `PRISMWRIGHT_FFMPEG` 仍保留最高优先级，方便临时换成别的构建（取舍见 [`encode_webm`]）。
 fn ffmpeg_program() -> String {
-    let env = std::env::var("CARDBARA_FFMPEG").ok();
+    let env = std::env::var("PRISMWRIGHT_FFMPEG").ok();
     let bundled: Vec<PathBuf> = BUNDLED_FFMPEG
         .get()
         .and_then(|p| p.clone())
@@ -336,7 +336,7 @@ fn run_ffmpeg(program: &str, args: &[String]) -> Result<(), String> {
     cmd.args(args);
     hide_console(&mut cmd);
     let out = cmd.output().map_err(|e| {
-        format!("无法启动 ffmpeg（{program}）：{e}。请确认已安装 ffmpeg，或用 CARDBARA_FFMPEG 指定其绝对路径。")
+        format!("无法启动 ffmpeg（{program}）：{e}。请确认已安装 ffmpeg，或用 PRISMWRIGHT_FFMPEG 指定其绝对路径。")
     })?;
     if !out.status.success() {
         return Err(format!(
@@ -910,11 +910,11 @@ mod tests {
         let _ = fs::remove_dir_all(&root);
     }
 
-    /// ffmpeg 可执行名：`CARDBARA_FFMPEG` 优先，否则回退 PATH 上的 `ffmpeg`。
+    /// ffmpeg 可执行名：`PRISMWRIGHT_FFMPEG` 优先，否则回退 PATH 上的 `ffmpeg`。
     #[test]
     fn ffmpeg_program_prefers_env_var() {
-        // 不设环境变量时返回默认名（测试进程一般不设 CARDBARA_FFMPEG）。
-        if std::env::var("CARDBARA_FFMPEG").is_err() {
+        // 不设环境变量时返回默认名（测试进程一般不设 PRISMWRIGHT_FFMPEG）。
+        if std::env::var("PRISMWRIGHT_FFMPEG").is_err() {
             assert_eq!(ffmpeg_program(), "ffmpeg");
         }
     }
@@ -927,7 +927,7 @@ mod tests {
         assert_eq!(picked, "/custom/ffmpeg");
     }
 
-    /// 空字符串等同于没设：Windows 上 `set CARDBARA_FFMPEG=` 很常见。
+    /// 空字符串等同于没设：Windows 上 `set PRISMWRIGHT_FFMPEG=` 很常见。
     #[test]
     fn pick_ffmpeg_ignores_blank_env() {
         let bundled = Path::new("/app/ffmpeg").to_path_buf();
