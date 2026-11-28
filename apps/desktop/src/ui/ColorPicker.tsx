@@ -128,7 +128,8 @@ export function ColorPicker({
 
   const displayHex = normalizeHexInput(value) ?? ""
   const hasValue = displayHex !== ""
-  const swatchSize = size === "md" ? "h-7 w-9" : "h-6 w-7"
+  // 色块用正方形，圆角与输入框同档（rounded-control）；不再做成扁长条。
+  const swatchSize = size === "md" ? "h-5 w-5" : "h-4 w-4"
   const pickerStyle = { "--picker-hue": `${hsv.h}` } as CSSProperties
   const alphaStyle = { "--picker-color": hsvToHex(hsv, 1) } as CSSProperties
 
@@ -144,10 +145,10 @@ export function ColorPicker({
           }`}
         >
           <span
-            className={`checkerboard relative block shrink-0 overflow-hidden rounded-chip border border-line-soft ${swatchSize}`}
+            className={`checkerboard relative block shrink-0 overflow-hidden rounded-control border border-line-soft ${swatchSize}`}
           >
             <span
-              className="absolute inset-0 rounded-chip"
+              className="absolute inset-0 rounded-control"
               style={{ backgroundColor: displayHex || "transparent" }}
             />
           </span>
