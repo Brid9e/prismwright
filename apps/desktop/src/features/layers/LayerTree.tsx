@@ -24,7 +24,6 @@ import {
   type DragMoveEvent,
   type DragStartEvent,
 } from "@dnd-kit/core"
-import { sortableKeyboardCoordinates } from "@dnd-kit/sortable"
 import { AlertTriangle, ChevronDown, ChevronRight, GripVertical } from "lucide-react"
 import { restrictToVerticalAxis } from "../../ui/dnd-modifiers"
 import type { LayerRow } from "./order"
@@ -168,7 +167,8 @@ export function LayerTree({
 }: LayerTreeProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+    // 图层树没有 SortableContext；默认键盘坐标器按 25px 步进移动，配合上面的行矩形测量即可。
+    useSensor(KeyboardSensor),
   )
   // 行元素的真实矩形：指针命中按它计算，不使用 dnd-kit 的碰撞 / 排序变换结果。
   const rowEls = useRef(new Map<string, HTMLDivElement>())
