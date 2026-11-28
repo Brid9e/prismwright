@@ -169,7 +169,7 @@ const MODE_OPTIONS: readonly FieldOption[] = [
   { value: "rays", labelKey: "pattern.rays" },
 ]
 
-/** 调色板的合成方式：色带 / 叠色式暗部叠色。 */
+/** 调色板的合成方式：色带 / 内容着色（用内容自身颜色做 HSL 叠色）。 */
 const PALETTE_COMPOSITE_OPTIONS: readonly FieldOption[] = [
   { value: "palette", labelKey: "gradient.compositePalette" },
   { value: "tint", labelKey: "gradient.compositeTint" },

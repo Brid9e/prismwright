@@ -17,7 +17,7 @@
     "colors": "渐变色",
     "composite": "合成方式",
     "compositePalette": "色带",
-    "compositeTint": "暗部叠色",
+    "compositeTint": "内容着色",
     "hue": "色相偏移",
     "sat": "饱和度",
     "lift": "提亮",

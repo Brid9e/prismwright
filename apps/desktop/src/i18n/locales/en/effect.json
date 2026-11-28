@@ -17,7 +17,7 @@
     "colors": "Gradient",
     "composite": "Composite",
     "compositePalette": "Bands",
-    "compositeTint": "Shadow tint",
+    "compositeTint": "Content color",
     "hue": "Hue shift",
     "sat": "Saturation",
     "lift": "Lift",

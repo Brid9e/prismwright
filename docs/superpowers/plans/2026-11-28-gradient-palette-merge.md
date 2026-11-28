@@ -236,7 +236,7 @@ Expected: FAIL。
 
 - [ ] **Step 7: 改编辑器默认卡背与 i18n**
 
-`createDefaultBackFace` 只创建一条 gradient；i18n 把 `palette.*` 字段文案并入 `gradient.*`（合成方式选项改「色带 / 暗部叠色」），删除 `palette` 块；`colors.ts` / `packStore` / `flatten` 注释改名。更新 `default-back` 与 `updates` 测试。
+`createDefaultBackFace` 只创建一条 gradient；i18n 把 `palette.*` 字段文案并入 `gradient.*`（合成方式选项改「色带 / 内容着色」），删除 `palette` 块；`colors.ts` / `packStore` / `flatten` 注释改名。更新 `default-back` 与 `updates` 测试。
 
 - [ ] **Step 8: 全量桌面测试 + typecheck**
 
