@@ -328,20 +328,17 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
         />
         <IconButton
           icon={FolderPlus}
-          label={t("action.addGroup")}
-          onClick={() => addGroupLayer(faceRef)}
+          // 多选 → 把选中层收进新分组；未多选（0 或 1 层）→ 建一个空分组。
+          label={t(
+            selectedLayerIds.length > 1 ? "action.groupSelected" : "action.addGroup",
+          )}
+          onClick={() => {
+            if (selectedLayerIds.length > 1) groupLayers(faceRef, selectedLayerIds)
+            else addGroupLayer(faceRef)
+          }}
         />
         <IconButton icon={Plus} label={t("action.add")} onClick={() => addLayer(faceRef)} />
       </div>
-      {selectedLayerIds.length > 1 && (
-        <div className="flex shrink-0 items-center gap-2 px-3 pb-2">
-          <IconButton
-            icon={FolderPlus}
-            label={t("action.groupSelected")}
-            onClick={() => groupLayers(faceRef, selectedLayerIds)}
-          />
-        </div>
-      )}
       {/* 纵向滚动的树列表同样不该出现横向滚动条（行内文本已 `truncate`）：只放开 y、裁掉 x，
           避免极窄栏 + 深层嵌套时挤出一条横向滚动条。滚动条走覆盖式。 */}
       <ScrollArea className="min-h-0 flex-1 bg-sunken">
