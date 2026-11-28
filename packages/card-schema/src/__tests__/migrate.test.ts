@@ -215,7 +215,8 @@ describe("v9 → v10：调色板并入渐变", () => {
       hue: 0.1,
       distortionStrength: 7,
       count: 12,
-      straight: 1,
+      // 旧渐变没有 straight 字段：保持旧观感（0），不套新默认 1。
+      straight: 0,
     })
   })
 
@@ -239,8 +240,15 @@ describe("v9 → v10：调色板并入渐变", () => {
     expect(effects[0]).toMatchObject({
       kind: "gradient",
       id: "g",
-      params: { colors: [], distortionStrength: 9, straight: 1 },
+      params: { colors: [], distortionStrength: 9, straight: 0 },
     })
+  })
+
+  it("旧渐变已有 straight 时保留落盘值", () => {
+    const migrated = migrate(
+      pack([card([layer([g("g", { straight: 0.4 })])])]),
+    ) as any
+    expect(migrated.cards[0].layers[0].effects[0].params.straight).toBe(0.4)
   })
 
   it("递归处理子树、隐藏卡与卡背，并丢弃多余的调色板 / 渐变", () => {

@@ -149,7 +149,9 @@ export function InspectorPanel() {
     </div>
   ) : activeTab === "effects" ? (
     selectedLayer ? (
-      <LayerDetail face={face} faceRef={faceRef} layerId={selectedLayer.id} section="effects" />
+      <div className="p-3">
+        <LayerDetail face={face} faceRef={faceRef} layerId={selectedLayer.id} section="effects" />
+      </div>
     ) : (
       <div className="p-3 text-body text-disabled">{t("inspector.noLayer")}</div>
     )

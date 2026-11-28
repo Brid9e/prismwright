@@ -56,15 +56,15 @@ export function ColorPicker({
   const [alpha, setAlpha] = useState(initial.alpha)
   const [draft, setDraft] = useState(() => normalizeHexInput(value) ?? "")
   const dragging = useRef(false)
-  const svRef = useRef<HTMLDivElement>(null)
 
-  // 外部值变化（拾色、撤销、换图层）时把内部状态拉回来；拖动期间不覆盖，避免回弹。
+  // 外部值变化（拾色、撤销、换图层）时把内部状态拉回来；拖动期间不覆盖 HSV，避免回弹。
+  // hex 文本始终跟随值更新，这样拖 SV 面板时输入框不会停在旧色值。
   useEffect(() => {
+    setDraft(normalizeHexInput(value) ?? "")
     if (dragging.current) return
     const next = seed(value)
     setHsv(next.hsv)
     setAlpha(next.alpha)
-    setDraft(normalizeHexInput(value) ?? "")
   }, [value])
 
   function commit(nextHsv: Hsv, nextAlpha: number) {
@@ -108,10 +108,18 @@ export function ColorPicker({
     commit(next, alpha)
   }
 
-  function onHexChange(input: string) {
-    setDraft(input)
-    const normalized = normalizeHexInput(input)
-    if (!normalized) return
+  /**
+   * 提交 hex 输入：只在回车 / 失焦时调用。
+   *
+   * 不能边输入边提交：`#123` 在打到第 4 位之前是合法的 3 位缩写，一旦提交就会被父组件
+   * 回写成 `#112233`，继续输入的后半截会接到错误的值后面。
+   */
+  function commitHexDraft() {
+    const normalized = normalizeHexInput(draft)
+    if (!normalized) {
+      setDraft(normalizeHexInput(value) ?? "")
+      return
+    }
     const next = seed(normalized)
     setHsv(next.hsv)
     setAlpha(next.alpha)
@@ -119,6 +127,7 @@ export function ColorPicker({
   }
 
   const displayHex = normalizeHexInput(value) ?? ""
+  const hasValue = displayHex !== ""
   const swatchSize = size === "md" ? "h-7 w-9" : "h-6 w-7"
   const pickerStyle = { "--picker-hue": `${hsv.h}` } as CSSProperties
   const alphaStyle = { "--picker-color": hsvToHex(hsv, 1) } as CSSProperties
@@ -157,7 +166,6 @@ export function ColorPicker({
         >
           <div className="flex flex-col gap-2">
             <div
-              ref={svRef}
               role="slider"
               tabIndex={0}
               aria-label={t("colorPicker.saturationValue")}
@@ -195,9 +203,10 @@ export function ColorPicker({
               min={0}
               max={1}
               step={0.01}
+              disabled={!hasValue}
               aria-label={t("colorPicker.alpha")}
               onValueChange={([a]) => commit(hsv, a)}
-              className="relative flex h-control touch-none select-none items-center"
+              className="relative flex h-control touch-none select-none items-center disabled:cursor-not-allowed disabled:opacity-40"
             >
               <RadixSlider.Track
                 style={alphaStyle}
@@ -212,10 +221,10 @@ export function ColorPicker({
               <input
                 value={draft}
                 aria-label={t("colorPicker.hex")}
-                onChange={(e) => onHexChange(e.target.value)}
-                onBlur={() => setDraft(displayHex)}
+                onChange={(e) => setDraft(e.target.value)}
+                onBlur={commitHexDraft}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") setDraft(displayHex)
+                  if (e.key === "Enter") commitHexDraft()
                 }}
                 className="h-control min-w-0 flex-1 rounded-control border border-line-soft bg-sunken px-1.5 font-mono text-num text-foreground outline-none focus:border-accent"
               />

@@ -125,7 +125,7 @@
     "layers": "Properties",
     "effects": "Effects",
     "export": "Export",
-    "noLayer": "Select a layer on the Layers tab first",
+    "noLayer": "Select a layer in the Layers panel first",
     "exportCard": "Export this card",
     "exportSeries": "Export series package"
   },

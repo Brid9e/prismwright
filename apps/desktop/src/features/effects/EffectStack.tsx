@@ -266,7 +266,7 @@ export function EffectFields({
             )
           }
           case "colorStops": {
-            // 色标字段（palette）：复用 ui/ColorStops。key={effect.id} 保证切换条目时内部选中态重置。
+            // 色标字段（渐变）：复用 ui/ColorStops。key={effect.id} 保证切换条目时内部选中态重置。
             return (
               <PropertyRow key={field.key} label={label} grow>
                 <div className="min-w-0 flex-1">

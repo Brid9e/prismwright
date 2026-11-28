@@ -133,7 +133,7 @@ export function ScrollArea({
         <div
           aria-hidden
           className={`absolute right-1 z-10 w-2 cursor-default touch-none rounded-full bg-line transition-opacity ${
-            active ? "opacity-100" : "opacity-0"
+            active ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
           style={{ top: metrics.thumbTop, height: metrics.thumbHeight }}
           onPointerDown={onThumbPointerDown}

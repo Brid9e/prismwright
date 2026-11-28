@@ -198,6 +198,8 @@ function mergeEffectList(list: unknown): unknown {
   const gradientParams = gradient && isRecord(gradient.params) ? gradient.params : {}
   const paletteParams = palette && isRecord(palette.params) ? palette.params : {}
   const seed: Record<string, unknown> = { ...defaults, ...gradientParams }
+  // v9 的渐变没有 straight 字段时保持旧观感（0）；新建 / 仅调色板的合并才吃 schema 的新默认 1。
+  if (gradient && !("straight" in gradientParams)) seed.straight = 0
   if (palette) Object.assign(seed, paletteParams)
   // 没有调色板、且渐变本身也没有 colors（v9 的渐变从不带色标）时保持空色标：
   // 迁移前这条渐变不出全息，迁移后也不该凭空出。已经是 v10 的渐变则保留已有 colors。

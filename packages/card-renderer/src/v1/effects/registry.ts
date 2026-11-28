@@ -425,7 +425,8 @@ export const EFFECT_REGISTRY = {
         precision: 2,
       },
       // 整齐：1 = 只留斜坡本身，色带笔直等距；0 = 保留原有的方向项 / 固定正弦 / 像素位移。
-      // 默认 0，故旧系列不受影响。它是相位全局项（同 distortionStrength），不进定长数组。
+      // schema v10 起默认 1；旧数据里落盘的 0 不被改写。它是相位全局项（同 distortionStrength），
+      // 不进定长数组。
       {
         key: "straight",
         labelKey: "gradient.straight",
