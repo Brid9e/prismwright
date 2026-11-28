@@ -15,17 +15,17 @@
   }
 
   body {
-    @apply bg-app text-foreground font-sans text-[13px] antialiased;
+    @apply bg-app text-foreground font-sans text-title antialiased;
     overflow: hidden;
   }
 
   ::selection {
-    background-color: rgb(var(--color-accent) / 0.3);
+    background-color: rgb(var(--color-accent) / 0.28);
   }
 
   * {
     scrollbar-width: thin;
-    scrollbar-color: rgb(var(--color-border-subtle)) transparent;
+    scrollbar-color: rgb(var(--color-line-soft)) transparent;
   }
 
   ::-webkit-scrollbar {
@@ -34,7 +34,7 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background-color: rgb(var(--color-border-subtle));
+    background-color: rgb(var(--color-line-soft));
     border-radius: 5px;
   }
 
