@@ -281,20 +281,24 @@ export default function App() {
   return (
     <TooltipProvider>
       {/* 顶栏直接贴在窗口上/左/右三边上（无外边距、无背景）；只有它下面的工作区留 8px 边距。 */}
+      {/* `isolate` 建独立层叠上下文：网格用 -z-10 落在内容之下、根底色之上。 */}
       <div
         data-tauri-drag-region
-        className={`flex h-full flex-col bg-app text-foreground ${showGrid ? "workspace-grid" : ""}`}
+        className="relative isolate flex h-full flex-col bg-app text-foreground"
       >
+        {/* 网格是独立的一层，mask 只作用在它身上：加在根节点上会把面板与文字一起渐隐。 */}
+        {showGrid && pack && !settingsOpen && (
+          <div aria-hidden className="workspace-grid pointer-events-none absolute inset-0 -z-10" />
+        )}
         {usesHtmlTitleBar(platform) && (
           <TitleBar platform={platform} variant={startPage ? "minimal" : "full"} />
         )}
-        <div className="flex min-h-0 flex-1 flex-col gap-2 px-2 pb-2 pt-2">
         {settingsOpen ? (
           <SettingsView />
         ) : pack ? (
           // 右键菜单只覆盖编辑器本体：起始屏 / 设置 / 对话框里不弹（文本控件除外，那由
           // 全局宿主接管）。所以监听挂在这一层而不是最外层。
-          <div className="flex min-h-0 flex-1 flex-col gap-2" onContextMenu={handleEditorContextMenu}>
+          <div className="flex min-h-0 flex-1 flex-col gap-2 px-2 pb-2 pt-2" onContextMenu={handleEditorContextMenu}>
             {editingDefaultBack && (
               <div className="flex h-8 shrink-0 items-center gap-2 rounded-control border border-line-soft bg-accent-soft/40 px-3 text-body text-foreground">
                 <span className="min-w-0 flex-1 truncate">{t("defaultBack.banner")}</span>
@@ -319,7 +323,6 @@ export default function App() {
         ) : (
           <StartScreen />
         )}
-        </div>
       </div>
       <NewPackDialog />
       <AlbumDialog />
