@@ -103,14 +103,16 @@ export function Slider({
         disabled={disabled}
       />
       {defaultValue !== undefined && (
-        // 等值时置灰（点击无效）。IconButton 本身就是固定的 h-5 w-5 槽位，
-        // 其出现与否只由 defaultValue 决定，所以滑杆布局不会因状态变化抖动。
-        <IconButton
-          icon={RotateCcw}
-          label={resetLabel ?? ""}
-          disabled={disabled || value === defaultValue}
-          onClick={() => commit(defaultValue)}
-        />
+        // 等值时置灰（点击无效）。IconButton 的 28px 命中区里有 7px 内边距；用 -ml-2
+        // 抵消这段不可见宽度，让「图标→输入框」与「滑轨→输入框」的视觉间距接近。
+        <span className="-ml-2 flex shrink-0">
+          <IconButton
+            icon={RotateCcw}
+            label={resetLabel ?? ""}
+            disabled={disabled || value === defaultValue}
+            onClick={() => commit(defaultValue)}
+          />
+        </span>
       )}
     </div>
   )
