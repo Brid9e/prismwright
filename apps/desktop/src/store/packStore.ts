@@ -1569,6 +1569,13 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
   },
 
   addEffect: (ref, target, kind, opts) => {
+    const { pack } = get()
+    if (
+      target.scope === "layer" &&
+      pack &&
+      isLayerLocked(findFace(pack, ref)?.layers ?? [], target.layerId)
+    )
+      return
     // 槽位判满在 commit 之前：`commit` 无条件记一个历史点，留到 recipe 里 return 会留下空撤销步。
     const list = currentEffects(ref, target)
     if (!list || list.filter((e) => e.kind === kind).length >= EFFECT_REGISTRY[kind].maxPerTarget)
@@ -1593,6 +1600,13 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
   },
 
   removeEffect: (ref, target, effectId, opts) => {
+    const { pack } = get()
+    if (
+      target.scope === "layer" &&
+      pack &&
+      isLayerLocked(findFace(pack, ref)?.layers ?? [], target.layerId)
+    )
+      return
     // id 不在目标上时落空：同样须在 commit 之前拦下，避免空撤销步。
     const list = currentEffects(ref, target)
     if (!list?.some((e) => e.id === effectId)) return
@@ -1611,6 +1625,13 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
   },
 
   updateEffect: (ref, target, effectId, patch, opts) => {
+    const { pack } = get()
+    if (
+      target.scope === "layer" &&
+      pack &&
+      isLayerLocked(findFace(pack, ref)?.layers ?? [], target.layerId)
+    )
+      return
     const list = currentEffects(ref, target)
     if (!list?.some((e) => e.id === effectId)) return
     // `enabled` 上提在 EffectBase（在 `params` 之外），故先摘出来单独写，其余才是参数补丁。
@@ -1639,6 +1660,13 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
   },
 
   moveEffect: (ref, target, effectId, toIndex, opts) => {
+    const { pack } = get()
+    if (
+      target.scope === "layer" &&
+      pack &&
+      isLayerLocked(findFace(pack, ref)?.layers ?? [], target.layerId)
+    )
+      return
     const list = currentEffects(ref, target)
     const from = list ? list.findIndex((e) => e.id === effectId) : -1
     if (!list || from < 0) return
@@ -1664,6 +1692,8 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
   },
 
   updateLayer: (ref, layerId, patch, opts) => {
+    const { pack } = get()
+    if (pack && isLayerLocked(findFace(pack, ref)?.layers ?? [], layerId)) return
     commitFace(
       ref,
       layerId,
@@ -1682,7 +1712,9 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
     // 空 patch 不入历史；目标必须是真实的文字层，否则 recipe 会空转却仍记一个历史点。
     if (fields.length === 0) return
     const { pack } = get()
-    const layer = pack ? findLayerById(findFace(pack, ref)?.layers ?? [], layerId) : null
+    const layers = pack ? (findFace(pack, ref)?.layers ?? []) : []
+    if (isLayerLocked(layers, layerId)) return
+    const layer = pack ? findLayerById(layers, layerId) : null
     if (!layer || layer.kind !== "text" || !layer.text) return
     commitFace(
       ref,

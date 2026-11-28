@@ -276,7 +276,7 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
           <span className="text-label text-muted">{t("blend.label")}</span>
           <Select
             value={selectedLayer?.blend ?? "normal"}
-            disabled={!selectedLayer || selectedLayer.kind === "adjustment"}
+            disabled={!selectedLayer || selectedLayer.kind === "adjustment" || selectedLayer.locked}
             grow
             onChange={(value) => {
               if (selectedLayer) updateLayer(faceRef, selectedLayer.id, { blend: value as BlendMode })
@@ -291,7 +291,7 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
           <span className="text-label text-muted">{t("field.opacity")}</span>
           <Slider
             value={selectedLayer?.opacity ?? 1}
-            disabled={!selectedLayer || selectedLayer.kind === "adjustment"}
+            disabled={!selectedLayer || selectedLayer.kind === "adjustment" || selectedLayer.locked}
             min={0}
             max={1}
             step={0.01}
