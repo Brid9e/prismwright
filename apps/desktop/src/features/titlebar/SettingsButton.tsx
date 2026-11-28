@@ -26,8 +26,8 @@ export function SettingsButton() {
         // pressed 表示「设置视图正开着」，与图标提亮同一语义。
         aria-pressed={settingsOpen}
         onClick={() => setSettingsOpen(!settingsOpen)}
-        className={`flex h-full w-6 items-center justify-center ${
-          settingsOpen ? "text-foreground" : "text-muted hover:text-foreground"
+        className={`flex h-7 w-7 items-center justify-center rounded-control outline-none hover:bg-elevated focus-visible:ring-2 focus-visible:ring-accent/50 ${
+          settingsOpen ? "bg-elevated text-foreground" : "text-muted hover:text-foreground"
         }`}
       >
         <Settings size={14} />

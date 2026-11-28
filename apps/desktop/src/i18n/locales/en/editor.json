@@ -111,6 +111,9 @@
     "saved": "Saved",
     "error": "Save failed"
   },
+  "topbar": {
+    "export": "Export"
+  },
   "preview": {
     "front": "Front",
     "back": "Back",

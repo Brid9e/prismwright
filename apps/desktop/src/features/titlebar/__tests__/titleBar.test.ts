@@ -49,6 +49,13 @@ function dragTargets(html: string): string[] {
 }
 
 describe("TitleBar（Windows）", () => {
+  it("顶栏是 46 高的浮层面板：panel 圆角与细描边", () => {
+    const html = render("windows")
+    expect(html).toContain("h-topbar")
+    expect(html).toContain("rounded-panel")
+    expect(html).toContain("border-line-soft")
+  })
+
   it("画出自绘菜单条：文件 / 编辑 / 视图", () => {
     const html = render("windows")
     expect(html).toContain("文件")
@@ -73,8 +80,8 @@ describe("TitleBar（Windows）", () => {
   it("拖拽区覆盖左右两列的留白，而不仅外层栅格一处", () => {
     const spans = dragTargets(render("windows"))
     expect(spans).toHaveLength(3) // 外层 + 左列 + 右列（中列 pointer-events-none，不挂属性）
-    expect(spans.some((el) => el.includes("items-center pl-1"))).toBe(true) // 左列
-    expect(spans.some((el) => el.includes("items-center justify-end"))).toBe(true) // 右列
+    expect(spans.some((el) => el.includes("pl-1"))).toBe(true) // 左列
+    expect(spans.some((el) => el.includes("justify-end"))).toBe(true) // 右列
   })
 
   it("按钮不带拖拽属性（可点元素照常可点，不会被拖拽吞掉）", () => {
@@ -132,8 +139,8 @@ describe("TitleBar（macOS）", () => {
   it("左右两列留白与起始屏中列都是拖拽区（两态一致）", () => {
     for (const variant of ["full", "minimal"] as const) {
       const spans = dragTargets(render("macos", variant))
-      expect(spans.some((el) => el.includes("items-center pl-1"))).toBe(true) // 左列
-      expect(spans.some((el) => el.includes("items-center justify-end"))).toBe(true) // 右列
+      expect(spans.some((el) => el.includes("pl-1"))).toBe(true) // 左列
+      expect(spans.some((el) => el.includes("justify-end"))).toBe(true) // 右列
     }
     // 起始屏正中那块空 div 自己就是这片空白的命中目标。
     expect(dragTargets(render("macos", "minimal")).some((el) => !el.includes("class="))).toBe(true)

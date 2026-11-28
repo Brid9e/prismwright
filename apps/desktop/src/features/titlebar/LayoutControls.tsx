@@ -57,7 +57,7 @@ export function LayoutControls() {
               // pressed 表示「该栏当前被切掉」，与图标变暗同一语义。
               aria-pressed={hidden}
               onClick={() => toggleCollapsed(side)}
-              className={`flex h-full w-6 items-center justify-center ${
+              className={`flex h-7 w-7 items-center justify-center rounded-control outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${
                 hidden
                   ? "text-disabled opacity-60 hover:text-muted hover:opacity-100"
                   : "text-muted hover:text-foreground"

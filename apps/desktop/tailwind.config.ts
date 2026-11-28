@@ -78,6 +78,8 @@ export default {
         switch: "30px",
         // 属性行的固定标签列宽。
         label: "60px",
+        // Windows 自绘窗口按钮的宽度（原生 Fluent 度量）。
+        window: "46px",
       },
       fontSize: {
         num: ["10px", { lineHeight: "12px" }],

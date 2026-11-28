@@ -111,6 +111,9 @@
     "saved": "已保存",
     "error": "保存失败"
   },
+  "topbar": {
+    "export": "导出"
+  },
   "preview": {
     "front": "正面",
     "back": "背面",

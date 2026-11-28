@@ -141,7 +141,7 @@ export function WindowControls() {
               // 无 Tauri：静默降级。
             }
           }}
-          className={`flex w-[46px] items-center justify-center text-muted ${
+          className={`flex w-window items-center justify-center text-muted ${
             b.key === "close"
               ? "hover:bg-danger hover:text-white"
               : "hover:bg-elevated hover:text-foreground"

@@ -51,7 +51,8 @@ describe("WindowControls", () => {
 
   it("按钮宽 46px（原生标题栏按钮的宽），字形撑满方框", () => {
     const html = render()
-    expect(html).toContain("w-[46px]")
+    // 46px 作为语义刻度 `w-window` 定义在 tailwind.config，组件不写任意值。
+    expect(html).toContain("w-window")
     // 最小化：10×1 的细横杠（半整数纵坐标，1× DPI 下才落成一整像素）。
     expect(html).toContain('d="M0 5.5h10"')
     // 关闭：对角线端点到 0.5 / 9.5，即撑满 10×10（原先用图标库只到 8×8）。

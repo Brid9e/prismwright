@@ -17,6 +17,7 @@ import { useRecentStore } from "../store/recentStore"
 import { useUiStore } from "../store/uiStore"
 import { attachAutosave, type AutosaveHandle } from "../store/autosave"
 import { ContextMenuHost } from "../ui/ContextMenu"
+import { ToastHost } from "../ui/Toast"
 import { editorContextItems, isTextEntry } from "../ui/contextMenuModel"
 import { Splitter } from "../ui/Splitter"
 import { TooltipProvider } from "../ui/Tooltip"
@@ -47,36 +48,6 @@ import { dispatch } from "./menuActions"
 import { installNativeMenu } from "./nativeMenu"
 import { detectPlatform, usesHtmlTitleBar, usesNativeMenu } from "./platform"
 import { useShortcuts } from "./shortcuts"
-
-/** 底部状态栏：保存状态，失败时附错误摘要与重试。 */
-function StatusBar() {
-  const { t } = useTranslation("editor")
-  const saveStatus = usePackStore((s) => s.saveStatus)
-  const lastError = usePackStore((s) => s.lastError)
-  const save = usePackStore((s) => s.save)
-
-  return (
-    <div className="flex h-6 shrink-0 items-center gap-3 border-t border-border bg-panel px-2 text-[11px] text-muted">
-      <span className={saveStatus === "error" ? "text-danger" : ""}>
-        {t(`status.${saveStatus}`)}
-      </span>
-      {saveStatus === "error" && (
-        <>
-          <span className="min-w-0 flex-1 truncate text-danger" title={lastError ?? ""}>
-            {lastError}
-          </span>
-          <button
-            type="button"
-            onClick={() => void save()}
-            className="shrink-0 rounded-sm border border-border-subtle px-1.5 hover:text-foreground"
-          >
-            {t("common:action.retry")}
-          </button>
-        </>
-      )}
-    </div>
-  )
-}
 
 export default function App() {
   const { t } = useTranslation("common")
@@ -301,7 +272,11 @@ export default function App() {
 
   return (
     <TooltipProvider>
-      <div className="flex h-full flex-col bg-app text-foreground">
+      {/* 外层 p-2 的留白也是拖拽区：顶栏是浮层，窗口边缘那 8px 若不接管，贴边按下就拖不动窗。 */}
+      <div
+        data-tauri-drag-region
+        className="flex h-full flex-col gap-2 bg-app p-2 text-foreground"
+      >
         {usesHtmlTitleBar(platform) && (
           <TitleBar platform={platform} variant={startPage ? "minimal" : "full"} />
         )}
@@ -310,14 +285,14 @@ export default function App() {
         ) : pack ? (
           // 右键菜单只覆盖编辑器本体：起始屏 / 设置 / 对话框里不弹（文本控件除外，那由
           // 全局宿主接管）。所以监听挂在这一层而不是最外层。
-          <div className="flex min-h-0 flex-1 flex-col" onContextMenu={handleEditorContextMenu}>
+          <div className="flex min-h-0 flex-1 flex-col gap-2" onContextMenu={handleEditorContextMenu}>
             {editingDefaultBack && (
-              <div className="flex h-7 shrink-0 items-center gap-2 border-b border-border bg-accent/10 px-3 text-[12px] text-foreground">
+              <div className="flex h-8 shrink-0 items-center gap-2 rounded-control border border-line-soft bg-accent-soft/40 px-3 text-body text-foreground">
                 <span className="min-w-0 flex-1 truncate">{t("defaultBack.banner")}</span>
                 <button
                   type="button"
                   onClick={() => void leaveDefaultBackFlow()}
-                  className="shrink-0 rounded-sm border border-border-subtle px-2 py-0.5 hover:bg-elevated"
+                  className="shrink-0 rounded-control border border-line-soft px-2 py-0.5 text-body hover:bg-elevated"
                 >
                   {t("defaultBack.done")}
                 </button>
@@ -330,7 +305,6 @@ export default function App() {
               center={<PreviewPanel />}
               right={<InspectorPanel />}
             />
-            <StatusBar />
           </div>
         ) : (
           <StartScreen />
@@ -349,6 +323,7 @@ export default function App() {
         onForceClose={forceClose}
       />
       <ContextMenuHost />
+      <ToastHost />
     </TooltipProvider>
   )
 }
