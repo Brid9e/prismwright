@@ -106,7 +106,7 @@ export function CoverCrop({ kind, bytes, ext, width, height, onCancel, onConfirm
     <div className="flex flex-col gap-2">
       <div
         style={{ width: frame.width, height: frame.height }}
-        className="relative cursor-grab touch-none select-none self-center overflow-hidden rounded-sm border border-border bg-sunken active:cursor-grabbing"
+        className="relative cursor-grab touch-none select-none self-center overflow-hidden rounded-control border border-line bg-sunken active:cursor-grabbing"
         onPointerDown={(e) => {
           e.currentTarget.setPointerCapture(e.pointerId)
           dragRef.current = { x: e.clientX, y: e.clientY, dx: view.dx, dy: view.dy }
@@ -137,7 +137,7 @@ export function CoverCrop({ kind, bytes, ext, width, height, onCancel, onConfirm
         )}
       </div>
 
-      <label className="flex items-center gap-2 text-[11px] text-muted">
+      <label className="flex items-center gap-2 text-label text-muted">
         <span className="shrink-0">{t("pack.cover.cropZoom")}</span>
         <input
           type="range"
@@ -157,14 +157,14 @@ export function CoverCrop({ kind, bytes, ext, width, height, onCancel, onConfirm
           className="min-w-0 flex-1"
         />
       </label>
-      <p className="text-[11px] leading-relaxed text-muted">{t("pack.cover.cropHint")}</p>
+      <p className="text-label leading-relaxed text-muted">{t("pack.cover.cropHint")}</p>
 
       <div className="flex justify-end gap-1.5">
         <button
           type="button"
           disabled={applying}
           onClick={onCancel}
-          className="h-6 rounded-sm border border-border-subtle px-3 text-[12px] text-muted hover:bg-elevated hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+          className="h-6 rounded-control border border-line-soft px-3 text-body text-muted hover:bg-elevated hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
         >
           {t("common:action.cancel")}
         </button>
@@ -172,7 +172,7 @@ export function CoverCrop({ kind, bytes, ext, width, height, onCancel, onConfirm
           type="button"
           disabled={applying}
           onClick={() => void apply()}
-          className="h-6 rounded-sm bg-accent px-3 text-[12px] text-accent-foreground hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+          className="h-6 rounded-control bg-accent px-3 text-body text-accent-foreground hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
         >
           {t("pack.cover.cropApply")}
         </button>

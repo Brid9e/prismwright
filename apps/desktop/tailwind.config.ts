@@ -89,6 +89,7 @@ export default {
         label: ["11px", { lineHeight: "16px" }],
         body: ["12px", { lineHeight: "16px" }],
         title: ["13px", { lineHeight: "16px" }],
+        cardname: ["17px", { lineHeight: "22px" }],
       },
       keyframes: {
         /**

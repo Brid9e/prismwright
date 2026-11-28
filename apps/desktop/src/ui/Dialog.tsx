@@ -53,15 +53,15 @@ export function DialogShell({
           // 无说明时显式声明 aria-describedby={undefined}，抑制 Radix 的缺说明警告（见 description 注释）；
           // 有说明时交给 Radix 自动把 Description 关联到 aria-describedby，故不传该属性。
           {...(hasDescription ? null : { "aria-describedby": undefined })}
-          className={`fixed left-1/2 top-1/2 z-50 max-h-[calc(100vh-32px)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-sm border border-border-strong bg-panel shadow-xl ${
+          className={`fixed left-1/2 top-1/2 z-50 max-h-[calc(100vh-32px)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-control border border-line bg-panel shadow-xl ${
             className ?? "w-80 p-3"
           }`}
         >
-          <Dialog.Title className="mb-2 text-[13px] font-medium text-foreground">
+          <Dialog.Title className="mb-2 text-title font-medium text-foreground">
             {title}
           </Dialog.Title>
           {hasDescription ? (
-            <Dialog.Description className="mb-3 text-[12px] leading-relaxed text-muted">
+            <Dialog.Description className="mb-3 text-body leading-relaxed text-muted">
               {description}
             </Dialog.Description>
           ) : null}

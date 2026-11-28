@@ -52,9 +52,9 @@ export function NewPackDialog() {
         onKeyDown={(e) => {
           if (e.key === "Enter") void confirm()
         }}
-        className="h-6 w-full rounded-sm border border-border bg-sunken px-1.5 text-[12px] outline-none focus:border-accent"
+        className="h-6 w-full rounded-control border border-line bg-sunken px-1.5 text-body outline-none focus:border-accent"
       />
-      <div className="mt-2 flex items-baseline gap-1.5 text-[11px] text-muted">
+      <div className="mt-2 flex items-baseline gap-1.5 text-label text-muted">
         <span className="shrink-0">{t("pack.location")}</span>
         <span className="min-w-0 flex-1 truncate" title={pending?.baseDir}>
           {pending?.baseDir}
@@ -64,7 +64,7 @@ export function NewPackDialog() {
         <button
           type="button"
           onClick={resolveNewPack}
-          className="h-6 rounded-sm border border-border-subtle px-3 text-[12px] text-foreground hover:bg-elevated"
+          className="h-6 rounded-control border border-line-soft px-3 text-body text-foreground hover:bg-elevated"
         >
           {t("common:action.cancel")}
         </button>
@@ -72,7 +72,7 @@ export function NewPackDialog() {
           type="button"
           disabled={trimmed === "" || busy}
           onClick={() => void confirm()}
-          className="h-6 rounded-sm bg-accent px-3 text-[12px] text-accent-foreground hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+          className="h-6 rounded-control bg-accent px-3 text-body text-accent-foreground hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
         >
           {t("common:action.confirm")}
         </button>

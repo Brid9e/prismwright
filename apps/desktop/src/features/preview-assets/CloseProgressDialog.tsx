@@ -34,7 +34,7 @@ export function CloseProgressDialog({ open, progress, onForceClose }: CloseProgr
       onClose={() => {}}
       className="w-80 p-3"
     >
-      <p className="text-[12px] leading-relaxed text-muted">{t("closing.body", { done, total })}</p>
+      <p className="text-body leading-relaxed text-muted">{t("closing.body", { done, total })}</p>
       {/* 不确定进度条：单张卡要渲 60 帧、耗时不均，逐卡推进的定值条只会一顿一顿地跳；
           用「色带反复扫过」的加载式动画，进度感交给下方的 `已完成 / 总数` 文字。 */}
       <div className="relative mt-3 h-1.5 w-full overflow-hidden rounded-full bg-sunken">
@@ -44,7 +44,7 @@ export function CloseProgressDialog({ open, progress, onForceClose }: CloseProgr
         <button
           type="button"
           onClick={onForceClose}
-          className="h-6 rounded-sm border border-border-subtle px-3 text-[12px] text-foreground hover:bg-elevated"
+          className="h-6 rounded-control border border-line-soft px-3 text-body text-foreground hover:bg-elevated"
         >
           {t("closing.force")}
         </button>

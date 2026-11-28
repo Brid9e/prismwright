@@ -114,6 +114,15 @@
   "topbar": {
     "export": "Export"
   },
+  "inspector": {
+    "design": "Design",
+    "layers": "Layers",
+    "effects": "Effects",
+    "export": "Export",
+    "noLayer": "Select a layer on the Layers tab first",
+    "exportCard": "Export this card",
+    "exportSeries": "Export series package"
+  },
   "library": {
     "title": "Cards",
     "search": "Search cards",

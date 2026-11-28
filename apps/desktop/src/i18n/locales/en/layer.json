@@ -89,5 +89,6 @@
     "weight": { "light": "Light", "regular": "Regular", "bold": "Bold", "black": "Black" },
     "mask": { "label": "Use as mask", "hint": "This layer draws nothing; child layers are clipped by the glyphs" }
   },
-  "empty": "No layer selected"
+  "empty": "No layer selected",
+  "effectsOnText": "Text layers have no effects of their own; add effects to their child layers."
 }

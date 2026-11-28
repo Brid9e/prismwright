@@ -166,7 +166,7 @@ export function ContextMenuHost() {
     >
       {items.map((item, index) =>
         item.kind === "separator" ? (
-          <div key={`sep-${index}`} role="separator" className="mx-1 my-1 h-px bg-border-subtle" />
+          <div key={`sep-${index}`} role="separator" className="mx-1 my-1 h-px bg-line-soft" />
         ) : (
           <button
             key={`${item.label}-${index}`}
@@ -179,12 +179,12 @@ export function ContextMenuHost() {
             onMouseEnter={() => setActive(index)}
             onClick={() => activate(item)}
             className={`${MENU_ITEM_CLASS} ${
-              index === active ? "bg-accent/25" : ""
+              index === active ? "bg-accent-soft" : ""
             } ${item.danger ? "text-danger" : ""} disabled:text-disabled`}
           >
             <span className="min-w-0 flex-1 truncate">{item.label}</span>
             {item.accelerator && (
-              <span className="ml-auto shrink-0 pl-4 text-[11px] text-muted">
+              <span className="ml-auto shrink-0 pl-4 text-label text-muted">
                 {formatAccelerator(item.accelerator)}
               </span>
             )}

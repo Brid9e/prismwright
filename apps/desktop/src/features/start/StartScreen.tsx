@@ -32,7 +32,7 @@ export function StartScreen() {
         <button
           type="button"
           onClick={() => void newPackFlow()}
-          className="flex h-7 items-center gap-1.5 rounded-sm bg-accent px-3 text-[12px] text-accent-foreground hover:bg-accent-hover"
+          className="flex h-7 items-center gap-1.5 rounded-control bg-accent px-3 text-body text-accent-foreground hover:bg-accent-hover"
         >
           <Plus size={13} />
           {t("start.newPack")}
@@ -40,7 +40,7 @@ export function StartScreen() {
         <button
           type="button"
           onClick={() => void openPackFlow()}
-          className="flex h-7 items-center gap-1.5 rounded-sm border border-border-subtle px-3 text-[12px] text-foreground hover:bg-elevated"
+          className="flex h-7 items-center gap-1.5 rounded-control border border-line-soft px-3 text-body text-foreground hover:bg-elevated"
         >
           <FolderOpen size={13} />
           {t("start.openPack")}

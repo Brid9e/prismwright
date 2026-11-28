@@ -34,7 +34,7 @@ export function ConfirmDialog({
           type="button"
           autoFocus={destructive}
           onClick={onCancel}
-          className="h-6 rounded-sm border border-border-subtle px-3 text-[12px] text-foreground hover:bg-elevated"
+          className="h-6 rounded-control border border-line-soft px-3 text-body text-foreground hover:bg-elevated"
         >
           {cancelLabel}
         </button>
@@ -42,7 +42,7 @@ export function ConfirmDialog({
           type="button"
           autoFocus={!destructive}
           onClick={onConfirm}
-          className={`h-6 rounded-sm px-3 text-[12px] text-accent-foreground ${
+          className={`h-6 rounded-control px-3 text-body text-accent-foreground ${
             destructive ? "bg-danger hover:opacity-90" : "bg-accent hover:bg-accent-hover"
           }`}
         >

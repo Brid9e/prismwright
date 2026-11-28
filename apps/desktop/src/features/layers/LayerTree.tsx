@@ -77,8 +77,8 @@ function Row({
         event.stopPropagation()
         onContextMenu(row.id, event)
       }}
-      className={`group relative flex h-7 items-center gap-1 pr-1 text-[12px] ${
-        row.selected ? "bg-accent/15 text-foreground" : "text-muted hover:bg-elevated"
+      className={`group relative flex h-7 items-center gap-1 pr-1 text-body ${
+        row.selected ? "bg-accent-soft/60 text-foreground" : "text-muted hover:bg-elevated"
       } ${isDragging ? "opacity-50" : ""}`}
     >
       {zone === "top" && (
@@ -88,7 +88,7 @@ function Row({
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-0.5 bg-accent" />
       )}
       {/* 「放进里面」的落点用整行填充表示（不用描边细环：细环在深色底上太弱、也难与选中态区分）。 */}
-      {zone === "middle" && <div className="pointer-events-none absolute inset-0 bg-accent/25" />}
+      {zone === "middle" && <div className="pointer-events-none absolute inset-0 bg-accent-soft" />}
 
       {/* 拖拽把手：固定在最左一列（不随层级缩进移动），且常驻显示——任何一行都能随时抓取。 */}
       <button
@@ -216,7 +216,7 @@ export function LayerTree({
   }
 
   if (rows.length === 0) {
-    return <div className="px-3 py-2 text-[12px] text-disabled">{emptyText}</div>
+    return <div className="px-3 py-2 text-body text-disabled">{emptyText}</div>
   }
 
   return (

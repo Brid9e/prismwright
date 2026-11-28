@@ -64,7 +64,7 @@ export function CoverDialog() {
         <button
           type="button"
           onClick={() => setCoverOpen(false)}
-          className="h-6 rounded-sm bg-accent px-3 text-[12px] text-accent-foreground hover:bg-accent-hover"
+          className="h-6 rounded-control bg-accent px-3 text-body text-accent-foreground hover:bg-accent-hover"
         >
           {t("common:action.confirm")}
         </button>
@@ -255,10 +255,10 @@ function CoverSlot({ kind, rootDir }: CoverSlotProps) {
   }
 
   return (
-    <div className="rounded-sm border border-border-subtle p-2">
+    <div className="rounded-control border border-line-soft p-2">
       <div className="mb-2 flex items-baseline justify-between gap-2">
-        <span className="shrink-0 text-[12px] font-medium text-foreground">{label}</span>
-        <span className="min-w-0 truncate text-[11px] text-muted" title={hint}>
+        <span className="shrink-0 text-body font-medium text-foreground">{label}</span>
+        <span className="min-w-0 truncate text-label text-muted" title={hint}>
           {hint}
         </span>
       </div>
@@ -279,13 +279,13 @@ function CoverSlot({ kind, rootDir }: CoverSlotProps) {
             <PackArtPreview
               artSrc={preview}
               style={packArtStyle ?? DEFAULT_PACK_ART_STYLE}
-              className="h-60 w-40 rounded-sm border border-border"
+              className="h-60 w-40 rounded-control border border-line"
             />
             <button
               type="button"
               disabled={busy}
               onClick={() => void pick()}
-              className="h-6 w-40 rounded-sm border border-border-subtle text-[12px] text-foreground hover:bg-elevated disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-6 w-40 rounded-control border border-line-soft text-body text-foreground hover:bg-elevated disabled:cursor-not-allowed disabled:opacity-50"
             >
               {rel ? t("pack.cover.replace") : t("pack.cover.pick")}
             </button>
@@ -293,7 +293,7 @@ function CoverSlot({ kind, rootDir }: CoverSlotProps) {
               type="button"
               disabled={busy || !rel}
               onClick={clear}
-              className="h-6 w-40 rounded-sm border border-border-subtle text-[12px] text-muted hover:bg-elevated hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-6 w-40 rounded-control border border-line-soft text-body text-muted hover:bg-elevated hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
             >
               {t("pack.cover.clear")}
             </button>
@@ -304,11 +304,11 @@ function CoverSlot({ kind, rootDir }: CoverSlotProps) {
         </div>
       ) : (
         <div className="flex gap-2">
-          <div className="flex h-24 w-32 shrink-0 items-center justify-center overflow-hidden rounded-sm border border-border bg-sunken">
+          <div className="flex h-24 w-32 shrink-0 items-center justify-center overflow-hidden rounded-control border border-line bg-sunken">
             {preview ? (
               <img src={preview} alt={label} className="h-full w-full object-contain" />
             ) : (
-              <span className="text-[11px] text-muted">{t("pack.cover.empty")}</span>
+              <span className="text-label text-muted">{t("pack.cover.empty")}</span>
             )}
           </div>
           <div className="flex flex-col gap-1.5">
@@ -316,7 +316,7 @@ function CoverSlot({ kind, rootDir }: CoverSlotProps) {
               type="button"
               disabled={busy}
               onClick={() => void pick()}
-              className="h-6 rounded-sm border border-border-subtle px-3 text-[12px] text-foreground hover:bg-elevated disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-6 rounded-control border border-line-soft px-3 text-body text-foreground hover:bg-elevated disabled:cursor-not-allowed disabled:opacity-50"
             >
               {rel ? t("pack.cover.replace") : t("pack.cover.pick")}
             </button>
@@ -324,16 +324,16 @@ function CoverSlot({ kind, rootDir }: CoverSlotProps) {
               type="button"
               disabled={busy || !rel}
               onClick={clear}
-              className="h-6 rounded-sm border border-border-subtle px-3 text-[12px] text-muted hover:bg-elevated hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-6 rounded-control border border-line-soft px-3 text-body text-muted hover:bg-elevated hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
             >
               {t("pack.cover.clear")}
             </button>
           </div>
         </div>
       )}
-      {error && <p className="mt-2 text-[11px] leading-relaxed text-danger">{error}</p>}
+      {error && <p className="mt-2 text-label leading-relaxed text-danger">{error}</p>}
       {oversize && (
-        <p className="mt-2 text-[11px] leading-relaxed text-warning">{t("pack.cover.oversize")}</p>
+        <p className="mt-2 text-label leading-relaxed text-warning">{t("pack.cover.oversize")}</p>
       )}
     </div>
   )

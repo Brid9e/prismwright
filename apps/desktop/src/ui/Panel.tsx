@@ -36,19 +36,19 @@ export function Panel({
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-panel">
-      <div className="flex h-7 shrink-0 items-center gap-1 border-b border-border px-2">
+      <div className="flex h-7 shrink-0 items-center gap-1 border-b border-line px-2">
         {collapsible && (
           <button
             type="button"
             onClick={onToggleCollapsed}
             aria-label={title}
             aria-expanded={!collapsed}
-            className="flex h-5 w-5 items-center justify-center rounded-sm text-muted hover:bg-elevated hover:text-foreground"
+            className="flex h-5 w-5 items-center justify-center rounded-control text-muted hover:bg-elevated hover:text-foreground"
           >
             {collapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
           </button>
         )}
-        <span className="select-none text-[11px] font-medium uppercase tracking-wide text-muted">
+        <span className="select-none text-label font-medium uppercase tracking-wide text-muted">
           {title}
         </span>
         <div className="ml-auto flex items-center gap-1">{actions}</div>

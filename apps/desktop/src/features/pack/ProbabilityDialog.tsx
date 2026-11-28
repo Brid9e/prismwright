@@ -69,7 +69,7 @@ export function ProbabilityDialog() {
       onClose={resolve}
       className="w-[22rem] p-3"
     >
-      <div className="mt-1 border-y border-border py-1">
+      <div className="mt-1 border-y border-line py-1">
         {PROBABILITY_TIERS.map((tier) => (
           <PercentageRow
             key={tier}
@@ -82,13 +82,13 @@ export function ProbabilityDialog() {
         ))}
       </div>
 
-      <p className="mt-2 text-[11px] leading-relaxed text-muted">
+      <p className="mt-2 text-label leading-relaxed text-muted">
         {Object.keys(weighted).length === 0
           ? t("probability.unweighted")
           : t("probability.hiddenHint")}
       </p>
       {warnings.map((text) => (
-        <p key={text} className="mt-1 text-[11px] leading-relaxed text-warning">
+        <p key={text} className="mt-1 text-label leading-relaxed text-warning">
           {text}
         </p>
       ))}
@@ -97,14 +97,14 @@ export function ProbabilityDialog() {
         <button
           type="button"
           onClick={resolve}
-          className="h-6 rounded-sm border border-border-subtle px-3 text-[12px] text-foreground hover:bg-elevated"
+          className="h-6 rounded-control border border-line-soft px-3 text-body text-foreground hover:bg-elevated"
         >
           {t("common:action.cancel")}
         </button>
         <button
           type="button"
           onClick={confirm}
-          className="h-6 rounded-sm bg-accent px-3 text-[12px] text-accent-foreground hover:bg-accent-hover"
+          className="h-6 rounded-control bg-accent px-3 text-body text-accent-foreground hover:bg-accent-hover"
         >
           {t("common:action.confirm")}
         </button>
@@ -127,14 +127,14 @@ function PercentageRow({ tier, weight, percent, cards, onChange }: PercentageRow
   const { t } = useTranslation("editor")
   return (
     <div className="flex h-8 items-center gap-2">
-      <span className="w-16 shrink-0 text-[12px] text-foreground">
+      <span className="w-16 shrink-0 text-body text-foreground">
         {t(`probability.tier.${tier}`)}
       </span>
-      <span className="min-w-0 flex-1 truncate text-[11px] text-disabled">
+      <span className="min-w-0 flex-1 truncate text-label text-disabled">
         {t("probability.cardCount", { cards })}
       </span>
       {/* 百分比跟着权重一起变，宽度固定成右对齐的一列，避免数字跳动时整行抖动。 */}
-      <span className="w-12 shrink-0 text-right font-mono text-[11px] text-muted">
+      <span className="w-12 shrink-0 text-right font-mono text-label text-muted">
         {percent === 0 ? "—" : `${percent}%`}
       </span>
       <NumberField value={weight} onChange={onChange} min={0} max={10000} step={1} precision={0} />

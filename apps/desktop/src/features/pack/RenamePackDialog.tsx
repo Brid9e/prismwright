@@ -54,14 +54,14 @@ export function RenamePackDialog() {
         onKeyDown={(e) => {
           if (e.key === "Enter") void confirm()
         }}
-        className="h-6 w-full rounded-sm border border-border bg-sunken px-1.5 text-[12px] outline-none focus:border-accent"
+        className="h-6 w-full rounded-control border border-line bg-sunken px-1.5 text-body outline-none focus:border-accent"
       />
-      <p className="mt-2 text-[11px] text-muted">{t("pack.renameHint")}</p>
+      <p className="mt-2 text-label text-muted">{t("pack.renameHint")}</p>
       <div className="mt-3 flex justify-end gap-2">
         <button
           type="button"
           onClick={resolve}
-          className="h-6 rounded-sm border border-border-subtle px-3 text-[12px] text-foreground hover:bg-elevated"
+          className="h-6 rounded-control border border-line-soft px-3 text-body text-foreground hover:bg-elevated"
         >
           {t("common:action.cancel")}
         </button>
@@ -69,7 +69,7 @@ export function RenamePackDialog() {
           type="button"
           disabled={trimmed === "" || busy}
           onClick={() => void confirm()}
-          className="h-6 rounded-sm bg-accent px-3 text-[12px] text-accent-foreground hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+          className="h-6 rounded-control bg-accent px-3 text-body text-accent-foreground hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
         >
           {t("common:action.confirm")}
         </button>

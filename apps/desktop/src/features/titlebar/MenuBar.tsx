@@ -14,7 +14,7 @@
  * `preventDefault`。←/→ 换菜单也是它内置的，不必再挂窗口级监听。
  *
  * 样式往 Windows 11 的原生菜单靠：整块 8px 圆角（`rounded-lg`）套 4px 内边距，行高 24px，
- * 高亮是内缩进去的 4px 圆角块（`rounded-md`），分隔线两侧留白。原生菜单条的下拉是**不透明**
+ * 高亮是内缩进去的 4px 圆角块（`rounded-control`），分隔线两侧留白。原生菜单条的下拉是**不透明**
  * 的（半透明的亚克力只用于 Win11 的右键菜单），所以这里不用背景模糊。
  */
 import { useEffect, useMemo, useState } from "react"
@@ -38,7 +38,7 @@ const CONTENT_CLASS = `z-50 ${MENU_CONTENT_CLASS}`
 const ITEM_CLASS = MENU_ITEM_CLASS
 
 /** 展开的子菜单：父项跟着保持高亮，跟原生一致。 */
-const SUBTRIGGER_CLASS = `${ITEM_CLASS} data-[state=open]:bg-accent/25`
+const SUBTRIGGER_CLASS = `${ITEM_CLASS} data-[state=open]:bg-accent-soft`
 
 /**
  * 勾选项左侧的留白槽：原生菜单在左边留一栏放勾，**没勾的项也占着**，同一个菜单里的文字
@@ -48,13 +48,13 @@ const CHECK_SLOT = "flex w-4 shrink-0 items-center justify-center"
 
 /** 顶层触发器：与弹层里的项同一套度量（高 24px、4px 圆角），只多一个悬停/展开底色。 */
 const TRIGGER_CLASS =
-  "flex h-6 select-none items-center rounded-md px-2 text-[12px] text-foreground outline-none hover:bg-elevated data-[state=open]:bg-elevated"
+  "flex h-6 select-none items-center rounded-control px-2 text-body text-foreground outline-none hover:bg-elevated data-[state=open]:bg-elevated"
 
 /** 在项的右侧显示快捷键（统一按 Windows 惯例排序，见 `formatAccelerator`）。 */
 function ShortcutHint({ accelerator }: { accelerator?: string }) {
   if (!accelerator) return null
   return (
-    <span className="ml-auto pl-4 text-[11px] text-muted">{formatAccelerator(accelerator)}</span>
+    <span className="ml-auto pl-4 text-label text-muted">{formatAccelerator(accelerator)}</span>
   )
 }
 
@@ -62,7 +62,7 @@ function ShortcutHint({ accelerator }: { accelerator?: string }) {
 function MenuEntry({ node, t }: { node: MenuNode; t: (key: string) => string }) {
   switch (node.kind) {
     case "separator":
-      return <Menubar.Separator className="mx-1 my-1 h-px bg-border-subtle" />
+      return <Menubar.Separator className="mx-1 my-1 h-px bg-line-soft" />
     case "check":
       return (
         <Menubar.CheckboxItem

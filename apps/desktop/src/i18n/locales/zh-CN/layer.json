@@ -89,5 +89,6 @@
     "weight": { "light": "细体", "regular": "常规", "bold": "粗体", "black": "特粗" },
     "mask": { "label": "作为蒙版", "hint": "本层不出图，下面的子图层按字形裁切" }
   },
-  "empty": "未选中图层"
+  "empty": "未选中图层",
+  "effectsOnText": "文字层本身没有效果，把效果加到它的子图层上。"
 }

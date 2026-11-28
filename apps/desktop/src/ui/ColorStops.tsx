@@ -88,7 +88,7 @@ function StopRow({
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={`flex items-center gap-1.5 rounded-sm px-1 py-0.5 ${
+      className={`flex items-center gap-1.5 rounded-control px-1 py-0.5 ${
         isDragging ? "relative z-10 bg-elevated shadow" : ""
       }`}
     >
@@ -109,7 +109,7 @@ function StopRow({
         value={toSixDigitHex(stop.color)}
         aria-label={t("colors.color", { index: index + 1 })}
         onChange={(e) => onColor(withAlpha(e.target.value, alphaOf(stop.color)))}
-        className="h-6 w-7 shrink-0 cursor-pointer rounded-sm border border-border bg-sunken p-0"
+        className="h-6 w-7 shrink-0 cursor-pointer rounded-control border border-line bg-sunken p-0"
       />
 
       {/* 吸管：与其它颜色字段一样，拾色按钮放在控件外面、点一下从画面取色。 */}
@@ -129,7 +129,7 @@ function StopRow({
         onChange={(e) => onAlpha(Number(e.target.value))}
         className="min-w-0 flex-1 accent-accent"
       />
-      <span className="w-7 shrink-0 text-right text-[10px] tabular-nums text-muted">
+      <span className="w-7 shrink-0 text-right text-num tabular-nums text-muted">
         {Math.round(alphaOf(stop.color) * 100)}%
       </span>
 
@@ -142,7 +142,7 @@ function StopRow({
         precision={1}
         aria-label={t("colors.percent", { index: index + 1 })}
       />
-      <span className="shrink-0 text-[10px] text-muted">%</span>
+      <span className="shrink-0 text-num text-muted">%</span>
 
       <button
         type="button"
@@ -177,7 +177,7 @@ export function ColorStops({ colors, onChange, onPick }: ColorStopsProps) {
       <div
         role="img"
         aria-label={t("colors.preview")}
-        className="h-4 w-full rounded-sm border border-border-subtle"
+        className="h-4 w-full rounded-control border border-line-soft"
         style={{ backgroundImage: gradientCss(colors) }}
       />
 
@@ -211,12 +211,12 @@ export function ColorStops({ colors, onChange, onPick }: ColorStopsProps) {
             disabled={full}
             onClick={() => onChange(addStop(colors, DEFAULT_NEW_STOP))}
             aria-label={t("colors.add")}
-            className="flex h-6 w-6 items-center justify-center rounded-sm border border-dashed border-border-subtle text-muted hover:border-accent hover:text-foreground disabled:opacity-40 disabled:hover:border-border-subtle disabled:hover:text-muted"
+            className="flex h-6 w-6 items-center justify-center rounded-control border border-dashed border-line-soft text-muted hover:border-accent hover:text-foreground disabled:opacity-40 disabled:hover:border-line-soft disabled:hover:text-muted"
           >
             <Plus size={13} />
           </button>
         </Tooltip>
-        {full && <span className="text-[11px] text-muted">{t("colors.max")}</span>}
+        {full && <span className="text-label text-muted">{t("colors.max")}</span>}
       </div>
     </div>
   )

@@ -68,17 +68,17 @@ export function BundleExportDialog() {
       }}
       className="w-96 p-3"
     >
-      <p className="truncate text-[12px] text-foreground" title={displayName}>
+      <p className="truncate text-body text-foreground" title={displayName}>
         {displayName}
       </p>
-      {message && <p className="mt-2 break-all text-[11px] text-muted">{message}</p>}
-      {error && <p className="mt-2 break-all text-[11px] text-danger">{error}</p>}
+      {message && <p className="mt-2 break-all text-label text-muted">{message}</p>}
+      {error && <p className="mt-2 break-all text-label text-danger">{error}</p>}
       <div className="mt-3 flex justify-end gap-2">
         <button
           type="button"
           disabled={busy}
           onClick={close}
-          className="h-6 rounded-sm border border-border-subtle px-3 text-[12px] text-foreground hover:bg-elevated disabled:cursor-not-allowed disabled:opacity-50"
+          className="h-6 rounded-control border border-line-soft px-3 text-body text-foreground hover:bg-elevated disabled:cursor-not-allowed disabled:opacity-50"
         >
           {t("common:action.cancel")}
         </button>
@@ -86,7 +86,7 @@ export function BundleExportDialog() {
           type="button"
           disabled={busy || !rootDir}
           onClick={() => void confirm()}
-          className="h-6 rounded-sm bg-accent px-3 text-[12px] text-accent-foreground hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+          className="h-6 rounded-control bg-accent px-3 text-body text-accent-foreground hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
         >
           {t("export.action")}
         </button>

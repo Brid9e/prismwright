@@ -205,25 +205,25 @@ export function ExportDialog({ previews }: ExportDialogProps) {
             // eslint-disable-next-line no-restricted-syntax
             onChange={(b) => patch({ background: b ? "transparent" : "#000000" })}
           />
-          <span className="text-[11px] text-muted">{t("transparent")}</span>
+          <span className="text-label text-muted">{t("transparent")}</span>
           {options.background !== "transparent" && (
             <input
               type="color"
               value={options.background}
               aria-label={t("background")}
               onChange={(e) => patch({ background: e.target.value })}
-              className="h-6 w-8 shrink-0 rounded-sm border border-border bg-sunken"
+              className="h-6 w-8 shrink-0 rounded-control border border-line bg-sunken"
             />
           )}
         </PropertyRow>
         {options.format === "gif" && options.background === "transparent" && (
-          <p className="px-2 pb-1 text-[11px] leading-relaxed text-muted">{t("transparentHint")}</p>
+          <p className="px-2 pb-1 text-label leading-relaxed text-muted">{t("transparentHint")}</p>
         )}
       </div>
 
       {busy && progress && (
         <div className="mt-2 px-2">
-          <div className="text-[11px] text-muted">
+          <div className="text-label text-muted">
             {t("progress", { done: progress.done, total: progress.total })}
           </div>
           <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-sunken">
@@ -235,19 +235,19 @@ export function ExportDialog({ previews }: ExportDialogProps) {
         </div>
       )}
       {message && (
-        <p className="mt-2 truncate px-2 text-[11px] text-accent" title={message}>
+        <p className="mt-2 truncate px-2 text-label text-accent" title={message}>
           {message}
         </p>
       )}
-      {error && <p className="mt-2 px-2 text-[11px] text-danger">{error}</p>}
-      {!card && <p className="mt-2 px-2 text-[11px] text-muted">{t("noCard")}</p>}
+      {error && <p className="mt-2 px-2 text-label text-danger">{error}</p>}
+      {!card && <p className="mt-2 px-2 text-label text-muted">{t("noCard")}</p>}
 
       <div className="mt-3 flex justify-end gap-2">
         <button
           type="button"
           disabled={busy}
           onClick={closeExportDialog}
-          className="h-6 rounded-sm border border-border-subtle px-3 text-[12px] text-foreground hover:bg-elevated disabled:cursor-not-allowed disabled:opacity-50"
+          className="h-6 rounded-control border border-line-soft px-3 text-body text-foreground hover:bg-elevated disabled:cursor-not-allowed disabled:opacity-50"
         >
           {t("common:action.cancel")}
         </button>
@@ -255,7 +255,7 @@ export function ExportDialog({ previews }: ExportDialogProps) {
           type="button"
           disabled={!card || !rootDir || busy}
           onClick={() => void run()}
-          className="h-6 rounded-sm bg-accent px-3 text-[12px] text-accent-foreground hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+          className="h-6 rounded-control bg-accent px-3 text-body text-accent-foreground hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
         >
           {t("export")}
         </button>

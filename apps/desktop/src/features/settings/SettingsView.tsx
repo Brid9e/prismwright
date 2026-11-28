@@ -52,7 +52,7 @@ export function SettingsView() {
             // 提示回落到编辑器；用 aria-label 而非可见文字，保持标题行紧凑。
             aria-label={t("back")}
             title={t("back")}
-            className="flex h-6 w-6 items-center justify-center rounded-sm text-muted hover:bg-elevated hover:text-foreground"
+            className="flex h-6 w-6 items-center justify-center rounded-control text-muted hover:bg-elevated hover:text-foreground"
           >
             <ArrowLeft size={16} />
           </button>
@@ -63,15 +63,15 @@ export function SettingsView() {
       {/* 正文居中、最宽 1100px；内层撑满高度，好让左侧栏的分割线通体到底。 */}
       <div className="flex min-h-0 flex-1 justify-center overflow-y-auto px-4 pb-4">
         <div className="flex w-full max-w-[1100px]">
-          <nav className="w-32 shrink-0 border-r border-border pr-2" aria-label={t("title")}>
+          <nav className="w-32 shrink-0 border-r border-line pr-2" aria-label={t("title")}>
             {CATEGORIES.map(({ id, labelKey }) => (
               <button
                 key={id}
                 type="button"
                 onClick={() => setCategory(id)}
-                className={`w-full rounded-sm px-2 py-1.5 text-left text-[13px] ${
+                className={`w-full rounded-control px-2 py-1.5 text-left text-title ${
                   category === id
-                    ? "bg-accent/20 text-foreground"
+                    ? "bg-accent-soft text-foreground"
                     : "text-muted hover:bg-elevated hover:text-foreground"
                 }`}
               >
@@ -83,7 +83,7 @@ export function SettingsView() {
             {category === "general" ? (
               <div className="flex flex-col">
                 <div className="flex items-center justify-between gap-2 py-1.5">
-                  <span className="shrink-0 text-[13px] text-muted">{t("language.label")}</span>
+                  <span className="shrink-0 text-title text-muted">{t("language.label")}</span>
                   <Select
                     value={language}
                     options={SUPPORTED_LANGUAGES.map((value) => ({
@@ -99,7 +99,7 @@ export function SettingsView() {
                 {/* 编辑器版本：编辑器与渲染器成套发布，当前只有 v1；选择暂不改变行为。 */}
                 <div>
                   <div className="flex items-center justify-between gap-2 py-1.5">
-                    <span className="shrink-0 text-[13px] text-muted">
+                    <span className="shrink-0 text-title text-muted">
                       {t("editorVersion.label")}
                     </span>
                     <Select
@@ -114,14 +114,14 @@ export function SettingsView() {
                       }}
                     />
                   </div>
-                  <p className="py-1 text-[12px] text-muted">{t("editorVersion.hint")}</p>
+                  <p className="py-1 text-body text-muted">{t("editorVersion.hint")}</p>
                 </div>
                 {/* 新建系列的落盘基目录：新建流程不再弹目录框，全靠这里的值。 */}
                 <div className="flex items-center justify-between gap-2 py-1.5">
-                  <span className="shrink-0 text-[13px] text-muted">{t("newPackDir.label")}</span>
+                  <span className="shrink-0 text-title text-muted">{t("newPackDir.label")}</span>
                   <div className="flex min-w-0 items-center gap-1">
                     <span
-                      className="min-w-0 max-w-[420px] truncate text-[13px] text-foreground"
+                      className="min-w-0 max-w-[420px] truncate text-title text-foreground"
                       title={newPackDir}
                     >
                       {newPackDir || "—"}
@@ -129,7 +129,7 @@ export function SettingsView() {
                     <button
                       type="button"
                       onClick={() => void chooseNewPackDir()}
-                      className="shrink-0 rounded-sm border border-border-subtle px-2 py-1 text-[13px] text-foreground hover:bg-elevated"
+                      className="shrink-0 rounded-control border border-line-soft px-2 py-1 text-title text-foreground hover:bg-elevated"
                     >
                       {t("newPackDir.choose")}
                     </button>
@@ -138,16 +138,16 @@ export function SettingsView() {
                 {/* 全系列共用的默认卡背：进入编辑 = 打开应用数据目录里那份工程（见 app/defaultBack）。 */}
                 <div>
                   <div className="flex items-center justify-between gap-2 py-1.5">
-                    <span className="shrink-0 text-[13px] text-muted">{t("defaultBack.label")}</span>
+                    <span className="shrink-0 text-title text-muted">{t("defaultBack.label")}</span>
                     <button
                       type="button"
                       onClick={() => void editDefaultBackFlow(t("defaultBack.name"))}
-                      className="shrink-0 rounded-sm border border-border-subtle px-2 py-1 text-[13px] text-foreground hover:bg-elevated"
+                      className="shrink-0 rounded-control border border-line-soft px-2 py-1 text-title text-foreground hover:bg-elevated"
                     >
                       {t("defaultBack.edit")}
                     </button>
                   </div>
-                  <p className="py-1 text-[12px] text-muted">{t("defaultBack.hint")}</p>
+                  <p className="py-1 text-body text-muted">{t("defaultBack.hint")}</p>
                 </div>
               </div>
             ) : category === "appearance" ? (

@@ -9,6 +9,7 @@
  */
 import { create } from "zustand"
 import type { EditorVersion } from "../app/editorVersions"
+import type { InspectorTab } from "../features/cards/inspectorTabs"
 import type { ExportFormat } from "../features/export/exportOptions"
 import { ERASE_BRUSH_WIDTH } from "../features/preview/eraseCanvas"
 import type { Language } from "../i18n/init"
@@ -92,6 +93,8 @@ export interface UiStoreState {
   folded: { left: boolean; right: boolean }
   /** 预览显示正面还是背面。 */
   previewSide: "front" | "back"
+  /** 检查器当前页签（设计 / 图层 / 效果 / 导出）；不持久化，换卡时保留。 */
+  inspectorTab: InspectorTab
   /** 预览是否在空闲时自动摆动（拖拽倾斜已常驻，无开关）。 */
   previewIdleSway: boolean
   /**
@@ -200,6 +203,7 @@ export interface UiStoreState {
   toggleCollapsed: (side: "left" | "right") => void
   toggleFolded: (side: "left" | "right") => void
   setPreviewSide: (side: "front" | "back") => void
+  setInspectorTab: (tab: InspectorTab) => void
   setPreviewIdleSway: (value: boolean) => void
   setPreviewZoom: (value: number) => void
   setShowChecker: (value: boolean) => void
@@ -258,6 +262,7 @@ export const useUiStore = create<UiStoreState>()((set) => ({
   collapsed: { left: false, right: false },
   folded: { left: false, right: false },
   previewSide: "front",
+  inspectorTab: "design",
   previewIdleSway: true,
   // 默认 2 倍：卡片在 1 倍下只占中间一小块，细节看不清；2 倍能直接看到印刷文字。
   previewZoom: 2,
@@ -291,6 +296,7 @@ export const useUiStore = create<UiStoreState>()((set) => ({
   toggleFolded: (side) => set((s) => ({ folded: { ...s.folded, [side]: !s.folded[side] } })),
 
   setPreviewSide: (previewSide) => set({ previewSide }),
+  setInspectorTab: (inspectorTab) => set({ inspectorTab }),
   setPreviewIdleSway: (previewIdleSway) => set({ previewIdleSway }),
   setPreviewZoom: (previewZoom) => set({ previewZoom }),
   setShowChecker: (showChecker) => set({ showChecker }),

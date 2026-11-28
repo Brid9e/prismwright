@@ -217,7 +217,7 @@ export function EffectFields({
             // 同一字段一致；若 grow 则控件区撑满、内容贴左，上传按钮会浮在中间。
             return (
               <PropertyRow key={field.key} label={label}>
-                <span className="min-w-0 max-w-[16ch] truncate text-[11px] text-muted" title={path}>
+                <span className="min-w-0 max-w-[16ch] truncate text-label text-muted" title={path}>
                   {fileName || t("imageMask.notSet")}
                 </span>
                 <IconButton
@@ -264,7 +264,7 @@ export function EffectFields({
             const painted = String(params[field.key] ?? "") !== ""
             return (
               <PropertyRow key={field.key} label={label}>
-                <span className="min-w-0 max-w-[16ch] truncate text-[11px] text-muted">
+                <span className="min-w-0 max-w-[16ch] truncate text-label text-muted">
                   {painted ? t("maskErase.painted") : t("maskErase.notPainted")}
                 </span>
                 <IconButton
@@ -345,7 +345,7 @@ function AddEffectMenu({
           横向内边距只由这层容器给（`px-2`），与分组标题对齐；`w-full` 显式铺满——`<button>`
           默认按内容收缩，光靠 `flex` 在 WebView 里未必撑开。 */}
       <div className="px-2 pb-1 pt-0.5">
-        <DropdownMenu.Trigger className="flex h-6 w-full items-center justify-center gap-1 rounded-sm bg-elevated px-1.5 text-[12px] text-muted outline-none hover:text-foreground focus:ring-1 focus:ring-ring data-[state=open]:text-foreground">
+        <DropdownMenu.Trigger className="flex h-6 w-full items-center justify-center gap-1 rounded-control bg-elevated px-1.5 text-body text-muted outline-none hover:text-foreground focus:ring-1 focus:ring-ring data-[state=open]:text-foreground">
           <Plus size={13} />
           {t("add")}
         </DropdownMenu.Trigger>
@@ -353,7 +353,7 @@ function AddEffectMenu({
       <DropdownMenu.Portal>
         <DropdownMenu.Content
           sideOffset={4}
-          className="z-50 min-w-[var(--radix-dropdown-menu-trigger-width)] rounded-sm border border-border-subtle bg-elevated py-1 shadow-lg"
+          className="z-50 min-w-[var(--radix-dropdown-menu-trigger-width)] rounded-control border border-line-soft bg-elevated py-1 shadow-lg"
         >
           {kinds.map((kind) => {
             const available = canAddKind(effects, kind)
@@ -362,12 +362,12 @@ function AddEffectMenu({
                 key={kind}
                 disabled={!available}
                 onSelect={() => onAdd(kind)}
-                className="flex cursor-default items-center gap-2 px-2 py-1 text-[12px] text-foreground outline-none data-[highlighted]:bg-accent/25 data-[disabled]:text-disabled"
+                className="flex cursor-default items-center gap-2 px-2 py-1 text-body text-foreground outline-none data-[highlighted]:bg-accent-soft data-[disabled]:text-disabled"
               >
                 <span className="truncate">{t(EFFECT_REGISTRY[kind].labelKey)}</span>
                 {/* 满槽位时在右侧标注原因，避免「点了没反应」的困惑。 */}
                 {!available && (
-                  <span className="ml-auto text-[10px] text-disabled">{t("role.full")}</span>
+                  <span className="ml-auto text-num text-disabled">{t("role.full")}</span>
                 )}
               </DropdownMenu.Item>
             )
@@ -421,7 +421,7 @@ function EffectRow({
   const name = t(EFFECT_REGISTRY[effect.kind].labelKey)
 
   return (
-    <div className="border-b border-border last:border-b-0">
+    <div className="border-b border-line last:border-b-0">
       <div className="flex items-center gap-1 px-2 py-1">
         <Switch checked={effect.enabled} onChange={() => onToggle(effect.id)} ariaLabel={name} />
 
@@ -447,7 +447,7 @@ function EffectRow({
           </>
         )}
 
-        <span className="min-w-0 flex-1 truncate text-[12px] text-foreground" title={name}>
+        <span className="min-w-0 flex-1 truncate text-body text-foreground" title={name}>
           {name}
         </span>
 
@@ -456,7 +456,7 @@ function EffectRow({
           onClick={() => onToggleExpand(effect.id)}
           aria-label={name}
           aria-expanded={expanded}
-          className="flex h-5 w-5 shrink-0 items-center justify-center rounded-sm text-muted hover:bg-elevated hover:text-foreground"
+          className="flex h-5 w-5 shrink-0 items-center justify-center rounded-control text-muted hover:bg-elevated hover:text-foreground"
         >
           {expanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
         </button>
@@ -466,7 +466,7 @@ function EffectRow({
 
       {/* 被覆盖提示：置于展开区之上，无论是否展开都能看到（用户需要先知道它当前不生效）。 */}
       {overridden && (
-        <div className="px-2 pb-1 text-[10px] text-warning">{t("imageMask.overridden")}</div>
+        <div className="px-2 pb-1 text-num text-warning">{t("imageMask.overridden")}</div>
       )}
       {expanded && (
         <EffectFields
@@ -509,7 +509,7 @@ export function EffectStack({
 
   return (
     <div className="py-1">
-      <div className="select-none px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-disabled">
+      <div className="select-none px-2 py-1 text-num font-medium uppercase tracking-wide text-disabled">
         {t("title")}
       </div>
 
@@ -521,8 +521,8 @@ export function EffectStack({
         if (group.length === 0 && kinds.length === 0) return null
 
         return (
-          <div key={role} className="border-b border-border last:border-b-0">
-            <div className="select-none px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-muted">
+          <div key={role} className="border-b border-line last:border-b-0">
+            <div className="select-none px-2 py-1 text-num font-medium uppercase tracking-wide text-muted">
               {t(`role.${role}`)}
             </div>
 

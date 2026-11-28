@@ -181,19 +181,19 @@ export function AlbumDialog() {
         {/* 页面：全部纵向排列，跨页拖动时不需要先切页。 */}
         <div className="min-w-0 flex-1 overflow-y-auto pr-1">
           {cards.length === 0 ? (
-            <p className="py-6 text-center text-[12px] text-muted">{t("album.noCards")}</p>
+            <p className="py-6 text-center text-body text-muted">{t("album.noCards")}</p>
           ) : null}
           {pages.map((slots, page) => (
             <section key={page} className="mb-3">
               <div className="mb-1.5 flex h-6 items-center justify-between">
-                <span className="text-[12px] font-medium text-foreground">
+                <span className="text-body font-medium text-foreground">
                   {t("album.page", { page: page + 1 })}
                 </span>
                 {pages.length > 1 ? (
                   <button
                     type="button"
                     onClick={() => apply(removePage(pages, page))}
-                    className="rounded-sm px-1.5 text-[11px] text-muted hover:text-danger"
+                    className="rounded-control px-1.5 text-label text-muted hover:text-danger"
                   >
                     {t("album.removePage")}
                   </button>
@@ -218,7 +218,7 @@ export function AlbumDialog() {
                             target.slot === slot,
                         )
                       }
-                      className={`aspect-[5/7] min-w-0 rounded-sm ${
+                      className={`aspect-[5/7] min-w-0 rounded-control ${
                         hovered ? "ring-2 ring-accent" : ""
                       }`}
                     >
@@ -232,10 +232,10 @@ export function AlbumDialog() {
                         />
                       ) : (
                         <div
-                          className={`flex h-full items-center justify-center rounded-sm border border-dashed text-[10px] ${
+                          className={`flex h-full items-center justify-center rounded-control border border-dashed text-num ${
                             hovered
-                              ? "border-accent bg-accent/10 text-accent"
-                              : "border-border-subtle text-disabled"
+                              ? "border-accent bg-accent-soft/40 text-accent"
+                              : "border-line-soft text-disabled"
                           }`}
                           title={t("album.emptySlot")}
                         >
@@ -251,7 +251,7 @@ export function AlbumDialog() {
           <button
             type="button"
             onClick={() => apply(appendPage(pages))}
-            className="mb-1 h-7 w-full rounded-sm border border-dashed border-border-subtle text-[12px] text-muted hover:bg-elevated"
+            className="mb-1 h-7 w-full rounded-control border border-dashed border-line-soft text-body text-muted hover:bg-elevated"
           >
             {t("album.addPage")}
           </button>
@@ -259,7 +259,7 @@ export function AlbumDialog() {
 
         {/* 未归档卡：拖进格子即落位；留在原地的卡由小程序自动补到最后一页。 */}
         <aside
-          className={`flex w-52 shrink-0 flex-col rounded-sm border border-border bg-app/40 p-2 ${
+          className={`flex w-52 shrink-0 flex-col rounded-control border border-line bg-app/40 p-2 ${
             hover?.kind === "tray" ? "ring-2 ring-accent" : ""
           }`}
           onPointerEnter={() => {
@@ -267,10 +267,10 @@ export function AlbumDialog() {
           }}
           onPointerLeave={() => clearDropTarget((target) => target.kind === "tray")}
         >
-          <h3 className="text-[12px] font-medium text-foreground">
+          <h3 className="text-body font-medium text-foreground">
             {t("album.unplaced", { cards: unplaced.length })}
           </h3>
-          <p className="mt-1 text-[11px] leading-relaxed text-muted">{t("album.unplacedHint")}</p>
+          <p className="mt-1 text-label leading-relaxed text-muted">{t("album.unplacedHint")}</p>
           <div className="mt-2 flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto">
             {unplaced.map((cardId) => {
               const card = byId.get(cardId)
@@ -293,7 +293,7 @@ export function AlbumDialog() {
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="h-6 rounded-sm bg-accent px-3 text-[12px] text-accent-foreground hover:bg-accent-hover"
+          className="h-6 rounded-control bg-accent px-3 text-body text-accent-foreground hover:bg-accent-hover"
         >
           {t("common:action.confirm")}
         </button>
@@ -303,7 +303,7 @@ export function AlbumDialog() {
       {drag && draggedCard
         ? createPortal(
             <div
-              className="pointer-events-none fixed z-[70] -translate-x-1/2 -translate-y-1/2 rounded-sm border border-accent bg-panel px-2 py-1 text-[11px] text-foreground shadow-lg"
+              className="pointer-events-none fixed z-[70] -translate-x-1/2 -translate-y-1/2 rounded-control border border-accent bg-panel px-2 py-1 text-label text-foreground shadow-lg"
               style={{ left: drag.x, top: drag.y }}
             >
               {draggedCard.name}
@@ -341,16 +341,16 @@ function AlbumTile({
     <div
       onPointerDown={(event) => onPointerDown(event, card.id)}
       title={card.name}
-      className={`group relative flex min-w-0 cursor-grab items-center gap-1.5 rounded-sm border border-border border-l-[3px] bg-panel px-1.5 active:cursor-grabbing ${tone.edge} ${
+      className={`group relative flex min-w-0 cursor-grab items-center gap-1.5 rounded-control border border-line border-l-[3px] bg-panel px-1.5 active:cursor-grabbing ${tone.edge} ${
         compact ? "h-8 shrink-0" : "h-full flex-col justify-center"
       }`}
     >
-      <span className="min-w-0 max-w-full truncate text-[11px] text-foreground">{card.name}</span>
-      <span className={`shrink-0 rounded-sm px-1 text-[9px] leading-4 ${tone.text} ${tone.tint}`}>
+      <span className="min-w-0 max-w-full truncate text-label text-foreground">{card.name}</span>
+      <span className={`shrink-0 rounded-control px-1 text-num leading-4 ${tone.text} ${tone.tint}`}>
         {t(`card:rarity.${card.rarity}`)}
       </span>
       {card.hidden ? (
-        <span className="shrink-0 rounded-sm bg-accent/15 px-1 text-[9px] text-accent">
+        <span className="shrink-0 rounded-control bg-accent-soft/60 px-1 text-num text-accent">
           {hiddenLabel}
         </span>
       ) : null}
@@ -362,7 +362,7 @@ function AlbumTile({
             event.stopPropagation()
             onRemove()
           }}
-          className="absolute right-0.5 top-0.5 hidden h-4 w-4 items-center justify-center rounded-sm bg-panel text-[11px] leading-none text-muted hover:text-danger group-hover:flex"
+          className="absolute right-0.5 top-0.5 hidden h-4 w-4 items-center justify-center rounded-control bg-panel text-label leading-none text-muted hover:text-danger group-hover:flex"
         >
           ×
         </button>

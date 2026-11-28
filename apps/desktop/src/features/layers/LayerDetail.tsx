@@ -13,15 +13,17 @@
  * 所有滑块共用一个规律：`updateLayer(ref, id, patch)` 的合并键按字段自动区分，
  * 因此拖动同一个滑块会被合并成一步历史，松手后再拖是新的一步。
  */
+import { Sparkles } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { findLayerById, type BlendMode, type CardFace, type Layer } from "@prismwright/schema"
 import { usePackStore, type EffectTarget, type FaceRef } from "../../store/packStore"
 import { useUiStore } from "../../store/uiStore"
 import { packFs } from "../../tauri/pack-fs"
+import { EmptyState } from "../../ui/EmptyState"
 import { PropertyRow } from "../../ui/PropertyRow"
 import { Slider } from "../../ui/Slider"
 import { Select } from "../../ui/Select"
-import { Section } from "../../ui/Section"
+import { Section, SectionCard } from "../../ui/Section"
 import { displayLayerName } from "../cards/display"
 import { importErrorMessage } from "../assets/import-error"
 import { EffectStack } from "../effects/EffectStack"
@@ -82,10 +84,16 @@ export function LayerDetail({
   face,
   faceRef,
   layerId,
+  section = "properties",
 }: {
   face: CardFace
   faceRef: FaceRef
   layerId: string
+  /**
+   * 渲染哪一半：`properties` 只画名称/混合/合成（图层页签），`effects` 只画效果栈
+   * （效果页签）。默认两半都画，保留旧调用方行为。
+   */
+  section?: "properties" | "effects"
 }) {
   const { t } = useTranslation("layer")
   // 第二把 t：绑定 `errors` 命名空间。`importErrorMessage` 内部用不带前缀的键
@@ -139,9 +147,44 @@ export function LayerDetail({
     if (!result.ok) window.alert(importErrorMessage(result, tErrors))
   }
 
+  if (section === "effects") {
+    if (layer.kind === "text") {
+      return (
+        <div className="p-3">
+          <EmptyState icon={Sparkles} title={t("effectsOnText")} />
+        </div>
+      )
+    }
+    return (
+      <div className="p-2">
+        <SectionCard title={t("section.layers")}>
+          <EffectStack
+            scope="layer"
+            effects={layer.effects}
+            onAdd={(kind) => addEffect(faceRef, effectTarget, kind)}
+            onRemove={(id) => removeEffect(faceRef, effectTarget, id)}
+            onToggle={(id) => {
+              const e = layer.effects.find((x) => x.id === id)
+              if (e) updateEffect(faceRef, effectTarget, id, { enabled: !e.enabled })
+            }}
+            onMove={(id, toIndex) => moveEffect(faceRef, effectTarget, id, toIndex)}
+            onUpdate={(id, patch) => updateEffect(faceRef, effectTarget, id, patch)}
+            onPickImage={(id, fieldKey) => void pickImage(id, fieldKey)}
+            onPickColor={(id, colorIndex) =>
+              requestColorPick({ ref: faceRef, target: effectTarget, effectId: id, colorIndex })
+            }
+            onPaintErase={(id) =>
+              requestErasePaint({ ref: faceRef, target: effectTarget, effectId: id })
+            }
+          />
+        </SectionCard>
+      </div>
+    )
+  }
+
   return (
     <div className="py-1">
-      <div className="select-none px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-disabled">
+      <div className="select-none px-2 py-1 text-num font-medium uppercase tracking-wide text-disabled">
         {displayLayerName(layer, t)}
       </div>
 
@@ -149,7 +192,7 @@ export function LayerDetail({
         <input
           value={layer.name}
           onChange={(e) => updateLayer(faceRef, layerId, { name: e.target.value })}
-          className="h-6 min-w-0 flex-1 rounded-sm border border-border bg-sunken px-1.5 text-[12px] outline-none focus:border-accent"
+          className="h-control min-w-0 flex-1 rounded-control border border-line-soft bg-sunken px-1.5 text-body text-foreground outline-none focus:border-accent"
         />
       </PropertyRow>
 
@@ -182,35 +225,8 @@ export function LayerDetail({
         )}
       </Section>
 
-      {layer.kind === "text" && layer.text ? (
-        // 文字层：排版参数面板；效果不在本层提供入口（效果加到子层，见 spec §6.2）。
+      {layer.kind === "text" && layer.text && (
         <TextDetail faceRef={faceRef} layerId={layerId} text={layer.text} />
-      ) : (
-        // 效果栈：注册表驱动，逐条可开关 / 调序 / 改参 / 删——图层唯一的效果入口。
-        // 图蒙版（imageMask）与程序化蒙版（maskPreset）都在此添加；前者的图片字段
-        // 经 onPickImage 拉起原生文件框（见 pickImage）。
-        <EffectStack
-          scope="layer"
-          effects={layer.effects}
-          onAdd={(kind) => addEffect(faceRef, effectTarget, kind)}
-          onRemove={(id) => removeEffect(faceRef, effectTarget, id)}
-          onToggle={(id) => {
-            // 开关走 updateEffect 的 `enabled`（EffectBase 字段，非 params），需先取当前值再取反。
-            const e = layer.effects.find((x) => x.id === id)
-            if (e) updateEffect(faceRef, effectTarget, id, { enabled: !e.enabled })
-          }}
-          onMove={(id, toIndex) => moveEffect(faceRef, effectTarget, id, toIndex)}
-          onUpdate={(id, patch) => updateEffect(faceRef, effectTarget, id, patch)}
-          onPickImage={(id, fieldKey) => void pickImage(id, fieldKey)}
-          // 图层也能挂 maskErase（注册表 scope: "both"）：画的是**本层自己**那张擦除图，
-          // 与整卡那张相乘，故这里传的 target 必须带上图层 id。
-          onPickColor={(id, colorIndex) =>
-            requestColorPick({ ref: faceRef, target: effectTarget, effectId: id, colorIndex })
-          }
-          onPaintErase={(id) =>
-            requestErasePaint({ ref: faceRef, target: effectTarget, effectId: id })
-          }
-        />
       )}
     </div>
   )

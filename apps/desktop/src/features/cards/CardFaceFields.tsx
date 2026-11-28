@@ -32,21 +32,21 @@ export function CardFaceFields({ face, faceRef, card, showSeriesAspect = true }:
   const updateCard = usePackStore((s) => s.updateCard)
   const updateFace = usePackStore((s) => s.updateFace)
   return (
-    <div className="border-b border-border py-1">
+    <div className="border-b border-line py-1">
       {card && (
         <>
           <PropertyRow label={t("field.name")} grow>
             <input
               value={card.name}
               onChange={(e) => updateCard(card.id, { name: e.target.value })}
-              className="h-6 min-w-0 flex-1 rounded-sm border border-border bg-sunken px-1.5 text-[12px] outline-none focus:border-accent"
+              className="h-6 min-w-0 flex-1 rounded-control border border-line bg-sunken px-1.5 text-body outline-none focus:border-accent"
             />
           </PropertyRow>
           <PropertyRow label={t("field.notes")} grow>
             <input
               value={card.notes}
               onChange={(e) => updateCard(card.id, { notes: e.target.value })}
-              className="h-6 min-w-0 flex-1 rounded-sm border border-border bg-sunken px-1.5 text-[12px] outline-none focus:border-accent"
+              className="h-6 min-w-0 flex-1 rounded-control border border-line bg-sunken px-1.5 text-body outline-none focus:border-accent"
             />
           </PropertyRow>
           <PropertyRow label={t("field.rarity")}>

@@ -19,6 +19,7 @@ import { IMAGE_EXTENSIONS, usePackStore, type FaceRef } from "../../store/packSt
 import { useUiStore } from "../../store/uiStore"
 import { packFs } from "../../tauri/pack-fs"
 import { layerContextItems } from "../../ui/contextMenuModel"
+import { Button } from "../../ui/Button"
 import { Tooltip } from "../../ui/Tooltip"
 import { importErrorMessage } from "../assets/import-error"
 import { displayLayerName } from "../cards/display"
@@ -137,7 +138,7 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
               e.stopPropagation()
               setLayerEnabled(faceRef, layerId, !enabled)
             }}
-            className="flex h-5 w-5 items-center justify-center rounded-sm text-muted hover:text-foreground"
+            className="flex h-5 w-5 items-center justify-center rounded-chip text-muted hover:bg-elevated hover:text-foreground"
           >
             {enabled ? <Eye size={12} /> : <EyeOff size={12} />}
           </button>
@@ -150,7 +151,7 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
               e.stopPropagation()
               duplicateLayer(faceRef, layerId)
             }}
-            className="flex h-5 w-5 items-center justify-center rounded-sm text-muted hover:text-foreground"
+            className="flex h-5 w-5 items-center justify-center rounded-chip text-muted hover:bg-elevated hover:text-foreground"
           >
             <Copy size={12} />
           </button>
@@ -163,7 +164,7 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
               e.stopPropagation()
               requestConfirm({ kind: "delete-layer", ref: faceRef, layerId })
             }}
-            className="flex h-5 w-5 items-center justify-center rounded-sm text-muted hover:text-danger"
+            className="flex h-5 w-5 items-center justify-center rounded-chip text-muted hover:bg-elevated hover:text-danger"
           >
             <Trash2 size={12} />
           </button>
@@ -173,52 +174,33 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
   }
 
   return (
-    <div className="flex min-h-0 flex-col border-b border-border">
-      <div className="flex shrink-0 items-center px-1 py-1">
-        <span className="select-none px-1 text-[10px] font-medium uppercase tracking-wide text-disabled">
+    <div className="flex min-h-0 flex-col border-b border-line">
+      <div className="flex shrink-0 items-center px-2 pb-1 pt-2">
+        <span className="select-none text-body font-semibold text-muted">
           {t("section.layers")}
         </span>
-        {/* 右对齐的起点在「添加文字」上：三个入口靠右排列，顺序为 文字 / 图片 / 普通图层。 */}
-        <Tooltip label={t("action.addText")}>
-          <button
-            type="button"
-            aria-label={t("action.addText")}
-            onClick={() => addTextLayer(faceRef, t("text.defaultContent"))}
-            className="ml-auto flex h-5 w-5 items-center justify-center rounded-sm text-muted hover:bg-elevated hover:text-foreground"
-          >
-            <Type size={13} />
-          </button>
-        </Tooltip>
-        <Tooltip label={t("action.addImage")}>
-          <button
-            type="button"
-            aria-label={t("action.addImage")}
-            onClick={() => void addImage()}
-            className="flex h-5 w-5 items-center justify-center rounded-sm text-muted hover:bg-elevated hover:text-foreground"
-          >
-            <ImagePlus size={13} />
-          </button>
-        </Tooltip>
-        <Tooltip label={t("action.addBackground")}>
-          <button
-            type="button"
-            aria-label={t("action.addBackground")}
-            onClick={() => void addImage(true)}
-            className="flex h-5 w-5 items-center justify-center rounded-sm text-muted hover:bg-elevated hover:text-foreground"
-          >
-            <Image size={13} />
-          </button>
-        </Tooltip>
-        <Tooltip label={t("action.add")}>
-          <button
-            type="button"
-            aria-label={t("action.add")}
-            onClick={() => addLayer(faceRef)}
-            className="flex h-5 w-5 items-center justify-center rounded-sm text-muted hover:bg-elevated hover:text-foreground"
-          >
-            <Plus size={13} />
-          </button>
-        </Tooltip>
+      </div>
+      <div className="grid shrink-0 grid-cols-2 gap-1 px-2 pb-2">
+        <Button variant="secondary" className="justify-start px-2 text-label" onClick={() => void addImage(true)}>
+          <Image size={13} />
+          {t("action.addBackground")}
+        </Button>
+        <Button variant="secondary" className="justify-start px-2 text-label" onClick={() => void addImage()}>
+          <ImagePlus size={13} />
+          {t("action.addImage")}
+        </Button>
+        <Button
+          variant="secondary"
+          className="justify-start px-2 text-label"
+          onClick={() => addTextLayer(faceRef, t("text.defaultContent"))}
+        >
+          <Type size={13} />
+          {t("action.addText")}
+        </Button>
+        <Button variant="secondary" className="justify-start px-2 text-label" onClick={() => addLayer(faceRef)}>
+          <Plus size={13} />
+          {t("action.add")}
+        </Button>
       </div>
       {/* 纵向滚动的树列表同样不该出现横向滚动条（行内文本已 `truncate`）：只放开 y、裁掉 x，
           避免极窄栏 + 深层嵌套时挤出一条横向滚动条。 */}

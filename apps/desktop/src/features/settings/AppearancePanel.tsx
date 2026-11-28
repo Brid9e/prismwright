@@ -36,7 +36,7 @@ export function AppearancePanel() {
   return (
     <div className="flex flex-col">
       <div className="flex items-center justify-between gap-2 py-1.5">
-        <span className="shrink-0 text-[13px] text-muted">{t("appearance.title")}</span>
+        <span className="shrink-0 text-title text-muted">{t("appearance.title")}</span>
         <div className="flex min-w-0 items-center gap-1">
           <Select
             value={selectedId}
@@ -49,7 +49,7 @@ export function AppearancePanel() {
           <button
             type="button"
             onClick={() => void importFromFile()}
-            className="shrink-0 rounded-sm border border-border-subtle px-2 py-1 text-[13px] text-foreground hover:bg-elevated"
+            className="shrink-0 rounded-control border border-line-soft px-2 py-1 text-title text-foreground hover:bg-elevated"
           >
             {t("appearance.import")}
           </button>
@@ -57,7 +57,7 @@ export function AppearancePanel() {
       </div>
 
       {importError && (
-        <p className="pt-1 text-[11px] text-danger">
+        <p className="pt-1 text-label text-danger">
           {tErr(importError.key, { message: importError.message ?? "" })}
         </p>
       )}

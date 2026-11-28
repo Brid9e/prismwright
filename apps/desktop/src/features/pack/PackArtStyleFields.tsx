@@ -32,19 +32,19 @@ export function PackArtStyleFields() {
   return (
     <div className="flex min-w-0 flex-col">
       <div className="flex items-center justify-between gap-2 px-2 pb-1">
-        <span className="shrink-0 text-[12px] font-medium text-foreground">
+        <span className="shrink-0 text-body font-medium text-foreground">
           {t("pack.cover.style.title")}
         </span>
         <button
           type="button"
           onClick={() => set({ ...DEFAULT_PACK_ART_STYLE })}
-          className="h-5 shrink-0 rounded-sm px-1.5 text-[11px] text-muted hover:bg-elevated hover:text-foreground"
+          className="h-5 shrink-0 rounded-control px-1.5 text-label text-muted hover:bg-elevated hover:text-foreground"
         >
           {t("pack.cover.style.resetAll")}
         </button>
       </div>
       {!hasArt && (
-        <p className="px-2 pb-1 text-[11px] leading-relaxed text-muted">
+        <p className="px-2 pb-1 text-label leading-relaxed text-muted">
           {t("pack.cover.style.needArt")}
         </p>
       )}

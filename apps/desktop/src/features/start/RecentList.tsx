@@ -40,13 +40,13 @@ export function RecentList() {
   }, [recent])
 
   if (recent.length === 0) {
-    return <p className="text-[12px] text-muted">{t("start.empty")}</p>
+    return <p className="text-body text-muted">{t("start.empty")}</p>
   }
 
   const now = Date.now()
   return (
     <div className="flex w-80 flex-col gap-1">
-      <div className="select-none px-1 text-[10px] font-medium uppercase tracking-wide text-disabled">
+      <div className="select-none px-1 text-num font-medium uppercase tracking-wide text-disabled">
         {tc("menu.recent")}
       </div>
       {recent.map((r) => {
@@ -54,7 +54,7 @@ export function RecentList() {
         return (
           <div
             key={r.rootDir}
-            className="group flex items-center gap-2 rounded-sm border border-border px-2 py-1.5"
+            className="group flex items-center gap-2 rounded-control border border-line px-2 py-1.5"
           >
             <button
               type="button"
@@ -66,11 +66,11 @@ export function RecentList() {
               }`}
             >
               <span
-                className={`block truncate text-[12px] ${gone ? "text-disabled" : "text-foreground"}`}
+                className={`block truncate text-body ${gone ? "text-disabled" : "text-foreground"}`}
               >
                 {r.name}
               </span>
-              <span className="block truncate text-[10px] text-muted">
+              <span className="block truncate text-num text-muted">
                 {
                   // 失效项的主按钮是 disabled、进不了 Tab 序，若只靠 title 提示路径会让
                   // 键盘/触屏用户无从知道它指向哪，故在副标签里显式带上路径（truncate 让长路径省略）。
@@ -87,7 +87,7 @@ export function RecentList() {
               // 隐藏用 opacity 而不是 hidden：仍然要让 × 留在 Tab 序里可键盘触达；
               // 但纯 opacity-0 会让键盘用户 Tab 到一个「看不见」的按钮，故补 focus-visible:opacity-100
               // 让它在获得键盘焦点时显形（并保留浏览器默认焦点环），悬停行为不变。
-              className="flex h-5 w-5 shrink-0 items-center justify-center rounded-sm text-muted opacity-0 hover:text-danger group-hover:opacity-100 focus-visible:opacity-100"
+              className="flex h-5 w-5 shrink-0 items-center justify-center rounded-control text-muted opacity-0 hover:text-danger group-hover:opacity-100 focus-visible:opacity-100"
             >
               <X size={12} />
             </button>
