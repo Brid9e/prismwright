@@ -240,7 +240,7 @@
 ### 11.2 落点
 
 - `features/cards/InspectorPanel.tsx`：在页签内容与底部面板之间插入竖向 `PanelGroup`；移除 `layers` 页签里的 `LayerList`；`layers` 页签只渲染 `TextDetail`，并按选中层是否为文字层过滤页签。
-- `features/layers/LayerList.tsx`：根节点 `flex h-full min-h-0 flex-col border-t border-line bg-sunken`；顶部一行渲染混合下拉 + 透明度滑杆（无选中层时禁用）；添加动作改 `IconButton` 图标行；树容器 `min-h-0 flex-1`；管理行内重命名状态。
+- `features/layers/LayerList.tsx`：根节点 `flex h-full min-h-0 flex-col border-t border-line`；顶部一行渲染混合下拉 + 透明度滑杆（无选中层时禁用）；添加动作改 `IconButton` 图标行；**树/列表滚动区** `min-h-0 flex-1 bg-sunken`（只有列表区域更深，标题与属性行仍用面板底色）；管理行内重命名状态。
 - `features/layers/LayerDetail.tsx`：只剩效果栈（`section` prop 删除），名称 / 混合 / 透明度的旧属性分支删除。
 - `features/layers/LayerTree.tsx`：行支持双击重命名与 `RenameInput`。
 - `features/cards/inspectorTabs.ts`：`layers` 的展示文案改为「属性」；`INSPECTOR_TABS` 顺序不变，标签变。

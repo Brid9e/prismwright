@@ -195,7 +195,7 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col border-t border-line bg-sunken">
+    <div className="flex h-full min-h-0 flex-col border-t border-line">
       <div className="flex shrink-0 items-center px-3 pb-1 pt-2">
         <span className="select-none text-body font-semibold text-muted">
           {t("section.layers")}
@@ -246,7 +246,7 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
       </div>
       {/* 纵向滚动的树列表同样不该出现横向滚动条（行内文本已 `truncate`）：只放开 y、裁掉 x，
           避免极窄栏 + 深层嵌套时挤出一条横向滚动条。滚动条走覆盖式。 */}
-      <ScrollArea className="min-h-0 flex-1">
+      <ScrollArea className="min-h-0 flex-1 bg-sunken">
         <LayerTree
           rows={rows}
           onSelect={selectLayer}
