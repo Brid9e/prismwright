@@ -84,13 +84,13 @@ export function Slider({
           disabled ? "cursor-not-allowed opacity-40" : ""
         }`}
       >
-        {/* 厚圆角矩形轨道：与数字框同高（24）同圆角（7）；已滑过部分用实心 track-fill，
+        {/* 扁平厚圆角矩形轨道：与数字框同高（24）同圆角（7）；已滑过部分用实心 track-fill，
             与未滑过的中性灰底形成明确区分。overflow-hidden 让填充在左端随轨道圆角收口。 */}
-        <RadixSlider.Track className="inset-control relative h-control w-full grow overflow-hidden rounded-control border border-line-soft bg-track">
+        <RadixSlider.Track className="relative h-control w-full grow overflow-hidden rounded-control bg-track">
           <RadixSlider.Range className="absolute h-full rounded-control bg-track-fill" />
         </RadixSlider.Track>
-        {/* 竖向圆角矩形手柄（8×16），不是圆点。 */}
-        <RadixSlider.Thumb className="thumb-shadow block h-4 w-2 rounded-chip bg-foreground outline-none focus-visible:ring-2 focus-visible:ring-accent/50" />
+        {/* 竖向圆角矩形手柄（8×24），与轨道同高、无投影。 */}
+        <RadixSlider.Thumb className="block h-control w-2 rounded-chip bg-foreground outline-none focus-visible:ring-2 focus-visible:ring-accent/50" />
       </RadixSlider.Root>
       <NumberField
         value={value}

@@ -23,14 +23,18 @@ function renderSlider(props: Partial<Parameters<typeof Slider>[0]>) {
 }
 
 describe("Slider 轨道", () => {
-  it("厚轨道、已滑过填充与竖直手柄都用了语义刻度类", () => {
+  it("扁平厚轨道：无内阴影、无边框，手柄与轨道同高且无投影", () => {
     const html = renderSlider({})
     // 轨道与数字框同用 control 圆角；填充用 track-fill 与未滑过部分区分。
     expect(html).toContain("rounded-control")
     expect(html).toContain("bg-track")
     expect(html).toContain("bg-track-fill")
-    // 手柄是 8×16 的竖向圆角矩形（h-4 = 16px，w-2 = 8px），不是圆点。
-    expect(html).toMatch(/class="[^"]*\bh-4\b[^"]*\bw-2\b[^"]*"/)
+    // 扁平：轨道不再有 inset-control 内阴影与描边。
+    expect(html).not.toContain("inset-control")
+    expect(html).toContain("overflow-hidden rounded-control bg-track")
+    // 手柄与轨道同高（h-control），宽 8px；不再有 thumb-shadow。
+    expect(html).toMatch(/class="[^"]*\bh-control\b[^"]*\bw-2\b[^"]*"/)
+    expect(html).not.toContain("thumb-shadow")
   })
 })
 
