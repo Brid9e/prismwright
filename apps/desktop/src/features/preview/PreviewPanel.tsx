@@ -13,7 +13,7 @@ import { CARD_ASPECT, MAX_ZOOM, MIN_ZOOM } from "@prismwright/renderer/v1"
 import { useDefaultBackStore } from "../../store/defaultBackStore"
 import { isDefaultBackPack } from "../default-back/default-back"
 import { findCard, usePackStore } from "../../store/packStore"
-import { useUiStore } from "../../store/uiStore"
+import { DEFAULT_PREVIEW_ZOOM, useUiStore } from "../../store/uiStore"
 import { Segmented } from "../../ui/Segmented"
 import { Slider } from "../../ui/Slider"
 import { ToolbarButton } from "../../ui/Toolbar"
@@ -483,10 +483,10 @@ export function PreviewPanel() {
     resolveErasePaint()
   }
 
-  // 「重置视角」= 缩放归 1 + 倾斜角清回原位——相机本身不做轨道控制，没有别的状态要复位。
+  // 「重置视角」= 缩放回到默认 200% + 倾斜角清回原位——相机本身不做轨道控制，没有别的状态要复位。
   // 倾斜那半由 `useCardView` 监听事件并调 `clearTilt()`，缩放这半是 store 状态，直接改。
   const resetView = () => {
-    setZoom(1)
+    setZoom(DEFAULT_PREVIEW_ZOOM)
     window.dispatchEvent(new CustomEvent(RESET_TILT_EVENT))
   }
 

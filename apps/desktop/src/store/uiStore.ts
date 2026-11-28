@@ -21,6 +21,9 @@ import type { EffectTarget, FaceRef } from "./packStore"
 /** 设置视图的分类清单；顺序即左侧导航的顺序。 */
 export const SETTINGS_CATEGORIES = ["general", "appearance"] as const
 
+/** 预览默认缩放倍数（200%）；「重置视角」也回到这里。 */
+export const DEFAULT_PREVIEW_ZOOM = 2
+
 /** 设置分类 id。 */
 export type SettingsCategory = (typeof SETTINGS_CATEGORIES)[number]
 
@@ -242,7 +245,7 @@ export const useUiStore = create<UiStoreState>()((set) => ({
   layout: "studio",
   previewIdleSway: false,
   // 默认 2 倍：卡片在 1 倍下只占中间一小块，细节看不清；2 倍能直接看到印刷文字。
-  previewZoom: 2,
+  previewZoom: DEFAULT_PREVIEW_ZOOM,
   showChecker: true,
   pendingConfirm: null,
   missingAssets: {},
