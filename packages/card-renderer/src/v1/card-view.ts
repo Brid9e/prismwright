@@ -58,10 +58,6 @@ import { clientToNdc, ndcToClient, type PickRect } from "./pick"
 import { createBaseMaterial } from "./materials/base-material"
 import { createLayerMaterial, type AncestorMask } from "./materials/layer-material"
 import {
-  EDGE_BEVEL_RENDER_ORDER,
-  createEdgeBevelMaterial,
-} from "./materials/edge-bevel-material"
-import {
   GLASS_OVERLAY_RENDER_ORDER,
   createGlassOverlayMaterial,
 } from "./materials/glass-overlay-material"
@@ -194,29 +190,7 @@ export function createCardView(opts: CardViewOptions): CardView {
   backBaseMesh.renderOrder = 0
   backGroup.add(backBaseMesh)
 
-  // 边缘假倒角：盖在全部图层之上的透明平面，只在圆角窄带出像素（见 edge-bevel-material）。
-  // 两面各一份，随各自的面组翻转；正视角 uTilt = 0 完全隐藏，保持平视画面不变。
-  const frontEdgeMat = createEdgeBevelMaterial({
-    aspect,
-    cornerRadius,
-    lightAngle: card.frontBumpLightAngle,
-  })
-  const frontEdgeMesh = new Mesh(geometry, frontEdgeMat)
-  frontEdgeMesh.renderOrder = EDGE_BEVEL_RENDER_ORDER
-  frontEdgeMesh.raycast = () => {}
-  frontGroup.add(frontEdgeMesh)
-
-  const backEdgeMat = createEdgeBevelMaterial({
-    aspect,
-    cornerRadius,
-    lightAngle: back?.frontBumpLightAngle,
-  })
-  const backEdgeMesh = new Mesh(geometry, backEdgeMat)
-  backEdgeMesh.renderOrder = EDGE_BEVEL_RENDER_ORDER
-  backEdgeMesh.raycast = () => {}
-  backGroup.add(backEdgeMesh)
-
-  // 玻璃反射层：与倒角同属覆盖层，renderOrder 略低（倒角压在最上面）。
+  // 玻璃反射层：覆盖在全部图层之上的透明平面，renderOrder 高于所有图层。
   const frontGlassMat = createGlassOverlayMaterial({
     envMap,
     aspect,
@@ -561,10 +535,6 @@ export function createCardView(opts: CardViewOptions): CardView {
   function applyTilt(): void {
     // 倾斜与翻面角只写在 cardGroup 上：两面与侧壁一起转，背面组预转的半圈随之生效。
     cardGroup.rotation.set(tilt.x, tilt.y, 0)
-    // 边缘倒角：平视保留一层很淡的厚度，转起来再增强。
-    const edgeTilt = 0.25 + 0.75 * Math.min(1, (Math.abs(tilt.x) + Math.abs(tilt.y)) / 0.45)
-    frontEdgeMat.uniforms.uTilt.value = edgeTilt
-    backEdgeMat.uniforms.uTilt.value = edgeTilt
     // 材质是 DoubleSide，两面同时在场会透出对面的镜像图层；按朝向只画朝观察者的那一面。
     // 单面卡没有「另一面」可换：正面组必须常显——弹簧回弹会甩过 ±90°，若按朝向隐藏，
     // 卡片与图层会空白两三帧（桌面编辑器 / 卡牌详情会看到）。背面组仍恒藏。
@@ -821,7 +791,6 @@ export function createCardView(opts: CardViewOptions): CardView {
     update(next: CardFace) {
       // 参数级更新可增量；图层数量/顺序变化则重建（此处简化：始终重建，正确优先）。
       card = next
-      frontEdgeMat.uniforms.uLightAngle.value = next.frontBumpLightAngle
       frontGlassMat.uniforms.uStrength.value = next.glassStrength
       frontGlassMat.uniforms.uRoughness.value = next.glassRoughness
       frontGlassMat.uniforms.uTint.value.set(next.glassTint)
@@ -851,8 +820,6 @@ export function createCardView(opts: CardViewOptions): CardView {
         if (stack.baseMat) stack.baseMat.uniforms.uCornerRadius.value = radius
         for (const mat of stack.layerMats) mat.uniforms.uCornerRadius.value = radius
       }
-      frontEdgeMat.uniforms.uCornerRadius.value = radius
-      backEdgeMat.uniforms.uCornerRadius.value = radius
       frontGlassMat.uniforms.uCornerRadius.value = radius
       backGlassMat.uniforms.uCornerRadius.value = radius
       if (mystery) mystery.material.uniforms.uCornerRadius.value = radius
@@ -913,12 +880,8 @@ export function createCardView(opts: CardViewOptions): CardView {
         stack.baseMat?.dispose()
       }
       flipSubs.clear()
-      frontGroup.remove(frontEdgeMesh)
-      backGroup.remove(backEdgeMesh)
       frontGroup.remove(frontGlassMesh)
       backGroup.remove(backGlassMesh)
-      frontEdgeMat.dispose()
-      backEdgeMat.dispose()
       frontGlassMat.dispose()
       backGlassMat.dispose()
       envMap.dispose()

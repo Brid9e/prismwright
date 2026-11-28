@@ -50,7 +50,7 @@ describe("玻璃卡环境", () => {
     expect(GLASS_OVERLAY_FRAGMENT).toContain("vWorldTangent * ripple.x")
   })
 
-  it("材质：正常混合、透明、不写深度、在倒角之下", () => {
+  it("材质：正常混合、透明、不写深度、渲染序高于图层", () => {
     const env = createEnvironmentTexture()
     const m = createGlassOverlayMaterial({
       envMap: env,
@@ -68,6 +68,6 @@ describe("玻璃卡环境", () => {
     expect(m.uniforms.uEnvMap.value).toBe(env)
     expect(m.uniforms.uStrength.value).toBe(0.8)
     expect(m.uniforms.uRoughness.value).toBe(0.3)
-    expect(GLASS_OVERLAY_RENDER_ORDER).toBeLessThan(100000)
+    expect(GLASS_OVERLAY_RENDER_ORDER).toBeGreaterThan(1000)
   })
 })
