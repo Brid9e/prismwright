@@ -4,6 +4,10 @@
     "normal": "Cards",
     "hidden": "Hidden"
   },
+  "identity": {
+    "title": "Edit card details",
+    "edit": "Edit name and notes"
+  },
   "field": {
     "name": "Name",
     "notes": "Notes",

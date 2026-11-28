@@ -4,6 +4,10 @@
     "normal": "普通卡",
     "hidden": "隐藏款"
   },
+  "identity": {
+    "title": "编辑卡片信息",
+    "edit": "编辑名称与备注"
+  },
   "field": {
     "name": "名称",
     "notes": "备注",

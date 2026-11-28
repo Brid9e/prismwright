@@ -7,7 +7,10 @@
  * 图层面板像 Photoshop 一样常驻在右栏底部，可拖高度；上方页签只显示当前选中层的属性 /
  * 效果，不再把图层树塞进页签里。
  */
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu"
+import { Check, Pencil } from "lucide-react"
 import { Panel as ResizePanel, PanelGroup, PanelResizeHandle } from "react-resizable-panels"
 import { createCardFace, findLayerById, flattenLayers, type CardFace } from "@prismwright/schema"
 import { isDefaultBackPack } from "../default-back/default-back"
@@ -22,8 +25,10 @@ import { Segmented } from "../../ui/Segmented"
 import { Tag } from "../../ui/Tag"
 import { customizeBackFlow, editDefaultBackFlow } from "../../app/defaultBack"
 import { CardFaceFields } from "./CardFaceFields"
+import { CardIdentityDialog } from "./CardIdentityDialog"
 import { displayCardName } from "./display"
 import { INSPECTOR_TABS, resolveInspectorTab, type InspectorTab } from "./inspectorTabs"
+import { RARITIES } from "./rarities"
 import { LayerList } from "../layers/LayerList"
 import { LayerDetail } from "../layers/LayerDetail"
 import { TextDetail } from "../layers/TextDetail"
@@ -60,6 +65,7 @@ export function InspectorPanel() {
   const selectedLayerId = usePackStore((s) => s.selectedLayerId)
   const deleteLayer = usePackStore((s) => s.deleteLayer)
   const deleteBack = usePackStore((s) => s.deleteBack)
+  const updateCard = usePackStore((s) => s.updateCard)
 
   const card = findCard(pack, selectedCardId)
   const faceRef: FaceRef =
@@ -93,6 +99,7 @@ export function InspectorPanel() {
 
   const selectedLayer =
     face && selectedLayerId ? findLayerById(face.layers, selectedLayerId) : undefined
+  const [identityOpen, setIdentityOpen] = useState(false)
   // 「属性」页签只服务文字层：普通层的混合 / 透明度已移到右下角图层面板顶部。
   const hasTextLayer = selectedLayer?.kind === "text"
   const tabs = INSPECTOR_TABS.filter((value) => value !== "layers" || hasTextLayer)
@@ -129,7 +136,6 @@ export function InspectorPanel() {
         <CardFaceFields
           face={face}
           faceRef={faceRef}
-          card={side === "back" ? null : card}
           showSeriesAspect={!editingDefaultBack}
         />
       </SectionCard>
@@ -190,7 +196,47 @@ export function InspectorPanel() {
             {title}
           </span>
           {side === "front" && card && (
-            <Tag tone={card.rarity}>{tc(`rarity.${card.rarity}`)}</Tag>
+            <>
+              <DropdownMenu.Root>
+                <DropdownMenu.Trigger asChild>
+                  <button
+                    type="button"
+                    aria-label={tc("field.rarity")}
+                    title={tc("field.rarity")}
+                    className="shrink-0 rounded-chip outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+                  >
+                    <Tag tone={card.rarity}>{tc(`rarity.${card.rarity}`)}</Tag>
+                  </button>
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Portal>
+                  <DropdownMenu.Content
+                    align="end"
+                    sideOffset={4}
+                    className="z-50 min-w-32 rounded-control border border-line-soft bg-elevated py-1 popover-shadow"
+                  >
+                    {RARITIES.map((rarity) => (
+                      <DropdownMenu.Item
+                        key={rarity}
+                        onSelect={() => updateCard(card.id, { rarity })}
+                        className="flex cursor-default items-center gap-2 px-2 py-1 outline-none data-[highlighted]:bg-accent-soft"
+                      >
+                        <Tag tone={rarity}>{tc(`rarity.${rarity}`)}</Tag>
+                        {rarity === card.rarity && <Check size={12} className="ml-auto text-accent" />}
+                      </DropdownMenu.Item>
+                    ))}
+                  </DropdownMenu.Content>
+                </DropdownMenu.Portal>
+              </DropdownMenu.Root>
+              <button
+                type="button"
+                aria-label={tc("identity.edit")}
+                title={tc("identity.edit")}
+                onClick={() => setIdentityOpen(true)}
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-control text-muted outline-none hover:bg-elevated hover:text-foreground focus-visible:ring-2 focus-visible:ring-accent/50"
+              >
+                <Pencil size={13} />
+              </button>
+            </>
           )}
         </div>
         {subtitle && <span className="truncate text-num text-disabled">{subtitle}</span>}
@@ -235,6 +281,14 @@ export function InspectorPanel() {
         </PanelGroup>
       ) : (
         <ScrollArea className="min-h-0 flex-1">{body}</ScrollArea>
+      )}
+
+      {card && (
+        <CardIdentityDialog
+          card={card}
+          open={identityOpen}
+          onClose={() => setIdentityOpen(false)}
+        />
       )}
 
       <ConfirmDialog

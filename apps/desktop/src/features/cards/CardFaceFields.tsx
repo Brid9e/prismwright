@@ -1,11 +1,11 @@
 /**
- * 卡片元信息 / 形状 / 表面 / 底色。
+ * 卡面形状 / 表面 / 底色。
  *
- * 正面与背面共用，靠 `card` 是否为 `null` 决定显示哪些身份字段。图片、蒙版、效果都在
- * 图层里，本面板不再有「卡面图」这一特殊字段。
+ * 名称 / 备注 / 稀有度已移到标题栏的编辑按钮与卡片信息弹框（见 `CardIdentityDialog`）；
+ * 图片、蒙版、效果都在图层里，本面板不再有「卡面图」这一特殊字段。
  */
 import { useTranslation } from "react-i18next"
-import type { Card, CardFace, CardFinish, Rarity } from "@prismwright/schema"
+import type { CardFace, CardFinish } from "@prismwright/schema"
 import { usePackStore, type FaceRef } from "../../store/packStore"
 import { ColorField } from "../../ui/ColorField"
 import { PropertyRow } from "../../ui/PropertyRow"
@@ -13,51 +13,21 @@ import { Select } from "../../ui/Select"
 import { Slider } from "../../ui/Slider"
 import { FaceShapeFields } from "./FaceShapeFields"
 
-/** 与 `card.rarity.*` 的 i18n key 一一对应的稀有度取值，顺序即由低到高。 */
-const RARITIES = ["common", "rare", "epic", "legendary"] as const
 /** 卡面表面材质，顺序即下拉展示序。 */
 const FINISHES = ["standard", "glass"] as const
 
 export interface CardFaceFieldsProps {
   face: CardFace
   faceRef: FaceRef
-  /** 卡片对象；背面为 `null`（背面没有身份与分类字段）。 */
-  card: Card | null
   /** 是否显示「系列宽高比」一行（编辑默认卡背时隐藏，见 `FaceShapeFields`）。 */
   showSeriesAspect?: boolean
 }
 
-export function CardFaceFields({ face, faceRef, card, showSeriesAspect = true }: CardFaceFieldsProps) {
+export function CardFaceFields({ face, faceRef, showSeriesAspect = true }: CardFaceFieldsProps) {
   const { t } = useTranslation("card")
-  const updateCard = usePackStore((s) => s.updateCard)
   const updateFace = usePackStore((s) => s.updateFace)
   return (
     <div className="flex flex-col gap-1">
-      {card && (
-        <>
-          <PropertyRow label={t("field.name")} grow>
-            <input
-              value={card.name}
-              onChange={(e) => updateCard(card.id, { name: e.target.value })}
-              className="h-control min-w-0 flex-1 rounded-control border border-line-soft bg-sunken px-2 text-body outline-none focus:border-accent"
-            />
-          </PropertyRow>
-          <PropertyRow label={t("field.notes")} grow>
-            <input
-              value={card.notes}
-              onChange={(e) => updateCard(card.id, { notes: e.target.value })}
-              className="h-control min-w-0 flex-1 rounded-control border border-line-soft bg-sunken px-2 text-body outline-none focus:border-accent"
-            />
-          </PropertyRow>
-          <PropertyRow label={t("field.rarity")}>
-            <Select
-              value={card.rarity}
-              onChange={(value) => updateCard(card.id, { rarity: value as Rarity })}
-              options={RARITIES.map((value) => ({ value, label: t(`rarity.${value}`) }))}
-            />
-          </PropertyRow>
-        </>
-      )}
 
       {/* 形状：宽高比决定整张卡的几何、圆角决定边缘弧度；正反面各自独立。 */}
       <FaceShapeFields face={face} faceRef={faceRef} showSeriesAspect={showSeriesAspect} />
