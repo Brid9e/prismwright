@@ -325,6 +325,9 @@ void main() {
   if (abs(uTiltGain - 1.0) > 1e-4) {
     N = normalize(vec3(N.xy * uTiltGain, N.z));
   }
+  // 倾斜方向（未叠 bump）：左右 / 上下倾斜的符号相反，稍后给相位加一个带符号的平移，
+  // 于是向左晃与向右晃的色带走向不再相同。平卡时 xy = 0，静止画面不受影响。
+  vec2 tiltDir = N.xy;
   // 法线（bump）：由本层图片（或继承来的卡面底图）的亮度差当场生成。两处一起改——N 给全息
   // 相位与反射，bUv 给效果图案的走势。关闭时 bUv ≡ vUv、N 不变、bumpShade ≡ 1，画面逐像素
   // 退回之前。bumpShade 是高度场在那束斜光下的明暗：没有内容可渲染成浮雕时，凹凸只靠它显形。
@@ -359,6 +362,8 @@ void main() {
 
   // 图案偏移在 holoPhase 的 uv0 里统一处理：小丑牌基场、色带、同心环、噪声一起挪。
   float phase = holoPhase(V, N, bUv, uOffset, uDistortionStrength, uNoiseStrength, uGradientStraight);
+  // 方位性：倾斜方向给相位一个带符号的平移（左/右、上/下反向），平卡时为 0。
+  phase += (tiltDir.x + tiltDir.y) * TILT_DIRECTION_PHASE;
   // 网格（相位加项）：线族数学沿用 latticeField，系数与旧刻纹一致；默认参数即旧刻纹观感。
   float grid = uHoloGridCount > 0.5
     ? latticeField(bUv - vec2(uHoloGridOffsetX[0], uHoloGridOffsetY[0]),

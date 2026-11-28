@@ -267,6 +267,11 @@ float gradientRamp(vec2 uvw, float mode, float angle, float twist, float twistSe
 // 7 * 0.036 ≈ 0.25（色板的四分之一圈）。这是唯一不可自动化验证的系数，取值靠人工对照。
 const float LATTICE_PHASE_SCALE = 7.0;
 
+// 倾斜方向 → 相位偏移：左右 / 上下晃动的色带走向相反。
+// 平卡时 N.xy = 0，静止画面不变；系数与 holoPhase 里的 keep 项独立，故「整齐」模式下
+// 色带仍然按倾斜方向平移，只是不再有扰动。
+const float TILT_DIRECTION_PHASE = 8.0;
+
 // 线族场（网格）：N 族等角余弦条纹各取峰后求和，clamp 到 [0,1]。
 //
 // 参数化：族数 / 角 / 频率 / 线宽全为入参（网格在片元里按当前参数求值），strength 仍在调用处乘；
@@ -484,7 +489,8 @@ float presetMaskWeight(vec2 uv) {
 // 全息基场：**小丑牌式纯 UV 场**（holoField），不含归一化视线 / 反射方向。
 // 旧版用归一化视线 / 反射方向驱动相位：相机正对的卡点就是方向的零点，方向绕它转一圈，
 // 色带在卡心被压成一块密集区——2026-10-31 的极点软化只是把尖磨圆，密集圈仍在。
-// 现在整幅基场只吃 uv，没有方向零点；倾斜仍通过 grazing 影响明暗 / 色板混合，但不再扫动色带。
+// 现在整幅基场只吃 uv，没有方向零点；倾斜通过 grazing 影响明暗 / 色板混合，并由调用方
+// 另加一个带符号的 TILT_DIRECTION_PHASE 平移，让左右 / 上下的色带走向相反。
 //
 // 圆心涟漪 sin(length(uvw - vec2(0.5)) * 21.0) 仍保留：它只是叠在基场上的低频纹理，
 // 圆心在 uvw = 卡面中心，不产生极点。

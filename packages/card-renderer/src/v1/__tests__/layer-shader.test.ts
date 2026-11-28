@@ -138,6 +138,14 @@ describe("LAYER_FRAGMENT 材质参数", () => {
     expect(LAYER_FRAGMENT).toContain("uNoiseStrength, uGradientStraight)")
   })
 
+  it("倾斜方向给相位加带符号平移：左右 / 上下晃动的色带走向相反", () => {
+    expect(GLSL_COMMON).toContain("const float TILT_DIRECTION_PHASE = 8.0;")
+    expect(LAYER_FRAGMENT).toContain("vec2 tiltDir = N.xy;")
+    expect(LAYER_FRAGMENT).toContain(
+      "phase += (tiltDir.x + tiltDir.y) * TILT_DIRECTION_PHASE;",
+    )
+  })
+
   // 网格 = 刻纹线族数学 + 相位加项：调用被删或退回旧的交叉网纹，滑块都会静默失效。
   it("网格用 latticeField 的线族数学并加进相位，且不再有刻纹相位 uniform", () => {
     expect(LAYER_FRAGMENT).toContain("latticeField(bUv - vec2(")
