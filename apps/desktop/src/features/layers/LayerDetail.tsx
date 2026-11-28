@@ -90,8 +90,8 @@ export function LayerDetail({
   faceRef: FaceRef
   layerId: string
   /**
-   * 渲染哪一半：`properties` 只画名称/混合/合成（图层页签），`effects` 只画效果栈
-   * （效果页签）。默认两半都画，保留旧调用方行为。
+   * 渲染哪一半：`properties` 画名称/混合/合成（图层页签），`effects` 画效果栈（效果页签）。
+   * 默认 `properties`——检查器两个页签各渲染一半，没有任何调用方需要「两半都画」。
    */
   section?: "properties" | "effects"
 }) {

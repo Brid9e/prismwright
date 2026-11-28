@@ -20,13 +20,30 @@ const VARIANT_CLASS: Record<ButtonVariant, string> = {
 
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className"> {
   variant?: ButtonVariant
-  /** 追加布局类（如 `w-full`、`justify-start`）；不参与尺寸与配色。 */
+  /**
+   * 尺寸：`md` 是默认（12px 字、12px 内边距），`sm` 用于面板内的工具按钮
+   * （11px 字、8px 内边距）。
+   *
+   * 做成显式 prop 而不是让调用方用 `className` 覆盖：`px-2` 与基类 `px-3` 是同一属性，
+   * Tailwind 的产出顺序决定谁赢，不按 class 书写顺序——覆盖会静默失效。
+   */
+  size?: "md" | "sm"
+  /** 内容对齐：默认居中；带图标的列表/工具按钮传 `start`。 */
+  align?: "center" | "start"
+  /** 追加布局类（如 `w-full`）；不要用它改尺寸、对齐或配色。 */
   className?: string
   children: ReactNode
 }
 
+const SIZE_CLASS = {
+  md: "px-3 text-body",
+  sm: "px-2 text-label",
+} as const
+
 export function Button({
   variant = "secondary",
+  size = "md",
+  align = "center",
   className = "",
   type = "button",
   children,
@@ -35,7 +52,9 @@ export function Button({
   return (
     <button
       type={type}
-      className={`inline-flex h-button shrink-0 items-center justify-center gap-1.5 rounded-control px-3 text-body font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent/50 disabled:cursor-not-allowed disabled:opacity-40 ${VARIANT_CLASS[variant]} ${className}`}
+      className={`inline-flex h-button shrink-0 items-center gap-1.5 rounded-control font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent/50 disabled:cursor-not-allowed disabled:opacity-40 ${
+        align === "start" ? "justify-start" : "justify-center"
+      } ${SIZE_CLASS[size]} ${VARIANT_CLASS[variant]} ${className}`}
       {...rest}
     >
       {children}

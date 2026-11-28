@@ -89,7 +89,7 @@ export function HierarchyPanel({ compact = false }: HierarchyPanelProps) {
         />
       </div>
 
-      <div className="shrink-0 px-3 pb-2">
+      <div className="no-scrollbar shrink-0 overflow-x-auto px-3 pb-2">
         <Segmented
           value={section}
           ariaLabel={t("library.title")}
@@ -107,11 +107,18 @@ export function HierarchyPanel({ compact = false }: HierarchyPanelProps) {
       </div>
 
       <div className="shrink-0 border-t border-line p-2">
-        {/* 卡背页签没有「卡片」可建，落回普通卡，避免按钮变成空动作。 */}
+        {/* 卡背页签没有「卡片」可建，落回普通卡并切到「全部」，否则新卡落在看不见的分组/
+            被搜索词滤掉，用户以为没建出来。 */}
         <Button
           variant="secondary"
-          className="w-full justify-start"
-          onClick={() => addCard(section === "hidden")}
+          size="sm"
+          align="start"
+          className="w-full"
+          onClick={() => {
+            addCard(section === "hidden")
+            if (section === "back") setSection("all")
+            setQuery("")
+          }}
         >
           <Plus size={14} />
           {t("library.newCard")}

@@ -164,12 +164,16 @@ export function TitleBar({
     // 整条与窗口上/左/右三边齐平：不铺背景、不留圆角与外边距，只保留内容中的 px-2。
     <div
       data-tauri-drag-region
-      style={gap ? { paddingLeft: TRAFFIC_LIGHT_GAP } : undefined}
-      className={`grid h-topbar shrink-0 grid-cols-[minmax(min-content,1fr)_minmax(0,max-content)_minmax(min-content,1fr)] items-stretch px-2`}
+      className={`grid h-topbar shrink-0 grid-cols-[minmax(min-content,1fr)_minmax(0,max-content)_minmax(min-content,1fr)] items-stretch ${
+        // 窗口按钮是原生控件，应贴住窗口右缘；没有它们时给一点收尾内边距。
+        showWindowControls ? "pl-2 pr-0" : "px-2"
+      }`}
     >
       <div data-tauri-drag-region className="flex min-w-0 items-center gap-2 pl-1">
         {!minimal && (
           <>
+            {/* 交通灯让位放在左列内部而不是整条栅格上：加在栅格上会把中列标题整体右推。 */}
+            {gap && <div data-tauri-drag-region className="shrink-0" style={{ width: TRAFFIC_LIGHT_GAP }} />}
             {/* 品牌锁形：logo + 拉丁字标。logo 的 aria-label 已报出应用名，字标随 aria-hidden，
                 免得读屏念两遍。字标尾部的负 margin 抵消 tracking 留在末字之后的空隙。 */}
             <PrismwrightLogoSmall

@@ -69,21 +69,23 @@ export function Splitter({
   const rightRef = useCollapsedSync(rightCollapsed)
 
   /**
-   * 布局模式 → 列宽。
+   * 布局模式 → 列宽（同一模式只应用一次）。
    *
    * 首次挂载且模式是「工作室」时跳过：此时 `autoSaveId` 恢复的是用户上次拖出来的宽度，
-   * 用 18% 覆盖会把这份记忆冲掉。其余情况（切模式、启动时就是专注/紧凑）一律套用配比。
+   * 用 18% 覆盖会把这份记忆冲掉。记「上次套用的模式」而不是布尔量，是因为 StrictMode
+   * 会把 effect 连跑两次——布尔量在第二次已为 true，会误把恢复出来的宽度冲掉。
    */
-  const applied = useRef(false)
+  const appliedLayout = useRef<LayoutMode | null>(null)
   useEffect(() => {
+    if (appliedLayout.current === layout) return
     const leftPanel = leftRef.current
     const rightPanel = rightRef.current
     if (!leftPanel || !rightPanel) return
-    if (!applied.current && layout === "studio") {
-      applied.current = true
-      return
-    }
-    applied.current = true
+
+    const firstRun = appliedLayout.current === null
+    appliedLayout.current = layout
+    if (firstRun && layout === "studio") return
+
     const sizes = layoutSizes(layout)
     if (sizes.left === 0) {
       if (!leftPanel.isCollapsed()) leftPanel.collapse()
@@ -123,7 +125,8 @@ export function Splitter({
         id="right"
         order={3}
         defaultSize={26}
-        minSize={18}
+        // 22%：1024 宽窗口下仍有约 220px，检查器页签与滑轨不会被裁到不可用。
+        minSize={22}
         maxSize={40}
         collapsible
         collapsedSize={0}

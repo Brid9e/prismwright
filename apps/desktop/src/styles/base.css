@@ -71,6 +71,15 @@
   }
 }
 
+/* 需要横向滚动但不想看到滚动条的窄容器（检查器页签、卡片库分组）。 */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* 工作区网格底：布满整个窗口，只在顶栏那一段渐隐为透明。
  *
  * 网格线用分隔线色（--color-line）的半透明版本，24px 一格；画布上下左右都直接透出它，

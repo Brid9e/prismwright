@@ -28,7 +28,10 @@ export function ColorField({ value, onChange, ariaLabel, size = "sm" }: ColorFie
   const alpha = alphaOf(value)
   const swatch = size === "md" ? "h-5 w-8" : "h-4 w-6"
   return (
-    <div className="flex h-button items-center gap-1.5 rounded-control border border-line-soft bg-sunken px-1.5">
+    // 固定宽度：滑块是 `flex-1`，在 `PropertyRow` 的自动宽度槽里若不给根节点尺寸，
+    // 整块会缩到「色块 + 百分比」的宽度，透明度轨道只剩几像素。160px 在 300px 检查器里
+    // 仍给标签留出收缩余量。
+    <div className="flex h-button w-40 min-w-0 shrink items-center gap-1.5 rounded-control border border-line-soft bg-sunken px-1.5">
       <input
         type="color"
         value={toSixDigitHex(value)}

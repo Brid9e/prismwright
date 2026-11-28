@@ -48,6 +48,8 @@ export function NumberField({
     if (next !== null) onChange(next)
   }
 
+  // 数字框 56px 而不是更窄：精度 3 的负值（如 `-0.196`）在 44px 里会从左侧裁掉负号，
+  // 用户读到的方向就是反的；宁可少 12px 滑轨宽度。
   return (
     <input
       type="number"
@@ -67,7 +69,7 @@ export function NumberField({
       onKeyDown={(e) => {
         if (e.key === "Enter") e.currentTarget.blur()
       }}
-      className="h-control w-11 shrink-0 rounded-control border border-line-soft bg-sunken px-1.5 text-right font-mono text-num text-foreground outline-none hover:border-line focus:border-accent disabled:cursor-not-allowed disabled:text-disabled"
+      className="h-control w-14 shrink-0 rounded-control border border-line-soft bg-sunken px-1.5 text-right font-mono text-num text-foreground outline-none hover:border-line focus:border-accent disabled:cursor-not-allowed disabled:text-disabled"
     />
   )
 }

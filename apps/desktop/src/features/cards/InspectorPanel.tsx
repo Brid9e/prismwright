@@ -98,10 +98,11 @@ export function InspectorPanel() {
         ? displayCardName(card, tc)
         : t("preview.noCard")
 
+  // 卡背的标题里已经带了系列名，副行再写一遍是重复。
   const subtitle =
     side === "front" && card
       ? `e${String(card.num).padStart(2, "0")} · ${pack?.name ?? ""}`
-      : (pack?.name ?? "")
+      : ""
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -118,7 +119,7 @@ export function InspectorPanel() {
       </div>
 
       {hasFace && !usingDefaultBack && (
-        <div className="shrink-0 border-b border-line px-2 py-1.5">
+        <div className="no-scrollbar shrink-0 overflow-x-auto border-b border-line px-2 py-1.5">
           <Segmented
             value={activeTab}
             ariaLabel={t("panel.inspector")}

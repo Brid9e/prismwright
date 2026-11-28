@@ -21,7 +21,8 @@ export interface LayoutSizes {
 export const LAYOUT_SIZES: Record<LayoutMode, LayoutSizes> = {
   studio: { left: 18, right: 26 },
   focus: { left: 0, right: 26 },
-  compact: { left: 5, right: 22 },
+  // 右栏 24%：1024 宽窗口下约 242px，再窄检查器的滑轨与页签就没法用了。
+  compact: { left: 5, right: 24 },
 }
 
 /** 取某个模式的列宽；未知值回落工作室。 */

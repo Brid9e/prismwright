@@ -181,23 +181,24 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
         </span>
       </div>
       <div className="grid shrink-0 grid-cols-2 gap-1 px-2 pb-2">
-        <Button variant="secondary" className="justify-start px-2 text-label" onClick={() => void addImage(true)}>
+        <Button variant="secondary" size="sm" align="start" onClick={() => void addImage(true)}>
           <Image size={13} />
           {t("action.addBackground")}
         </Button>
-        <Button variant="secondary" className="justify-start px-2 text-label" onClick={() => void addImage()}>
+        <Button variant="secondary" size="sm" align="start" onClick={() => void addImage()}>
           <ImagePlus size={13} />
           {t("action.addImage")}
         </Button>
         <Button
           variant="secondary"
-          className="justify-start px-2 text-label"
+          size="sm"
+          align="start"
           onClick={() => addTextLayer(faceRef, t("text.defaultContent"))}
         >
           <Type size={13} />
           {t("action.addText")}
         </Button>
-        <Button variant="secondary" className="justify-start px-2 text-label" onClick={() => addLayer(faceRef)}>
+        <Button variant="secondary" size="sm" align="start" onClick={() => addLayer(faceRef)}>
           <Plus size={13} />
           {t("action.add")}
         </Button>

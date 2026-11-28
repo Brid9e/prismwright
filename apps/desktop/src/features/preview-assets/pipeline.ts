@@ -28,6 +28,7 @@ import { join } from "../../app/path"
 import { usePackStore } from "../../store/packStore"
 import { ffmpeg } from "../../tauri/ffmpeg"
 import { packFs } from "../../tauri/pack-fs"
+import { invalidateCardThumbnails } from "../cards/useCardThumbnail"
 import { createResolveAsset } from "../preview/resolve-asset"
 import { GENERATE_VIDEO_PREVIEW, cardRenderHash, staleCards } from "./card-hash"
 import { frameRel, framesDirRel, MANIFEST_REL, previewPngRel, previewWebmRel } from "./paths"
@@ -163,6 +164,8 @@ export function attachPreviewAssets(): PreviewAssetsHandle {
     try {
       // 静态正视角 PNG：时间项取 0，与交互预览逐像素一致。
       await writePng(renderer, rootDir, previewPngRel(card.id), 0)
+      // 通知卡片库重读缩略图：此刻卡片数据没有变化，光靠内容哈希不会触发重读。
+      invalidateCardThumbnails()
       // 视频按开关可选：关闭时到此为止，不渲染帧序列、不落帧、不调 ffmpeg。
       if (!GENERATE_VIDEO_PREVIEW) return
       // WebM 帧序列：相位从 0 起逐帧递增，得到「静卡·全息流动」。
