@@ -28,6 +28,19 @@
     scrollbar-color: rgb(var(--color-line-soft)) transparent;
   }
 
+  /* 数字输入框不要浏览器自带的上下微调按钮：编辑器里靠拖滑杆 / 直接输入，
+   * 那两个小箭头既占宽又与控件系统不一致。 */
+  input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
