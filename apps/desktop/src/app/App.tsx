@@ -279,14 +279,12 @@ export default function App() {
 
   return (
     <TooltipProvider>
-      {/* 外层 p-2 的留白也是拖拽区：顶栏是浮层，窗口边缘那 8px 若不接管，贴边按下就拖不动窗。 */}
-      <div
-        data-tauri-drag-region
-        className="flex h-full flex-col gap-2 bg-app p-2 text-foreground"
-      >
+      {/* 顶栏直接贴在窗口上/左/右三边上（无外边距、无背景）；只有它下面的工作区留 8px 边距。 */}
+      <div data-tauri-drag-region className="flex h-full flex-col bg-app text-foreground">
         {usesHtmlTitleBar(platform) && (
           <TitleBar platform={platform} variant={startPage ? "minimal" : "full"} />
         )}
+        <div className="flex min-h-0 flex-1 flex-col gap-2 px-2 pb-2 pt-2">
         {settingsOpen ? (
           <SettingsView />
         ) : pack ? (
@@ -317,6 +315,7 @@ export default function App() {
         ) : (
           <StartScreen />
         )}
+        </div>
       </div>
       <NewPackDialog />
       <AlbumDialog />

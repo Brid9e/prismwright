@@ -613,7 +613,9 @@ export function PreviewPanel() {
 
   return (
     // 舞台直铺应用底色：不再套背景面板，工具栏与视图胶囊浮在画面上。
-    <div className="relative flex min-h-0 flex-1 flex-col">
+    // 父级（分栏中心面板）不是 flex 容器：这里必须自带 `h-full`，只写 `flex-1` 的话
+    // 高度会塌成内容高（画布是绝对定位，内容高为 0），整张卡就看不见了。
+    <div className="relative flex h-full min-h-0 flex-col">
       <div className="absolute left-3 top-3 z-20 flex items-center gap-2">
         {!editingDefaultBack && (
           <Segmented

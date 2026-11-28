@@ -49,11 +49,12 @@ function dragTargets(html: string): string[] {
 }
 
 describe("TitleBar（Windows）", () => {
-  it("顶栏是 46 高的浮层面板：panel 圆角与细描边", () => {
+  it("顶栏与窗口上缘齐平：46 高、通栏、不铺容器背景", () => {
     const html = render("windows")
     expect(html).toContain("h-topbar")
-    expect(html).toContain("rounded-panel")
-    expect(html).toContain("border-line-soft")
+    // 曾经把顶栏做成与面板一样的浮层，实机观感是「在最顶端分离」，故不再有圆角/投影。
+    expect(html).not.toContain("rounded-panel")
+    expect(html).not.toContain("panel-shadow")
   })
 
   it("画出自绘菜单条：文件 / 编辑 / 视图", () => {

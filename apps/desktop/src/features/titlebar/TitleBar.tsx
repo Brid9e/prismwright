@@ -160,12 +160,12 @@ export function TitleBar({
     // 自己那份「剩余空间」里居中，两侧一宽一窄就整体偏移。
     // 列取 `items-stretch`（拉伸）而**不是**居中：列若收缩到内容高，列内那些 `h-full`
     // （窗口按钮）便统统解析成那个高度——悬停底色于是上下撑不满。纵向居中由各列自己负责。
+    //
+    // 整条与窗口上/左/右三边齐平：不铺背景、不留圆角与外边距，只保留内容中的 px-2。
     <div
       data-tauri-drag-region
       style={gap ? { paddingLeft: TRAFFIC_LIGHT_GAP } : undefined}
-      className={`grid h-topbar shrink-0 grid-cols-[minmax(min-content,1fr)_minmax(0,max-content)_minmax(min-content,1fr)] items-stretch ${
-        minimal ? "" : "overflow-hidden rounded-panel border border-line-soft bg-panel panel-shadow px-2"
-      }`}
+      className={`grid h-topbar shrink-0 grid-cols-[minmax(min-content,1fr)_minmax(0,max-content)_minmax(min-content,1fr)] items-stretch px-2`}
     >
       <div data-tauri-drag-region className="flex min-w-0 items-center gap-2 pl-1">
         {!minimal && (
