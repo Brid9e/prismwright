@@ -77,12 +77,19 @@ describe("cardContextItems", () => {
 })
 
 describe("layerContextItems", () => {
-  it("复制 / 删除都带上图层 id", () => {
-    const actions = { duplicateLayer: vi.fn(), deleteLayer: vi.fn() }
+  it("重命名 / 复制 / 删除都带上图层 id", () => {
+    const actions = { renameLayer: vi.fn(), duplicateLayer: vi.fn(), deleteLayer: vi.fn() }
     const items = layerContextItems({ layerId: "l1", t, ...actions })
-    expect(labels(items)).toEqual(["layer:action.duplicate", "layer:action.delete"])
+    expect(labels(items)).toEqual([
+      "layer:action.rename",
+      "---",
+      "layer:action.duplicate",
+      "layer:action.delete",
+    ])
+    click(items, "layer:action.rename")
     click(items, "layer:action.duplicate")
     click(items, "layer:action.delete")
+    expect(actions.renameLayer).toHaveBeenCalledWith("l1")
     expect(actions.duplicateLayer).toHaveBeenCalledWith("l1")
     expect(actions.deleteLayer).toHaveBeenCalledWith("l1")
   })

@@ -26,6 +26,7 @@ import { displayCardName } from "./display"
 import { INSPECTOR_TABS, resolveInspectorTab, type InspectorTab } from "./inspectorTabs"
 import { LayerList } from "../layers/LayerList"
 import { LayerDetail } from "../layers/LayerDetail"
+import { TextDetail } from "../layers/TextDetail"
 import { displayLayerName } from "./display"
 
 /**
@@ -39,11 +40,11 @@ const EMPTY_FACE: CardFace = createCardFace()
 
 export function InspectorPanel() {
   const { t } = useTranslation("editor")
-  const { t: tl } = useTranslation("layer")
   // 默认卡背那份工程的名字归 `settings` 命名空间（与设置面板同一个键）。
   const { t: ts } = useTranslation("settings")
   const { t: tc } = useTranslation("card")
   const { t: tm } = useTranslation("common")
+  const { t: tl } = useTranslation("layer")
 
   const side = useUiStore((s) => s.previewSide)
   const tab = useUiStore((s) => s.inspectorTab)
@@ -92,6 +93,10 @@ export function InspectorPanel() {
 
   const selectedLayer =
     face && selectedLayerId ? findLayerById(face.layers, selectedLayerId) : undefined
+  // 「属性」页签只服务文字层：普通层的混合 / 透明度已移到右下角图层面板顶部。
+  const hasTextLayer = selectedLayer?.kind === "text"
+  const tabs = INSPECTOR_TABS.filter((value) => value !== "layers" || hasTextLayer)
+  const shownTab = activeTab === "layers" && !hasTextLayer ? "design" : activeTab
 
   const title =
     side === "back"
@@ -118,7 +123,7 @@ export function InspectorPanel() {
     </div>
   ) : !hasFace || !face ? (
     <div className="p-3 text-body text-disabled">{t("preview.noCard")}</div>
-  ) : activeTab === "design" ? (
+  ) : shownTab === "design" ? (
     <div className="flex flex-col gap-2 p-3">
       <SectionCard title={t("inspector.design")} collapsible={false}>
         <CardFaceFields
@@ -134,23 +139,20 @@ export function InspectorPanel() {
         </Button>
       )}
     </div>
-  ) : activeTab === "layers" ? (
-    <div className="flex flex-col gap-2 p-3">
-      {selectedLayer ? (
-        <LayerDetail
-          face={face}
+  ) : shownTab === "layers" ? (
+    <div className="p-3">
+      {selectedLayer?.kind === "text" && selectedLayer.text ? (
+        <TextDetail
           faceRef={faceRef}
           layerId={selectedLayer.id}
-          section="properties"
+          text={selectedLayer.text}
         />
-      ) : (
-        <div className="text-body text-disabled">{tl("empty")}</div>
-      )}
+      ) : null}
     </div>
-  ) : activeTab === "effects" ? (
+  ) : shownTab === "effects" ? (
     selectedLayer ? (
       <div className="p-3">
-        <LayerDetail face={face} faceRef={faceRef} layerId={selectedLayer.id} section="effects" />
+        <LayerDetail face={face} faceRef={faceRef} layerId={selectedLayer.id} />
       </div>
     ) : (
       <div className="p-3 text-body text-disabled">{t("inspector.noLayer")}</div>
@@ -197,10 +199,10 @@ export function InspectorPanel() {
       {hasFace && !usingDefaultBack && (
         <div className="no-scrollbar shrink-0 overflow-x-auto border-b border-line px-3 py-2">
           <Segmented
-            value={activeTab}
+            value={shownTab}
             ariaLabel={t("panel.inspector")}
             onChange={(value) => setTab(value as InspectorTab)}
-            options={INSPECTOR_TABS.map((value) => ({
+            options={tabs.map((value) => ({
               value,
               label: t(`inspector.${value}`),
             }))}

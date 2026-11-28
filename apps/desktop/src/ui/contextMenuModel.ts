@@ -85,10 +85,13 @@ export function cardContextItems(params: {
 export function layerContextItems(params: {
   layerId: string
   t: Translate
+  renameLayer: (layerId: string) => void
   duplicateLayer: (layerId: string) => void
   deleteLayer: (layerId: string) => void
 }): ContextMenuItem[] {
   return [
+    item(params.t("layer:action.rename"), () => params.renameLayer(params.layerId)),
+    SEPARATOR,
     item(params.t("layer:action.duplicate"), () => params.duplicateLayer(params.layerId)),
     item(params.t("layer:action.delete"), () => params.deleteLayer(params.layerId), {
       danger: true,

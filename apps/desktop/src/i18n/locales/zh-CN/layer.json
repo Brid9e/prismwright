@@ -2,12 +2,12 @@
   "unnamed": "图层 {{num}}",
   "unnamedText": "文字 {{num}}",
   "unnamedLayer": "未命名图层",
-  "section": { "layers": "图层", "detail": "图层详情", "composite": "合成" },
+  "section": { "layers": "图层" },
   "action": {
     "add": "添加图层",
     "addText": "添加文字",
     "addImage": "添加图片",
-    "addBackground": "添加底图",
+    "rename": "重命名图层",
     "duplicate": "复制图层",
     "delete": "删除图层",
     "toggle": "启用/禁用"
@@ -29,9 +29,6 @@
     "percent": "第 {{index}} 个颜色的位置百分比"
   },
   "field": {
-    "name": "图层名",
-    "holoMix": "混合度",
-    "holoAlpha": "不透明度",
     "opacity": "图层不透明度"
   },
   "blend": {

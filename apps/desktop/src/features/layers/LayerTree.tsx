@@ -44,17 +44,25 @@ export interface LayerTreeRow extends LayerRow {
 function Row({
   row,
   zone,
+  renaming,
   onSelect,
   onToggleExpand,
   onContextMenu,
+  onStartRename,
+  onCommitRename,
+  onCancelRename,
   trailing,
   registerRow,
 }: {
   row: LayerTreeRow
   zone: DropZone | null
+  renaming: boolean
   onSelect: (id: string) => void
   onToggleExpand: (id: string) => void
   onContextMenu?: (id: string, event: MouseEvent<HTMLDivElement>) => void
+  onStartRename: (id: string) => void
+  onCommitRename: (id: string, name: string) => void
+  onCancelRename: () => void
   trailing: ReactNode
   registerRow: (id: string, el: HTMLDivElement | null) => void
 }) {
@@ -77,6 +85,11 @@ function Row({
     <div
       ref={setRef}
       onClick={() => onSelect(row.id)}
+      onDoubleClick={(event) => {
+        // 双击行名进入就地重命名；点到按钮 / 输入框时不抢。
+        if ((event.target as HTMLElement).closest("button,input")) return
+        onStartRename(row.id)
+      }}
       onContextMenu={(event) => {
         if (!onContextMenu) return
         event.preventDefault()
@@ -128,9 +141,17 @@ function Row({
         </button>
       )}
 
-      <span className="min-w-0 flex-1 truncate" title={row.label}>
-        {row.label}
-      </span>
+      {renaming ? (
+        <RenameInput
+          initial={row.label}
+          onCommit={(name) => onCommitRename(row.id, name)}
+          onCancel={onCancelRename}
+        />
+      ) : (
+        <span className="min-w-0 flex-1 truncate" title={row.label}>
+          {row.label}
+        </span>
+      )}
 
       {row.warn && (
         <span className="shrink-0 text-warning" title={t("tree.missing")}>
@@ -144,6 +165,44 @@ function Row({
   )
 }
 
+/** 行内重命名输入：回车 / 失焦提交，Esc 取消。 */
+function RenameInput({
+  initial,
+  onCommit,
+  onCancel,
+}: {
+  initial: string
+  onCommit: (name: string) => void
+  onCancel: () => void
+}) {
+  const { t } = useTranslation("layer")
+  const [value, setValue] = useState(initial)
+  const cancelled = useRef(false)
+  return (
+    <input
+      autoFocus
+      value={value}
+      aria-label={t("action.rename")}
+      onChange={(e) => setValue(e.target.value)}
+      onFocus={(e) => e.currentTarget.select()}
+      onClick={(e) => e.stopPropagation()}
+      onDoubleClick={(e) => e.stopPropagation()}
+      onBlur={() => {
+        if (!cancelled.current) onCommit(value)
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          e.currentTarget.blur()
+        } else if (e.key === "Escape") {
+          cancelled.current = true
+          onCancel()
+        }
+      }}
+      className="h-6 min-w-0 flex-1 rounded-chip border border-accent bg-sunken px-1 text-body text-foreground outline-none"
+    />
+  )
+}
+
 export interface LayerTreeProps {
   rows: LayerTreeRow[]
   onSelect: (id: string) => void
@@ -154,6 +213,11 @@ export interface LayerTreeProps {
   trailing: (row: LayerTreeRow) => ReactNode
   emptyText: string
   onContextMenu?: (id: string, event: MouseEvent<HTMLDivElement>) => void
+  /** 正在重命名的行 id；`null` = 没有行在编辑。 */
+  renamingId: string | null
+  onStartRename: (id: string) => void
+  onCommitRename: (id: string, name: string) => void
+  onCancelRename: () => void
 }
 
 export function LayerTree({
@@ -164,6 +228,10 @@ export function LayerTree({
   trailing,
   emptyText,
   onContextMenu,
+  renamingId,
+  onStartRename,
+  onCommitRename,
+  onCancelRename,
 }: LayerTreeProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -249,9 +317,13 @@ export function LayerTree({
           key={row.id}
           row={row}
           zone={over && over.id === row.id ? over.zone : null}
+          renaming={renamingId === row.id}
           onSelect={onSelect}
           onToggleExpand={onToggleExpand}
           onContextMenu={onContextMenu}
+          onStartRename={onStartRename}
+          onCommitRename={onCommitRename}
+          onCancelRename={onCancelRename}
           trailing={trailing(row)}
           registerRow={registerRow}
         />

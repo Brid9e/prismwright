@@ -229,16 +229,22 @@
 - 右栏改为上下两段：上方是检查器（卡名 / 页签 / 当前页内容），下方是常驻的**图层面板**。
 - 两段之间用竖向 `PanelResizeHandle` 分隔，可拖高度；默认 34%，最小 20%，最大 60%，`autoSaveId` 持久化。
 - 图层面板只在「有可编辑卡面且不是默认卡背占位」时出现；无卡面 / 使用默认卡背时隐藏，检查器占满整栏。
-- 底部面板复用 `LayerList`：标题「图层」+ 添加按钮 + 可滚动的图层树。树不再写死 `max-h-48`，改为 `min-h-0 flex-1` 填满面板并滚动。
-- 原「图层」页签更名为「属性」，只显示选中层的 `LayerDetail`（名称 / 混合 / 不透明度 / 全息合成）；图层树本身只在右下角出现。页签顺序变为 设计 / 属性 / 效果 / 导出。
+- 底部面板复用 `LayerList`：标题「图层」+ **选中层属性**（混合模式下拉 + 一个图层不透明度）+ 一排添加图标 + 可滚动的图层树。树不再写死 `max-h-48`，改为 `min-h-0 flex-1` 填满面板并滚动。
+- 选中层属性直接放在图层面板顶部，像 PS：只保留 `blend` 与 `opacity`；`holoMix` / `holoAlpha` 的 UI 控件删除（数据字段保留在 schema 里，渲染器继续用默认值，避免破坏旧系列）。
+- 图层名不再占属性行：**双击行名**或右键「重命名图层」进入行内编辑；回车 / 失焦提交，Esc 取消。
+- 添加动作收成一排图标（图片 / 文字 / 图层），删除「添加底图」长按钮。
+- 原「图层」页签更名为「属性」，且**只对文字层显示**，内容只剩 `TextDetail`（字体 / 字号 / 颜色 / 描边 / 投影）；普通层的属性已在图层面板顶部。页签顺序为 设计 / 属性（仅文字层）/ 效果 / 导出。
 - 布局模式切换不改这个上下比例；紧凑布局下仍保留图层面板，只是高度由用户/默认值决定。
 
 ### 11.2 落点
 
-- `features/cards/InspectorPanel.tsx`：在页签内容与底部面板之间插入竖向 `PanelGroup`；移除 `layers` 页签里的 `LayerList`，改为只渲染 `LayerDetail`。
-- `features/layers/LayerList.tsx`：根节点改为可填满的 `flex min-h-0 flex-col`，树容器 `min-h-0 flex-1`；标题 / 添加按钮保留。
+- `features/cards/InspectorPanel.tsx`：在页签内容与底部面板之间插入竖向 `PanelGroup`；移除 `layers` 页签里的 `LayerList`；`layers` 页签只渲染 `TextDetail`，并按选中层是否为文字层过滤页签。
+- `features/layers/LayerList.tsx`：根节点 `flex h-full min-h-0 flex-col`；顶部渲染混合下拉 + 透明度滑杆；添加动作改 `IconButton` 图标行；树容器 `min-h-0 flex-1`；管理行内重命名状态。
+- `features/layers/LayerDetail.tsx`：只剩效果栈（`section` prop 删除），名称 / 混合 / 透明度的旧属性分支删除。
+- `features/layers/LayerTree.tsx`：行支持双击重命名与 `RenameInput`。
 - `features/cards/inspectorTabs.ts`：`layers` 的展示文案改为「属性」；`INSPECTOR_TABS` 顺序不变，标签变。
-- i18n：`editor.inspector.layers` 中文改「属性」，英文改「Properties」。
+- `ui/contextMenuModel.ts`：图层右键菜单新增「重命名图层」。
+- i18n：`editor.inspector.layers` 中文改「属性」，英文改「Properties」；`layer.action.rename` 补「重命名图层 / Rename layer」；删除不再使用的 `action.addBackground`、`field.name`、`field.holoMix`、`field.holoAlpha`、`section.detail`、`section.composite`。
 
 ## 12. 拖拽父子命中
 

@@ -2,12 +2,12 @@
   "unnamed": "Layer {{num}}",
   "unnamedText": "Text {{num}}",
   "unnamedLayer": "Unnamed layer",
-  "section": { "layers": "Layers", "detail": "Layer detail", "composite": "Composite" },
+  "section": { "layers": "Layers" },
   "action": {
     "add": "Add layer",
     "addText": "Add text",
     "addImage": "Add image",
-    "addBackground": "Add background",
+    "rename": "Rename layer",
     "duplicate": "Duplicate layer",
     "delete": "Delete layer",
     "toggle": "Enable/disable"
@@ -29,9 +29,6 @@
     "percent": "Position of color {{index}} (percent)"
   },
   "field": {
-    "name": "Layer name",
-    "holoMix": "Mix",
-    "holoAlpha": "Alpha",
     "opacity": "Layer opacity"
   },
   "blend": {
