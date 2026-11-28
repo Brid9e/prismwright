@@ -21,7 +21,6 @@ import { useUiStore } from "../../store/uiStore"
 import { packFs } from "../../tauri/pack-fs"
 import { layerContextItems } from "../../ui/contextMenuModel"
 import { IconButton } from "../../ui/IconButton"
-import { PropertyRow } from "../../ui/PropertyRow"
 import { ScrollArea } from "../../ui/ScrollArea"
 import { Select } from "../../ui/Select"
 import { Slider } from "../../ui/Slider"
@@ -196,41 +195,45 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
+    <div className="flex h-full min-h-0 flex-col border-t border-line bg-sunken">
       <div className="flex shrink-0 items-center px-3 pb-1 pt-2">
         <span className="select-none text-body font-semibold text-muted">
           {t("section.layers")}
         </span>
       </div>
-      {/* 选中层的属性：与 PS 一样放在图层面板顶部，只留混合模式 + 一个图层不透明度。
-          名称在行内双击 / 右键重命名，不在这里再占一行。 */}
-      {selectedLayer && (
-        <div className="flex shrink-0 flex-col gap-1 px-3 pb-2">
-          <PropertyRow label={t("blend.label")}>
-            <Select
-              value={selectedLayer.blend}
-              onChange={(value) =>
-                updateLayer(faceRef, selectedLayer.id, { blend: value as BlendMode })
-              }
-              options={BLEND_MODES.map((value) => ({
-                value,
-                label: t(`blend.${value}`),
-              }))}
-            />
-          </PropertyRow>
-          <PropertyRow label={t("field.opacity")} grow reserveControlSpace>
-            <Slider
-              value={selectedLayer.opacity}
-              min={0}
-              max={1}
-              step={0.01}
-              defaultValue={1}
-              resetLabel={t("reset")}
-              onChange={(opacity) => updateLayer(faceRef, selectedLayer.id, { opacity })}
-            />
-          </PropertyRow>
+      {/* 选中层的属性：与 PS 一样放在图层面板顶部一行。没选中层时保留控件但禁用，
+          面板高度不跳动。名称在行内双击 / 右键重命名，不在这里再占一行。 */}
+      <div className="flex shrink-0 items-center gap-2 px-3 pb-2">
+        <div className="w-24 shrink-0">
+          <Select
+            value={selectedLayer?.blend ?? "normal"}
+            disabled={!selectedLayer}
+            grow
+            onChange={(value) => {
+              if (selectedLayer) updateLayer(faceRef, selectedLayer.id, { blend: value as BlendMode })
+            }}
+            options={BLEND_MODES.map((value) => ({
+              value,
+              label: t(`blend.${value}`),
+            }))}
+          />
         </div>
-      )}
+        <div className="min-w-0 flex-1">
+          <Slider
+            value={selectedLayer?.opacity ?? 1}
+            disabled={!selectedLayer}
+            min={0}
+            max={1}
+            step={0.01}
+            defaultValue={1}
+            resetLabel={t("reset")}
+            ariaLabel={t("field.opacity")}
+            onChange={(opacity) => {
+              if (selectedLayer) updateLayer(faceRef, selectedLayer.id, { opacity })
+            }}
+          />
+        </div>
+      </div>
       {/* 添加动作收成一排图标：不占一整行文字宽度。 */}
       <div className="flex shrink-0 items-center gap-2 px-3 pb-2">
         <IconButton icon={ImagePlus} label={t("action.addImage")} onClick={() => void addImage()} />

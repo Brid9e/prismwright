@@ -29,7 +29,7 @@
     "percent": "Position of color {{index}} (percent)"
   },
   "field": {
-    "opacity": "Layer opacity"
+    "opacity": "Opacity"
   },
   "blend": {
     "label": "Blend",

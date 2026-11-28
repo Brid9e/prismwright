@@ -29,7 +29,7 @@
     "percent": "第 {{index}} 个颜色的位置百分比"
   },
   "field": {
-    "opacity": "图层不透明度"
+    "opacity": "透明度"
   },
   "blend": {
     "label": "混合模式",
