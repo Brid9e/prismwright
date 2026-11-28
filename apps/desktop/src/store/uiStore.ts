@@ -76,7 +76,7 @@ export interface UiStoreState {
   inspectorTab: InspectorTab
   /** 工作区布局模式（工作室 / 专注 / 紧凑）。 */
   layout: LayoutMode
-  /** 预览是否在空闲时自动摆动（拖拽倾斜已常驻，无开关）。 */
+  /** 预览是否在空闲时自动摆动（默认关闭；拖拽倾斜已常驻）。 */
   previewIdleSway: boolean
   /**
    * 预览缩放倍数。
@@ -240,7 +240,7 @@ export const useUiStore = create<UiStoreState>()((set) => ({
   previewSide: "front",
   inspectorTab: "design",
   layout: "studio",
-  previewIdleSway: true,
+  previewIdleSway: false,
   // 默认 2 倍：卡片在 1 倍下只占中间一小块，细节看不清；2 倍能直接看到印刷文字。
   previewZoom: 2,
   showChecker: true,
