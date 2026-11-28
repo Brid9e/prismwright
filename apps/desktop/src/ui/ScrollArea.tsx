@@ -57,7 +57,9 @@ export function ScrollArea({
   const showTemporarily = useCallback(() => {
     setActive(true)
     if (hideTimer.current) clearTimeout(hideTimer.current)
-    hideTimer.current = setTimeout(() => setActive(false), 800)
+    hideTimer.current = setTimeout(() => {
+      if (!dragging.current) setActive(false)
+    }, 800)
   }, [])
 
   useEffect(() => {
@@ -112,7 +114,10 @@ export function ScrollArea({
   return (
     <div
       className={`relative min-h-0 ${className}`}
-      onPointerEnter={() => setActive(true)}
+      onPointerEnter={() => {
+        if (hideTimer.current) clearTimeout(hideTimer.current)
+        setActive(true)
+      }}
       onPointerLeave={() => {
         if (!dragging.current) setActive(false)
       }}
