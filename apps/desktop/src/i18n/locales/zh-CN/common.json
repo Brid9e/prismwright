@@ -60,6 +60,12 @@
     "close": "关闭"
   },
   "colorAlpha": "{{label}}透明度",
+  "colorPicker": {
+    "saturationValue": "饱和度与明度",
+    "hue": "色相",
+    "alpha": "透明度",
+    "hex": "十六进制色值"
+  },
   "defaultBack": {
     "banner": "正在编辑全系列默认卡背：没有单独卡背的系列都用这一份。",
     "done": "完成"

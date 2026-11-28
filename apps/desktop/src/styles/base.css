@@ -80,6 +80,49 @@
   display: none;
 }
 
+/* 透明度色块 / 取色器里的棋盘格。 */
+.checkerboard {
+  background-image: repeating-conic-gradient(
+    rgb(var(--color-checker-a)) 0% 25%,
+    rgb(var(--color-checker-b)) 0% 50%
+  );
+  background-size: 8px 8px;
+}
+
+/* 饱和度 / 明度面板：底色由 --picker-hue 驱动，上方两条遮罩给出白→透明与透明→黑。
+ * 这是功能性的渐变（取色器本身），不属于界面装饰。 */
+.color-sv-field {
+  background-color: hsl(var(--picker-hue) 100% 50%);
+  background-image:
+    linear-gradient(to top, rgb(0 0 0), transparent),
+    linear-gradient(to right, rgb(255 255 255), transparent);
+}
+
+/* 色相滑轨：整条彩虹，不再叠一根 Range 填充。 */
+.color-hue-track {
+  background-image: linear-gradient(
+    to right,
+    rgb(255 0 0),
+    rgb(255 255 0),
+    rgb(0 255 0),
+    rgb(0 255 255),
+    rgb(0 0 255),
+    rgb(255 0 255),
+    rgb(255 0 0)
+  );
+}
+
+/* 透明度滑轨：棋盘格上叠一条「透明 → 当前色」的线性渐变。 */
+.color-alpha-track {
+  background-image:
+    linear-gradient(to right, transparent, var(--picker-color)),
+    repeating-conic-gradient(
+      rgb(var(--color-checker-a)) 0% 25%,
+      rgb(var(--color-checker-b)) 0% 50%
+    );
+  background-size: auto, 8px 8px;
+}
+
 /* 工作区网格底：独立的一层（App 里的小 div），布满整个窗口，只在顶栏那一段渐隐为透明。
  *
  * 网格线用分隔线色（--color-line）的半透明版本，24px 一格；画布上下左右都直接透出它，

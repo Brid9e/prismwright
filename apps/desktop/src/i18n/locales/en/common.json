@@ -60,6 +60,12 @@
     "close": "Close"
   },
   "colorAlpha": "{{label}} opacity",
+  "colorPicker": {
+    "saturationValue": "Saturation and value",
+    "hue": "Hue",
+    "alpha": "Opacity",
+    "hex": "Hex color"
+  },
   "defaultBack": {
     "banner": "Editing the shared default card back — every series without its own back uses it.",
     "done": "Done"

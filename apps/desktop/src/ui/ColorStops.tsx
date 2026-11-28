@@ -3,7 +3,7 @@
  *
  * 交互按「一个一个加颜色」设计：
  * - 拖把手排序（颜色换到别的行，百分比留在原来的行上）；
- * - 每行一个看得见的系统取色块，点了就地弹出取色板；
+ * - 每行一个色块，点开面板内取色器改色；透明度也在取色器里调，行内不再占滑杆；
  * - 每行一个吸管按钮（放在控件外面，与其它颜色字段一致），从画面拾取颜色；
  * - 百分比输入的是**色标位置**（这个颜色停在色带的百分之几处，与 CSS 渐变一致），
  *   改一行只改这一行，其它行的数字原样不动；
@@ -11,11 +11,6 @@
  *
  * 所有增删改排序都走 `features/layers/colors.ts` 的纯函数，组件本身不实现规则——
  * 上限、合法性、邻居夹取只有一处定义，也才有测试覆盖。
- *
- * 取色用系统原生 `<input type="color">`：它是受控、可见的，`onChange` 里直接写回 store。
- * 不再有旧实现那只「隐藏控件 + 定位盒 + showPicker」的锚定逻辑——那套是为了从自绘游标上
- * 弹面板，控件不可见时取色板的位置与关闭行为都依赖 WebView 的实现细节，正是「十字光标关不掉」
- * 一类问题的温床。
  */
 import { useTranslation } from "react-i18next"
 import {
@@ -35,7 +30,7 @@ import {
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { GripVertical, Pipette, Plus, X } from "lucide-react"
-import { alphaOf, withAlpha, type ColorStop } from "@prismwright/schema"
+import type { ColorStop } from "@prismwright/schema"
 import {
   DEFAULT_NEW_STOP,
   addStop,
@@ -46,8 +41,8 @@ import {
   replaceStop,
   reorderStop,
   setStopPosition,
-  toSixDigitHex,
 } from "../features/layers/colors"
+import { ColorPicker } from "./ColorPicker"
 import { IconButton } from "./IconButton"
 import { NumberField } from "./NumberField"
 import { Tooltip } from "./Tooltip"
@@ -65,7 +60,6 @@ function StopRow({
   stop,
   canRemove,
   onColor,
-  onAlpha,
   onPosition,
   onPick,
   onRemove,
@@ -74,7 +68,6 @@ function StopRow({
   stop: ColorStop
   canRemove: boolean
   onColor: (hex: string) => void
-  onAlpha: (alpha: number) => void
   onPosition: (at: number) => void
   onPick: () => void
   onRemove: () => void
@@ -103,13 +96,11 @@ function StopRow({
         <GripVertical size={12} />
       </button>
 
-      {/* 可见的系统取色块：点开面板改色。绑值前过 toSixDigitHex，6/8 位或 3 位旧数据都能显示。 */}
-      <input
-        type="color"
-        value={toSixDigitHex(stop.color)}
-        aria-label={t("colors.color", { index: index + 1 })}
-        onChange={(e) => onColor(withAlpha(e.target.value, alphaOf(stop.color)))}
-        className="h-6 w-7 shrink-0 cursor-pointer rounded-control border border-line bg-sunken p-0"
+      {/* 面板内取色器：色块点开改色，透明度在弹层里调；行内不再占一条滑杆。 */}
+      <ColorPicker
+        value={stop.color}
+        onChange={onColor}
+        ariaLabel={t("colors.color", { index: index + 1 })}
       />
 
       {/* 吸管：与其它颜色字段一样，拾色按钮放在控件外面、点一下从画面取色。 */}
@@ -118,20 +109,6 @@ function StopRow({
         label={t("colors.pick", { index: index + 1 })}
         onClick={onPick}
       />
-
-      <input
-        type="range"
-        min={0}
-        max={1}
-        step={0.01}
-        value={alphaOf(stop.color)}
-        aria-label={t("colors.alpha", { index: index + 1 })}
-        onChange={(e) => onAlpha(Number(e.target.value))}
-        className="min-w-0 flex-1 accent-accent"
-      />
-      <span className="w-7 shrink-0 text-right text-num tabular-nums text-muted">
-        {Math.round(alphaOf(stop.color) * 100)}%
-      </span>
 
       {/* 位置百分比：这个颜色停在色带的百分之几处；只影响这一行。 */}
       <NumberField
@@ -192,9 +169,6 @@ export function ColorStops({ colors, onChange, onPick }: ColorStopsProps) {
                 stop={stop}
                 canRemove={canRemoveStop(colors)}
                 onColor={(hex) => onChange(replaceStop(colors, index, hex))}
-                onAlpha={(alpha) =>
-                  onChange(replaceStop(colors, index, withAlpha(stop.color, alpha)))
-                }
                 onPosition={(at) => onChange(setStopPosition(colors, index, at))}
                 onPick={() => onPick(index)}
                 onRemove={() => onChange(removeStop(colors, index))}

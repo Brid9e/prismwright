@@ -19,7 +19,6 @@ import {
   replaceStop,
   reorderStop,
   setStopPosition,
-  toSixDigitHex,
 } from "../colors"
 
 const HEX = /^#[0-9a-f]{6}$/i
@@ -52,11 +51,6 @@ describe("色标纯函数", () => {
     expect(replaceStop(same, 3, "#333333")).toBe(same)
   })
 
-  it("toSixDigitHex 展开 3 位、去掉 8 位的透明度", () => {
-    expect(toSixDigitHex("#abc")).toBe("#aabbcc")
-    expect(toSixDigitHex("#aabbccdd")).toBe("#aabbcc")
-    expect(toSixDigitHex("#aabbcc")).toBe("#aabbcc")
-  })
 })
 
 describe("setStopPosition（输入百分比调位置）", () => {

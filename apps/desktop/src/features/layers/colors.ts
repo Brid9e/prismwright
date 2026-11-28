@@ -38,21 +38,6 @@ function clamp01(v: number): number {
 }
 
 /**
- * 把 3 位色值展开、8 位色值去掉透明度，得到原生取色器认的 6 位；6 位原样返回。
- *
- * 原生 `<input type="color">` 只认 6 位：把 `#abc` 或 `#aabbcc80` 绑上去会显示成黑色。而这两者
- * 在数据层都是合法的（`schema.ts` 的 `HEX_COLOR` 接受 `#rgb` 与 `#rrggbbaa`），所以这不是防御性
- * 代码，是真实可达的输入。展开规则与渲染器 `palette.ts` 的 `parseHex` 一致；不在这儿 import 它，
- * 理由见文件头。
- */
-export function toSixDigitHex(hex: string): string {
-  const body = hex.slice(1)
-  if (body.length === 8) return `#${body.slice(0, 6)}`
-  if (body.length !== 3) return hex
-  return `#${body[0]}${body[0]}${body[1]}${body[1]}${body[2]}${body[2]}`
-}
-
-/**
  * 当前是否还能再加一个色标。
  *
  * @param colors - 现有色标数组。
