@@ -321,6 +321,15 @@ export function CardFaceFields({ face, faceRef, card, showSeriesAspect = true }:
         </>
       )}
 
+      {/* 卡面底色：底图没覆盖到的留白 / 没有底图时垫的颜色。 */}
+      <PropertyRow label={t("field.baseColor")}>
+        <ColorField
+          value={face.baseColor}
+          onChange={(baseColor) => updateFace(faceRef, { baseColor })}
+          ariaLabel={t("field.baseColor")}
+        />
+      </PropertyRow>
+
       {/* 法线（bump）：底图亮度差或法线贴图，扰动光泽 / 摩尔纹的走势，并继承给没有
           自带法线的图层。强度 0 = 关（默认），其余各项在 0 时不起作用；光照 0 = 不出明暗
           （只影响走势），没有光泽 / 摩尔纹时凹凸只靠它显形。

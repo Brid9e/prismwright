@@ -9,6 +9,7 @@
     "notes": "Notes",
     "rarity": "Rarity",
     "front": "Front image",
+    "baseColor": "Card color",
     "notSet": "Not set",
     "upload": "Upload image",
     "replace": "Replace image",

@@ -30,6 +30,7 @@ function sampleCard(): Card {
     notes: "备注",
     rarity: "common",
     front: "assets/front.png",
+    baseColor: "#282830",
     frontFit: "cover",
     frontOffsetX: 0,
     frontOffsetY: 0,
@@ -248,6 +249,11 @@ describe("卡面形状也进哈希", () => {
 
   it("改圆角必变", () => {
     const changed = { ...sampleCard(), cornerRadius: 0.2 }
+    expect(cardRenderHash(changed, ASPECT)).not.toBe(cardRenderHash(sampleCard(), ASPECT))
+  })
+
+  it("改卡牌底色必变", () => {
+    const changed = { ...sampleCard(), baseColor: "#88ccff" }
     expect(cardRenderHash(changed, ASPECT)).not.toBe(cardRenderHash(sampleCard(), ASPECT))
   })
 

@@ -51,6 +51,8 @@ export interface BaseMaterialParams {
    * 离屏导出不传，恒为关——导出要的是真实结果，不是辅助显示。
    */
   erasePreview?: boolean
+  /** 卡面底色（hex）：底图没覆盖到的位置 / 没有底图时垫的颜色。默认深灰。 */
+  baseColor?: string
   /** 底图填充方式。默认 `"cover"`。 */
   frontFit?: FrontFit
   /** 底图水平偏移（卡高单位，正 = 图片向右）。默认 0。 */
@@ -154,7 +156,8 @@ export function createBaseMaterial(p: BaseMaterialParams): ShaderMaterial {
       uMapOffset: { value: new Vector2(uv.offsetU, uv.offsetV) },
       // 越界处垫的卡面底色。Color 会在构造时把 sRGB 十六进制转到线性工作空间，
       // 与纹理取样（three 在片元里解码 sRGB）处在同一空间。
-      uMapBackground: { value: new Color(CARD_BACKGROUND_COLOR) },
+      uMapBackground: { value: new Color(p.baseColor ?? CARD_BACKGROUND_COLOR) },
+      uHasFront: { value: p.frontValid === false ? 0 : 1 },
       uCameraPosition: { value: new Vector3() },
       uColors: { value: PLACEHOLDER.colors.map((c) => new Color(c)) },
       uColorAlphas: { value: PLACEHOLDER.alphas },

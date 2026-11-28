@@ -354,6 +354,7 @@ export function createCardView(opts: CardViewOptions): CardView {
       normal: faceNormal,
       // 颜色源蒙版要采样真原图：没有卡面图时它必须整体关掉（否则会去采 1×1 占位纹理）。
       frontValid: faceTexture !== null,
+      baseColor: face.baseColor,
     })
 
     // 树 → 线性绘制序列：深度优先、父在前子随后；被禁用的层连同整棵子树一起跳过。

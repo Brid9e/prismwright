@@ -72,6 +72,7 @@ const card: Card = {
   notes: "",
   rarity: "epic",
   front: "assets/cards/c1/front.png",
+    baseColor: "#282830",
   // 底图调整字段：本测试只收集资源路径，取 schema 默认值即可。
   frontFit: "cover",
   frontOffsetX: 0,

@@ -42,6 +42,7 @@ function card(id: string): Card {
     notes: "",
     rarity: "common",
     front: "",
+    baseColor: "#282830",
     // 底图调整字段：本测试只查 id，取 schema 默认值即可。
     frontFit: "cover",
     frontOffsetX: 0,

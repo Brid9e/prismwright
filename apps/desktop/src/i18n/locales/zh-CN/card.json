@@ -9,6 +9,7 @@
     "notes": "备注",
     "rarity": "稀有度",
     "front": "卡面图",
+    "baseColor": "卡牌底色",
     "notSet": "未设置",
     "upload": "上传卡面图",
     "replace": "替换卡面图",

@@ -552,6 +552,7 @@ export interface PackStoreState {
       Pick<
         CardFace,
         | "front"
+        | "baseColor"
         | "frontFit"
         | "frontOffsetX"
         | "frontOffsetY"

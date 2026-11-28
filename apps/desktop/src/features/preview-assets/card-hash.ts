@@ -65,6 +65,8 @@ export function cardRenderHash(card: Card, aspect: number): string {
     v: RENDER_SPEC_VERSION,
     video: GENERATE_VIDEO_PREVIEW,
     front: card.front,
+    // 卡面底色直接决定留白 / 无底图时的画面，漏掉会让预览停在旧颜色。
+    baseColor: card.baseColor,
     // 填充方式、偏移、缩放与旋转直接决定底图取样，却不在 `front` 里——漏掉它们的后果是
     // 「换了填充方式 / 转了个角度，预览 / 展柜缩略图仍是旧画面」，且要等别的字段变化才被顺带重渲。
     frontFit: card.frontFit,

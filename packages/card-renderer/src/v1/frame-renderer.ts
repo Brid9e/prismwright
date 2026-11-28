@@ -223,6 +223,7 @@ export async function createCardFrameRenderer(
       frontNormalFlipY: card.frontNormalFlipY,
       normal: faceNormal,
       frontValid: front !== null,
+      baseColor: card.baseColor,
     })
     baseMesh.material = baseMat
     // 相机固定不动，故位置只需写入一次（交互视图则逐帧同步）。卡面与图层都读它做高光/反射。

@@ -28,6 +28,8 @@ uniform vec4 uMapMatrix;
 uniform vec2 uMapOffset;
 // 底图没覆盖到的位置（适应模式留白、缩小 / 旋转露出的角）垫的卡面默认底色。
 uniform vec3 uMapBackground;
+// 1 = 有真卡面图；0 = 只有 1×1 占位纹理（此时直接 uMapBackground，不采占位像素）。
+uniform float uHasFront;
 uniform sampler2D uMask;              // 卡面图蒙版（与图层同构）
 uniform sampler2D uFrontMap;          // 卡面原图：颜色蒙版按此采样（原始 uv，不含底图变换）
 uniform float uTime;                 // 秒；自流动时推进光泽/摩尔纹图案，静止时为 0
@@ -128,7 +130,8 @@ void main() {
   // 真实 vUv。
   // mapUv 已在法线段之前算好（法线贴图也要按它采样）。
   vec4 base;
-  if (any(lessThan(mapUv, vec2(0.0))) || any(greaterThan(mapUv, vec2(1.0)))) {
+  if (uHasFront < 0.5
+      || any(lessThan(mapUv, vec2(0.0))) || any(greaterThan(mapUv, vec2(1.0)))) {
     base = vec4(uMapBackground, 1.0);
   } else {
     base = texture2D(uMap, mapUv);

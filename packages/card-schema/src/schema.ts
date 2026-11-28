@@ -93,6 +93,8 @@ export const DEFAULT_CORNER_RADIUS = 0.06
  * 法线光照缺省方向（度，-180–180）：127° ≈ 摩尔纹浮雕那束固定斜光 (-0.6, 0.8) 的方向，
  * 两者的明暗因此默认同向。编辑器与渲染器共用这一个值。
  */
+export const DEFAULT_CARD_BASE_COLOR = "#282830"
+
 export const DEFAULT_BUMP_LIGHT_ANGLE = 127
 
 /** 法线光照缺省颜色：白光 = 明暗不带色偏。schema 缺省与渲染器的「关」态共用。 */
@@ -671,6 +673,9 @@ export const CardFinishSchema = z.enum(["standard", "glass"])
 
 export const CardFaceSchema = z.object({
   front: z.string().default(""),
+  // 卡面底色：底图没覆盖到的位置（适应模式留白、缩小 / 旋转露出的角）或没有底图时垫的颜色。
+  // 新增字段带默认值，旧系列解析后与原深灰画面一致。
+  baseColor: z.string().regex(HEX_COLOR).default(DEFAULT_CARD_BASE_COLOR),
   // 底图调整字段：新增字段带默认值（additive default），故不必升 schemaVersion；
   // 旧系列缺这些字段时按「覆盖 / 零偏移 / 1 倍 / 0 度」解析，渲染结果与显式设置一致。
   frontFit: FrontFitSchema.default("cover"),

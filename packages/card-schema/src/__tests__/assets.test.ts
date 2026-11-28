@@ -97,6 +97,7 @@ const card: Card = {
   notes: "",
   rarity: "epic",
   front: "assets/cards/c1/front.png",
+  baseColor: "#282830",
   frontFit: "cover",
   frontOffsetX: 0,
   frontOffsetY: 0,

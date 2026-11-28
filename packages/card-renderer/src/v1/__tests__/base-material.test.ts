@@ -12,6 +12,7 @@ import { describe, it, expect } from "vitest"
 import { Color, DataTexture, RGBAFormat } from "three"
 import { EffectSchema } from "@prismwright/schema"
 import { createBaseMaterial } from "../materials/base-material"
+import { BASE_FRAGMENT } from "../shaders/base"
 import { CARD_BACKGROUND_COLOR } from "../card-scene"
 
 /** 1×1 占位纹理：充当底图 / 蒙版 sampler 的绑定。 */
@@ -259,6 +260,17 @@ describe("createBaseMaterial", () => {
   it("把卡面默认底色接线到 uMapBackground", () => {
     const m = build()
     expect(m.uniforms.uMapBackground.value.getHex()).toBe(CARD_BACKGROUND_COLOR)
+  })
+
+  it("自定义底色接线到 uMapBackground", () => {
+    expect(build({ baseColor: "#88ccff" }).uniforms.uMapBackground.value.getHex()).toBe(0x88ccff)
+  })
+
+  // 没有真底图时不能采 1×1 占位纹理：否则底色设置对空卡无效。
+  it("没有真底图时 uHasFront 为 0，片元用 uMapBackground 垫色", () => {
+    expect(build().uniforms.uHasFront.value).toBe(1)
+    expect(build({ frontValid: false }).uniforms.uHasFront.value).toBe(0)
+    expect(BASE_FRAGMENT).toContain("uHasFront < 0.5")
   })
 })
 

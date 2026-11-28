@@ -696,6 +696,8 @@ export type CardFinish = "standard" | "glass"
 export interface CardFace {
   /** 卡面图相对系列根的路径；空串表示未设置。默认 `""`。 */
   front: string
+  /** 卡面底色（hex）：底图没覆盖到的位置 / 没有底图时垫的颜色。默认 `#282830`。 */
+  baseColor: string
   /** 底图填充方式（见 {@link FrontFit}）。默认 `"cover"`。 */
   frontFit: FrontFit
   /**
