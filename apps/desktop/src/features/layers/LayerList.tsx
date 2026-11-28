@@ -201,6 +201,8 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
 
   function trailingFor(layerId: string, enabled: boolean, locked: boolean) {
     const disabledClass = "disabled:cursor-not-allowed disabled:opacity-40"
+    // 多选状态下点任意一个选中行的复制 / 删除，按整组选中处理。
+    const multi = selectedLayerIds.length > 1 && selectedLayerIds.includes(layerId)
     return (
       <>
         <Tooltip label={locked ? t("action.unlock") : t("action.lock")}>
@@ -230,28 +232,37 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
             {enabled ? <Eye size={12} /> : <EyeOff size={12} />}
           </button>
         </Tooltip>
-        <Tooltip label={t("action.duplicate")}>
+        <Tooltip label={t(multi ? "action.duplicateSelected" : "action.duplicate")}>
           <button
             type="button"
-            aria-label={t("action.duplicate")}
+            aria-label={t(multi ? "action.duplicateSelected" : "action.duplicate")}
             disabled={locked}
             onClick={(e) => {
               e.stopPropagation()
-              duplicateLayer(faceRef, layerId)
+              if (multi) duplicateLayers(faceRef, selectedLayerIds)
+              else duplicateLayer(faceRef, layerId)
             }}
             className={`flex h-5 w-5 items-center justify-center rounded-chip text-muted hover:bg-elevated hover:text-foreground ${disabledClass}`}
           >
             <Copy size={12} />
           </button>
         </Tooltip>
-        <Tooltip label={t("action.delete")}>
+        <Tooltip label={t(multi ? "action.deleteSelected" : "action.delete")}>
           <button
             type="button"
-            aria-label={t("action.delete")}
+            aria-label={t(multi ? "action.deleteSelected" : "action.delete")}
             disabled={locked}
             onClick={(e) => {
               e.stopPropagation()
-              requestConfirm({ kind: "delete-layer", ref: faceRef, layerId })
+              if (multi) {
+                requestConfirm({
+                  kind: "delete-layers",
+                  ref: faceRef,
+                  layerIds: [...selectedLayerIds],
+                })
+              } else {
+                requestConfirm({ kind: "delete-layer", ref: faceRef, layerId })
+              }
             }}
             className={`flex h-5 w-5 items-center justify-center rounded-chip text-muted hover:bg-elevated hover:text-danger ${disabledClass}`}
           >
@@ -328,22 +339,6 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
             icon={FolderPlus}
             label={t("action.groupSelected")}
             onClick={() => groupLayers(faceRef, selectedLayerIds)}
-          />
-          <IconButton
-            icon={Copy}
-            label={t("action.duplicateSelected")}
-            onClick={() => duplicateLayers(faceRef, selectedLayerIds)}
-          />
-          <IconButton
-            icon={Trash2}
-            label={t("action.deleteSelected")}
-            onClick={() =>
-              requestConfirm({
-                kind: "delete-layers",
-                ref: faceRef,
-                layerIds: [...selectedLayerIds],
-              })
-            }
           />
         </div>
       )}
