@@ -32,7 +32,7 @@
     "opacity": "透明度"
   },
   "blend": {
-    "label": "混合模式",
+    "label": "叠加",
     "add": "叠加",
     "normal": "正常",
     "shadow": "暗部颜色",

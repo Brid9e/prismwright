@@ -201,10 +201,11 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
           {t("section.layers")}
         </span>
       </div>
-      {/* 选中层的属性：与 PS 一样放在图层面板顶部一行。没选中层时保留控件但禁用，
-          面板高度不跳动。名称在行内双击 / 右键重命名，不在这里再占一行。 */}
-      <div className="flex shrink-0 items-center gap-2 px-3 pb-2">
-        <div className="w-24 shrink-0">
+      {/* 选中层的属性：两列一行，带小标签。没选中层时保留控件但禁用，面板高度不跳动。
+          名称在行内双击 / 右键重命名，不在这里再占一行。透明度不挂复位图标，给滑轨留宽度。 */}
+      <div className="grid shrink-0 grid-cols-2 gap-2 px-3 pb-2">
+        <div className="flex min-w-0 flex-col gap-1">
+          <span className="text-label text-muted">{t("blend.label")}</span>
           <Select
             value={selectedLayer?.blend ?? "normal"}
             disabled={!selectedLayer}
@@ -218,15 +219,14 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
             }))}
           />
         </div>
-        <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 flex-col gap-1">
+          <span className="text-label text-muted">{t("field.opacity")}</span>
           <Slider
             value={selectedLayer?.opacity ?? 1}
             disabled={!selectedLayer}
             min={0}
             max={1}
             step={0.01}
-            defaultValue={1}
-            resetLabel={t("reset")}
             ariaLabel={t("field.opacity")}
             onChange={(opacity) => {
               if (selectedLayer) updateLayer(faceRef, selectedLayer.id, { opacity })
