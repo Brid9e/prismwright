@@ -129,6 +129,8 @@
     "resetView": "Reset view",
     "toggleChecker": "Checkerboard",
     "zoom": "Zoom",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
     "noCard": "No card selected",
     "backNotSet": "Back is not set yet; editing any field creates it.",
     "usingDefaultBack": "This series has no back of its own; it uses the shared default card back.",

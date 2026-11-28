@@ -10,10 +10,17 @@ import type { ReactNode } from "react"
 import type { ImperativePanelHandle } from "react-resizable-panels"
 import { Panel as ResizePanel, PanelGroup, PanelResizeHandle } from "react-resizable-panels"
 
-/** 可拖拽的分隔条：默认 1px，悬浮/拖拽时高亮。 */
+/**
+ * 可拖拽的分隔条：8px 留白（与面板间距一致），悬浮/拖拽时中部亮起一条绿线。
+ *
+ * 不用 1px 实线：左右栏是浮层，中间那 8px 应该像「空气」而不是分割线；只有鼠标靠近时
+ * 才提示这里可以拖。
+ */
 function Handle() {
   return (
-    <PanelResizeHandle className="w-px bg-border transition-colors data-[resize-handle-state=drag]:bg-accent data-[resize-handle-state=hover]:bg-accent/60" />
+    <PanelResizeHandle className="group relative w-2 transition-colors">
+      <span className="absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 rounded-full bg-transparent transition-colors group-data-[resize-handle-state=hover]:bg-accent/50 group-data-[resize-handle-state=drag]:bg-accent" />
+    </PanelResizeHandle>
   )
 }
 
@@ -62,12 +69,15 @@ export function Splitter({ left, center, right, leftCollapsed, rightCollapsed }:
         maxSize={32}
         collapsible
         collapsedSize={0}
-        className="min-w-0"
+        className="min-w-0 overflow-hidden"
       >
-        {left}
+        <div className="panel-shadow flex h-full flex-col overflow-hidden rounded-panel border border-line-soft bg-panel">
+          {left}
+        </div>
       </ResizePanel>
       <Handle />
-      <ResizePanel id="center" order={2} minSize={30} className="min-w-0 bg-sunken">
+      {/* 中栏不铺底色：舞台直接落在应用底色上，四周的浮层是左右栏与顶栏。 */}
+      <ResizePanel id="center" order={2} minSize={30} className="min-w-0">
         {center}
       </ResizePanel>
       <Handle />
@@ -80,9 +90,11 @@ export function Splitter({ left, center, right, leftCollapsed, rightCollapsed }:
         maxSize={40}
         collapsible
         collapsedSize={0}
-        className="min-w-0"
+        className="min-w-0 overflow-hidden"
       >
-        {right}
+        <div className="panel-shadow flex h-full flex-col overflow-hidden rounded-panel border border-line-soft bg-panel">
+          {right}
+        </div>
       </ResizePanel>
     </PanelGroup>
   )

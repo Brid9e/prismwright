@@ -39,9 +39,9 @@ export function ToolbarButton({
         disabled={disabled}
         aria-label={label}
         aria-pressed={active}
-        className={`flex h-6 w-6 items-center justify-center rounded-sm transition-colors ${
+        className={`flex h-7 w-7 items-center justify-center rounded-control outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent/50 ${
           active
-            ? "bg-accent/20 text-foreground"
+            ? "bg-accent-soft text-accent"
             : "text-muted hover:bg-elevated hover:text-foreground"
         } disabled:text-disabled disabled:hover:bg-transparent`}
       >

@@ -14,9 +14,9 @@ import { useDefaultBackStore } from "../../store/defaultBackStore"
 import { isDefaultBackPack } from "../default-back/default-back"
 import { findCard, usePackStore } from "../../store/packStore"
 import { useUiStore } from "../../store/uiStore"
-import { Panel } from "../../ui/Panel"
+import { Segmented } from "../../ui/Segmented"
 import { Slider } from "../../ui/Slider"
-import { Toolbar, ToolbarButton } from "../../ui/Toolbar"
+import { ToolbarButton } from "../../ui/Toolbar"
 import {
   applyPickedStopColor,
   faceRefMatches,
@@ -612,71 +612,28 @@ export function PreviewPanel() {
   }
 
   return (
-    <Panel
-      title={t("panel.preview")}
-      scroll={false}
-      actions={
-        <Toolbar>
-          {/* 绘画期间禁用空闲摆动：`idleSway` 是 `useCardView` 创建 effect 的依赖，
-              切换它会销毁并重建整个 CardView——绘画中的擦除图（挂在旧视图上的内存纹理）
-              随之丢失，笔迹「看不见但确实画上了」。见擦除会话里那次 setViewIdleSway。 */}
-          <ToolbarButton
-            icon={Waves}
-            label={t("previewToggle.idleSway")}
-            active={idleSway}
-            disabled={paintActive}
-            onClick={() => setIdleSway(!idleSway)}
+    // 舞台直铺应用底色：不再套背景面板，工具栏与视图胶囊浮在画面上。
+    <div className="relative flex min-h-0 flex-1 flex-col">
+      <div className="absolute left-3 top-3 z-20 flex items-center gap-2">
+        {!editingDefaultBack && (
+          <Segmented
+            value={side}
+            onChange={(value) => setSide(value as "front" | "back")}
+            ariaLabel={t("panel.preview")}
+            options={[
+              { value: "front", label: t("preview.front") },
+              { value: "back", label: t("preview.back") },
+            ]}
           />
-          <ToolbarButton
-            icon={SquareDashed}
-            label={t("preview.toggleChecker")}
-            active={showChecker}
-            onClick={() => setShowChecker(!showChecker)}
-          />
-          <ToolbarButton icon={RotateCcw} label={t("preview.resetView")} onClick={resetView} />
-        </Toolbar>
-      }
-    >
-      <div className="flex h-full flex-col">
-        <div className="flex h-7 shrink-0 items-center gap-2 border-b border-border px-2">
-          {!editingDefaultBack && (
-            <div className="flex rounded-sm border border-border-subtle p-0.5">
-              {(["front", "back"] as const).map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setSide(value)}
-                  className={`h-5 rounded-sm px-2 text-[11px] ${
-                    side === value
-                      ? "bg-accent/25 text-foreground"
-                      : "text-muted hover:text-foreground"
-                  }`}
-                >
-                  {t(`preview.${value}`)}
-                </button>
-              ))}
-            </div>
-          )}
-
-          <div className="ml-auto w-40 min-w-0 shrink-0">
-            <Slider
-              value={zoom}
-              onChange={setZoom}
-              min={MIN_ZOOM}
-              max={MAX_ZOOM}
-              step={0.05}
-              precision={2}
-              ariaLabel={t("preview.zoom")}
-            />
-          </div>
-        </div>
+        )}
+      </div>
 
         {/* 渲染容器与拾色层是**兄弟**而非父子：拾色层盖在上面拦截指针事件，事件不会冒泡到
             渲染容器的拖拽倾斜监听上（那是渲染器挂在 canvas 容器上的，不是 React 树）。 */}
         <div className={`relative min-h-0 flex-1 ${showChecker ? "checkerboard" : ""}`}>
           <div ref={containerRef} className="absolute inset-0" />
           {!face && (
-            <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-[12px] text-disabled">
+            <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-body text-disabled">
               {side === "back" ? t("preview.backNotSet") : t("preview.noCard")}
             </div>
           )}
@@ -691,7 +648,7 @@ export function PreviewPanel() {
               {/* 退出提示 + 取消按钮：拾色层盖住整块预览，必须让「怎么退出」一眼可见。
                   浮条自己吞掉 pointerdown，否则点「取消」会先落成一次取色。 */}
               <div
-                className="absolute left-1/2 top-2 flex w-[min(360px,calc(100%-1rem))] -translate-x-1/2 items-center gap-2 rounded-sm border border-border-subtle bg-elevated/95 px-2 py-1 text-[11px] text-muted shadow-lg"
+                className="popover-shadow absolute left-1/2 top-2 flex w-[min(360px,calc(100%-1rem))] -translate-x-1/2 items-center gap-2 rounded-card border border-line-soft bg-panel/95 px-2 py-1 text-label text-muted"
                 onPointerDown={(e) => e.stopPropagation()}
               >
                 <span className="min-w-0 flex-1 leading-tight">
@@ -700,7 +657,7 @@ export function PreviewPanel() {
                 <button
                   type="button"
                   onClick={resolveColorPick}
-                  className="h-5 shrink-0 rounded-sm px-2 text-[11px] hover:bg-elevated hover:text-foreground"
+                  className="h-6 shrink-0 rounded-control px-2 text-label hover:bg-elevated hover:text-foreground"
                 >
                   {tEffect("imageMask.cancel")}
                 </button>
@@ -734,7 +691,7 @@ export function PreviewPanel() {
                 className="pointer-events-none absolute left-0 top-0 rounded-full border border-dashed border-white/90 opacity-0 ring-1 ring-black/50"
               />
               <div
-                className="absolute left-1/2 top-2 flex w-[min(480px,calc(100%-1rem))] -translate-x-1/2 flex-col gap-1 rounded-sm border border-border-subtle bg-elevated/95 px-2 py-1 text-[11px] text-muted shadow-lg"
+                className="popover-shadow absolute left-1/2 top-2 flex w-[min(480px,calc(100%-1rem))] -translate-x-1/2 flex-col gap-1 rounded-card border border-line-soft bg-panel/95 px-2 py-1 text-label text-muted"
                 onPointerDown={(e) => e.stopPropagation()}
               >
                 <div className="flex items-center gap-2">
@@ -779,27 +736,68 @@ export function PreviewPanel() {
                   <button
                     type="button"
                     onClick={cancelErase}
-                    className="ml-auto h-5 shrink-0 rounded-sm px-2 text-[11px] text-muted hover:bg-elevated hover:text-foreground"
+                    className="ml-auto h-6 shrink-0 rounded-control px-2 text-label text-muted hover:bg-elevated hover:text-foreground"
                   >
                     {tEffect("maskErase.cancel")}
                   </button>
                   <button
                     type="button"
                     onClick={() => void commitErase()}
-                    className="h-5 shrink-0 rounded-sm bg-accent/25 px-2 text-[11px] text-foreground hover:bg-accent/40"
+                    className="h-6 shrink-0 rounded-control bg-accent-soft px-2 text-label text-accent hover:bg-accent-soft/70"
                   >
                     {tEffect("maskErase.done")}
                   </button>
                 </div>
                 {/* 提示可能较长（含快捷键与反向笔说明），允许换行而不是撑破浮条。 */}
-                <span className="leading-tight text-[10px] text-disabled">
+                <span className="leading-tight text-num text-disabled">
                   {tEffect("maskErase.hint")}
                 </span>
               </div>
             </div>
           )}
         </div>
+        {/* 底部视图胶囊：缩放与视图开关。浮在舞台上，不占据画面高度。 */}
+        <div className="pointer-events-none absolute bottom-4 left-1/2 z-20 -translate-x-1/2">
+          <div className="pointer-events-auto flex h-button items-center gap-0.5 rounded-full border border-line-soft bg-panel/90 px-1.5 popover-shadow backdrop-blur">
+            {/* 绘画期间禁用空闲摆动：`idleSway` 是 `useCardView` 创建 effect 的依赖，
+                切换它会销毁并重建整个 CardView——绘画中的擦除图（挂在旧视图上的内存纹理）
+                随之丢失，笔迹「看不见但确实画上了」。 */}
+            <ToolbarButton
+              icon={Waves}
+              label={t("previewToggle.idleSway")}
+              active={idleSway}
+              disabled={paintActive}
+              onClick={() => setIdleSway(!idleSway)}
+            />
+            <ToolbarButton
+              icon={SquareDashed}
+              label={t("preview.toggleChecker")}
+              active={showChecker}
+              onClick={() => setShowChecker(!showChecker)}
+            />
+            <ToolbarButton icon={RotateCcw} label={t("preview.resetView")} onClick={resetView} />
+            <span className="mx-1 h-4 w-px bg-line-soft" aria-hidden />
+            <button
+              type="button"
+              aria-label={t("preview.zoomOut")}
+              onClick={() => setZoom(Math.max(MIN_ZOOM, Math.round((zoom - 0.1) * 100) / 100))}
+              className="flex h-7 w-7 items-center justify-center rounded-control text-muted hover:bg-elevated hover:text-foreground"
+            >
+              −
+            </button>
+            <span className="w-10 text-center font-mono text-num text-muted">
+              {Math.round(zoom * 100)}%
+            </span>
+            <button
+              type="button"
+              aria-label={t("preview.zoomIn")}
+              onClick={() => setZoom(Math.min(MAX_ZOOM, Math.round((zoom + 0.1) * 100) / 100))}
+              className="flex h-7 w-7 items-center justify-center rounded-control text-muted hover:bg-elevated hover:text-foreground"
+            >
+              +
+            </button>
+          </div>
+        </div>
       </div>
-    </Panel>
-  )
+    )
 }
