@@ -71,12 +71,22 @@
   }
 }
 
-/* 预览画布的棋盘底：透明区域用棋盘格表示「这里是空的」。
- * 写在样式表而非内联样式，因为色值守卫禁止 TSX 里出现 rgb(...) 字面量。 */
-.checkerboard {
-  background-image: repeating-conic-gradient(
-    rgb(var(--color-checker-a)) 0% 25%,
-    rgb(var(--color-checker-b)) 0% 50%
+/* 工作区网格底：布满整个窗口，只在顶栏那一段渐隐为透明。
+ *
+ * 网格线用分隔线色（--color-line）的半透明版本，24px 一格；画布上下左右都直接透出它，
+ * 不再单独铺棋盘格。mask 的两段数值与顶栏对齐：0–46px 完全透明（顶栏所在高度），
+ * 到 150px 处完全显现，中间是一段柔和过渡，避免栏下出现一条硬边。
+ * 色值写在样式表而非 TSX：组件里禁 rgb(...) 字面量。 */
+.workspace-grid {
+  background-image:
+    linear-gradient(to right, rgb(var(--color-line) / 0.7) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(var(--color-line) / 0.7) 1px, transparent 1px);
+  background-size: 24px 24px;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 46px,
+    rgb(0 0 0) 150px
   );
-  background-size: 20px 20px;
+  mask-image: linear-gradient(to bottom, transparent 0, transparent 46px, rgb(0 0 0) 150px);
 }

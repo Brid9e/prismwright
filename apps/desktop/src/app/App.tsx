@@ -55,6 +55,7 @@ export default function App() {
   const openContextMenu = useUiStore((s) => s.openContextMenu)
   const collapse = useUiStore((s) => s.collapsed)
   const layout = useUiStore((s) => s.layout)
+  const showGrid = useUiStore((s) => s.showChecker)
   const language = useUiStore((s) => s.language)
   const editorVersion = useUiStore((s) => s.editorVersion)
   const settingsOpen = useUiStore((s) => s.settingsOpen)
@@ -280,7 +281,10 @@ export default function App() {
   return (
     <TooltipProvider>
       {/* 顶栏直接贴在窗口上/左/右三边上（无外边距、无背景）；只有它下面的工作区留 8px 边距。 */}
-      <div data-tauri-drag-region className="flex h-full flex-col bg-app text-foreground">
+      <div
+        data-tauri-drag-region
+        className={`flex h-full flex-col bg-app text-foreground ${showGrid ? "workspace-grid" : ""}`}
+      >
         {usesHtmlTitleBar(platform) && (
           <TitleBar platform={platform} variant={startPage ? "minimal" : "full"} />
         )}

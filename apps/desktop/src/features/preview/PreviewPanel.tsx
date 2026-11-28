@@ -632,7 +632,8 @@ export function PreviewPanel() {
 
         {/* 渲染容器与拾色层是**兄弟**而非父子：拾色层盖在上面拦截指针事件，事件不会冒泡到
             渲染容器的拖拽倾斜监听上（那是渲染器挂在 canvas 容器上的，不是 React 树）。 */}
-        <div className={`relative min-h-0 flex-1 ${showChecker ? "checkerboard" : ""}`}>
+        {/* 背景不在这里铺：网格底挂在整个窗口上（见 App 的 workspace-grid），画布直接透出。 */}
+        <div className="relative min-h-0 flex-1">
           <div ref={containerRef} className="absolute inset-0" />
           {!face && (
             <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-body text-disabled">
