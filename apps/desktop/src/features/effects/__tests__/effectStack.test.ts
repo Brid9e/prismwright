@@ -12,7 +12,7 @@ import { describe, it, expect } from "vitest"
 import { createElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import type { Effect, EffectKind } from "@prismwright/schema"
-import { EFFECT_REGISTRY } from "@prismwright/renderer/v1"
+import { EFFECT_REGISTRY, type FieldDescriptor } from "@prismwright/renderer/v1"
 import { initI18n } from "../../../i18n/init"
 import { TooltipProvider } from "../../../ui/Tooltip"
 import { EffectFields, EffectStack } from "../EffectStack"
@@ -69,6 +69,30 @@ function resetButtons(html: string): string[] {
   return html.match(/<button[^>]*aria-label="重置为默认值"[^>]*>/g) ?? []
 }
 
+describe("EffectStack 展开态", () => {
+  it("默认展开所有效果，参数直接可见", () => {
+    const html = renderToStaticMarkup(
+      createElement(
+        TooltipProvider,
+        null,
+        createElement(EffectStack, {
+          scope: "layer",
+          effects: [fx("gloss", "g")],
+          onAdd: noop,
+          onRemove: noop,
+          onToggle: noop,
+          onMove: noop,
+          onUpdate: noop,
+          onPickImage: noop,
+          onPaintErase: noop,
+        }),
+      ),
+    )
+    // gloss 的「方向」字段在展开区里；折叠态不会渲染它。
+    expect(html).toContain("方向")
+  })
+})
+
 describe("EffectStack 空分组", () => {
   it("卡面作用域下隐藏「内容」分组：无可添加的 kind，空组不该占位", () => {
     const html = renderEmptyStack("face")
@@ -86,7 +110,8 @@ describe("EffectStack 空分组", () => {
 describe("EffectFields 滑块复位", () => {
   /** 默认参数下实际可见的滑块数量：叠色联动参数在 palette 合成下会被 visibleWhen 隐藏。 */
   function visibleSliderCount(params: Record<string, unknown>): number {
-    return EFFECT_REGISTRY.gradient.fields.filter(
+    const fields: readonly FieldDescriptor[] = EFFECT_REGISTRY.gradient.fields
+    return fields.filter(
       (f) =>
         f.type === "slider" &&
         (f.visibleWhen === undefined || f.visibleWhen(params)),
@@ -98,7 +123,9 @@ describe("EffectFields 滑块复位", () => {
     const html = renderFields(effect)
     const buttons = resetButtons(html)
 
-    expect(buttons).toHaveLength(visibleSliderCount(effect.params as Record<string, unknown>))
+    expect(buttons).toHaveLength(
+      visibleSliderCount(effect.params as unknown as Record<string, unknown>),
+    )
     // 参数都等于注册表默认值时，每个复位按钮都该禁用；有任何一个可点即说明默认值没对上。
     expect(buttons.every((b) => b.includes('disabled=""'))).toBe(true)
   })
@@ -112,7 +139,7 @@ describe("EffectFields 滑块复位", () => {
     )
     const enabled = buttons.filter((b) => !b.includes('disabled=""'))
 
-    expect(buttons).toHaveLength(visibleSliderCount(changed as Record<string, unknown>))
+    expect(buttons).toHaveLength(visibleSliderCount(changed as unknown as Record<string, unknown>))
     expect(enabled).toHaveLength(1)
   })
 })

@@ -6,7 +6,7 @@
  * 旧面板（LayerDetail）里每种效果各写一大段 JSX 的做法由此收敛掉。
  *
  * 组件是**受控的展示组件**：不碰 store，一切经 `onAdd` / `onRemove` / `onToggle` / `onMove` /
- * `onUpdate` 上抛给调用方（卡面或图层面板）。唯一的本地状态是「哪几条展开着参数」——纯视图
+ * `onUpdate` 上抛给调用方（卡面或图层面板）。唯一的本地状态是「哪几条被折叠」——纯视图
  * 状态，不该进撤销栈，也不必让 store 知道。
  *
  * 分组与槽位这类可算的东西都挪到 `effectOps`（纯函数、有单测）；本文件只留渲染。
@@ -474,9 +474,10 @@ export function EffectStack({
 }: EffectStackProps) {
   const { t } = useTranslation("effect")
   // 展开态是纯视图状态，不进 store——它不该进撤销栈，重渲染也不该被撤销历史牵动。
-  const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set())
+  // 记录「已折叠」而不是「已展开」：默认集合为空即全部展开，新增效果也天然展开。
+  const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(() => new Set())
   const toggleExpanded = (id: string) =>
-    setExpanded((prev) => {
+    setCollapsed((prev) => {
       const next = new Set(prev)
       if (next.has(id)) next.delete(id)
       else next.add(id)
@@ -510,7 +511,7 @@ export function EffectStack({
                 effect={effect}
                 role={role}
                 scope={scope}
-                expanded={expanded.has(effect.id)}
+                expanded={!collapsed.has(effect.id)}
                 overridden={effect.kind === "imageMask" && imageMaskOverridden}
                 onToggleExpand={toggleExpanded}
                 onToggle={onToggle}
