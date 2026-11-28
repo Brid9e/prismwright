@@ -1,24 +1,25 @@
 /**
  * 玻璃卡的反射覆盖层。
  *
- * 卡面是平的，但相机有透视：每个像素的视线方向不同，`reflect(-V, N)` 因此扫过环境贴图的
+ * 卡面是平的，相机有透视：每个像素的视线方向不同，`reflect(-V, N)` 因此扫过环境贴图的
  * 不同区域——倾斜卡片时反射会跟着移动，这就是「映射场景」的来源。材质用正常混合，
  * 天空盒里的建筑 / 天空直接叠在卡面上；Fresnel 让正对时淡、侧看时更强。
+ *
+ * 法线保持几何法线，不再叠程序化波纹：波纹会让反射在 UV 上周期重复，看起来像万花筒。
+ * 代价是平面镜只反射环境的一个窄切片，这是平面玻璃的物理结果。
  */
 export const GLASS_OVERLAY_VERTEX = /* glsl */ `
 varying vec3 vWorldPos;
 varying vec3 vWorldNormal;
-varying vec3 vWorldTangent;
-varying vec3 vWorldBitangent;
 varying vec2 vUv;
 
 void main() {
   vUv = uv;
   vec4 wp = modelMatrix * vec4(position, 1.0);
   vWorldPos = wp.xyz;
-  vWorldNormal = normalize(normalMatrix * normal);
-  vWorldTangent = normalize((modelMatrix * vec4(1.0, 0.0, 0.0, 0.0)).xyz);
-  vWorldBitangent = normalize((modelMatrix * vec4(0.0, 1.0, 0.0, 0.0)).xyz);
+  // 反射与视线都在世界空间；这里也必须给世界法线（mat3(modelMatrix)），
+  // 不能拿 normalMatrix（那是视图空间）去混算。
+  vWorldNormal = normalize(mat3(modelMatrix) * normal);
   gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
 `
@@ -34,8 +35,6 @@ uniform vec3 uTint;
 
 varying vec3 vWorldPos;
 varying vec3 vWorldNormal;
-varying vec3 vWorldTangent;
-varying vec3 vWorldBitangent;
 varying vec2 vUv;
 
 // 与 common.ts 的 roundedRectMask 同一套圆角遮罩：玻璃反射也必须被卡面轮廓裁掉。
@@ -58,12 +57,8 @@ vec2 equirectUv(vec3 d) {
 
 void main() {
   vec3 V = normalize(uCameraPosition - vWorldPos);
-  // 很轻的一层波纹法线：平卡也需要一点起伏，环境才会「铺」在卡面上，而不是整片一个颜色。
-  vec2 ripple = vec2(
-    sin(vUv.x * 9.0 + vUv.y * 4.0),
-    cos(vUv.y * 8.0 - vUv.x * 3.0)
-  ) * 0.10;
-  vec3 N = normalize(normalize(vWorldNormal) + vWorldTangent * ripple.x + vWorldBitangent * ripple.y);
+  // 纯几何法线：平面镜反射，不再叠周期波纹。
+  vec3 N = normalize(vWorldNormal);
   vec3 R = reflect(-V, N);
 
   // 粗糙度 → mip 偏移：0 = 清晰的镜面反射，1 = 几乎只取平均色。

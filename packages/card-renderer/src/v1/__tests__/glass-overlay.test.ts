@@ -47,7 +47,9 @@ describe("玻璃卡环境", () => {
     expect(GLASS_OVERLAY_FRAGMENT).toContain("uRoughness")
     expect(GLASS_OVERLAY_FRAGMENT).toContain("pow(1.0 - clamp(dot(N, V)")
     expect(GLASS_OVERLAY_FRAGMENT).toContain("roundedRectMask(vUv, uAspect, uCornerRadius)")
-    expect(GLASS_OVERLAY_FRAGMENT).toContain("vWorldTangent * ripple.x")
+    // 纯平面镜：法线就是几何法线，不再有周期波纹（否则反射会像万花筒一样重复）。
+    expect(GLASS_OVERLAY_FRAGMENT).toContain("vec3 N = normalize(vWorldNormal);")
+    expect(GLASS_OVERLAY_FRAGMENT).not.toContain("ripple")
   })
 
   it("材质：正常混合、透明、不写深度、渲染序高于图层", () => {
