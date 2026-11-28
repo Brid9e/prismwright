@@ -76,6 +76,8 @@ export default {
       },
       width: {
         switch: "30px",
+        // 属性行的固定标签列宽。
+        label: "60px",
       },
       fontSize: {
         num: ["10px", { lineHeight: "12px" }],

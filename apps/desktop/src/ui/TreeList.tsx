@@ -47,8 +47,10 @@ function Row({
         event.stopPropagation()
         onContextMenu(node.id, event)
       }}
-      className={`group flex h-7 items-center gap-1 pl-2 pr-1 text-[12px] ${
-        node.selected ? "bg-accent/15 text-foreground" : "text-muted hover:bg-elevated"
+      className={`group relative flex h-row items-center gap-1 rounded-control pl-2 pr-1 text-body ${
+        node.selected
+          ? "bg-accent-soft text-foreground before:absolute before:inset-y-1.5 before:left-0 before:w-0.5 before:rounded-full before:bg-accent"
+          : "text-muted hover:bg-elevated"
       }`}
     >
       <span className="min-w-0 flex-1 truncate" title={node.label}>
@@ -77,7 +79,7 @@ export interface TreeListProps {
 
 export function TreeList({ nodes, onSelect, emptyText, onContextMenu }: TreeListProps) {
   if (nodes.length === 0) {
-    return <div className="px-3 py-2 text-[12px] text-disabled">{emptyText}</div>
+    return <div className="px-3 py-2 text-body text-disabled">{emptyText}</div>
   }
 
   return (
@@ -88,7 +90,7 @@ export function TreeList({ nodes, onSelect, emptyText, onContextMenu }: TreeList
         return (
           <div key={node.id}>
             {showSection && (
-              <div className="select-none px-2 pb-0.5 pt-2 text-[10px] font-medium uppercase tracking-wide text-disabled">
+              <div className="select-none px-2 pb-1 pt-2 text-num font-medium uppercase tracking-wide text-disabled">
                 {node.section}
               </div>
             )}

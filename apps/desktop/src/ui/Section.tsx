@@ -1,44 +1,60 @@
 /**
- * 面板内可折叠分区：一组相关属性的分组容器。
+ * 面板内的分组卡：把长属性列表按语义折成几块。
  *
- * 与 `Panel` 的区别：`Panel` 是占满整块的三栏外壳，`Section` 是外壳**内部**的分组——
- * 用来把长属性列表按语义折叠成几块，单个面板因此不必一次性铺满几十行。
- * 展开态由组件自身持有（非受控）；同一面板里的多个 `Section` 各自独立折叠。
+ * 与 `Panel` 的区别：`Panel` 是占满整块的三栏外壳，`SectionCard` 是外壳**内部**的圆角卡片。
+ * 展开态由组件自身持有（非受控）；同一面板里的多张卡各自独立折叠。
+ *
+ * `Section` 是旧名，保留导出以免迁移期大面积改调用点，行为等同 `SectionCard`。
  */
 import { useState, type ReactNode } from "react"
 import { ChevronDown, ChevronRight } from "lucide-react"
 
-export interface SectionProps {
+export interface SectionCardProps {
   /** 标题文本（调用方负责翻译）。 */
   title: string
   /** 初始是否展开；之后由组件自身状态接管。默认展开。 */
   defaultOpen?: boolean
   /** 标题栏右侧的附加控件（如启用开关、摘要文本）。 */
   actions?: ReactNode
+  /** 是否允许折叠；固定分组传 `false`，标题只作分隔。 */
+  collapsible?: boolean
   children: ReactNode
 }
 
-export function Section({ title, defaultOpen = true, actions, children }: SectionProps) {
+export function SectionCard({
+  title,
+  defaultOpen = true,
+  actions,
+  collapsible = true,
+  children,
+}: SectionCardProps) {
   const [open, setOpen] = useState(defaultOpen)
 
   return (
-    <div className="border-b border-border last:border-b-0">
-      <div className="flex h-7 items-center gap-1 bg-elevated/40 px-2">
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-label={title}
-          aria-expanded={open}
-          className="flex h-5 w-5 items-center justify-center rounded-sm text-muted hover:bg-elevated hover:text-foreground"
-        >
-          {open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-        </button>
-        <span className="select-none text-[10px] font-medium uppercase tracking-wide text-disabled">
-          {title}
-        </span>
+    <div className="overflow-hidden rounded-card border border-line bg-elevated/40">
+      <div className="flex h-row items-center gap-1 px-2">
+        {collapsible && (
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-label={title}
+            aria-expanded={open}
+            className="flex h-6 w-6 items-center justify-center rounded-control text-muted outline-none hover:bg-elevated hover:text-foreground focus-visible:ring-2 focus-visible:ring-accent/50"
+          >
+            {open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+          </button>
+        )}
+        <span className="select-none text-body font-semibold text-muted">{title}</span>
         <div className="ml-auto flex items-center gap-1">{actions}</div>
       </div>
-      {open && <div>{children}</div>}
+      {(!collapsible || open) && <div className="px-3 pb-3">{children}</div>}
     </div>
   )
+}
+
+export type SectionProps = Omit<SectionCardProps, "collapsible">
+
+/** 旧名：默认任意分组都可折叠。 */
+export function Section(props: SectionProps) {
+  return <SectionCard {...props} />
 }

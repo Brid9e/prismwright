@@ -23,7 +23,7 @@ export function Tooltip({ label, children }: { label: string; children: ReactNod
       <RadixTooltip.Portal>
         <RadixTooltip.Content
           sideOffset={6}
-          className="z-50 rounded-sm border border-border-subtle bg-elevated px-2 py-1 text-[12px] text-foreground shadow-md"
+          className="popover-shadow z-50 rounded-card border border-line-soft bg-panel px-2 py-1 text-label text-foreground"
         >
           {label}
         </RadixTooltip.Content>

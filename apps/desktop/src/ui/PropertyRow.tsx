@@ -29,15 +29,14 @@ export function PropertyRow({
   reserveControlSpace = false,
 }: PropertyRowProps) {
   return (
-    <div className="flex min-h-8 items-center gap-2 px-2 py-1">
+    <div className="flex min-h-row items-center gap-2 px-2">
       {/*
-        标签宽度是「首选」而非「固定」：`w-24` + `min-w-0 shrink` 让它在极窄面板下让位给控件。
-        若固定 96px，1024px 窗口把右栏拖到最小的 18% 时，滑杆尾部的复位图标会被 Panel 的
-        `overflow-x-hidden` 裁掉（控件区只剩约 64px，而数字框 + 图标 + 间距就要约 100px）。
-        标签自身 truncate + title，压缩后仍可悬停看全名。
+        标签宽 60px（`w-label`），但仍是「首选」而非「固定」：配合 `min-w-0 shrink` 让它在
+        极窄面板下让位给控件。若写死不可收缩，1024px 窗口把右栏拖窄时，滑杆尾部的复位图标
+        会被 Panel 的 `overflow-x-hidden` 裁掉。标签自身 truncate + title，压缩后仍可悬停看全名。
       */}
       <span
-        className="w-24 min-w-0 shrink select-none truncate text-[12px] text-muted"
+        className="w-label min-w-0 shrink select-none truncate text-label text-muted"
         title={label}
       >
         {label}
