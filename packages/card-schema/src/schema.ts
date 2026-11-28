@@ -443,7 +443,8 @@ export const ImageParamsSchema = z.object({
   // 填充方式：与卡面底图同名同义（见 FrontFitSchema）。缺省 `contain` 是刻意的——加该字段
   // 之前图片按 `fitImageSize` 铺，效果等价「完整可见」，缺省取 cover 会把存量图层的图裁掉一圈。
   // 新增字段带默认值（additive default），故不必升 schemaVersion。
-  fit: FrontFitSchema.default("contain"),
+  // 图层图片默认覆盖卡面（等比铺满、超出裁掉）；显式写过 contain 的旧数据保持 contain。
+  fit: FrontFitSchema.default("cover"),
   // 跟随卡面：打开后编辑器在写卡面变换时同步填充方式 / 位移 / 缩放 / 旋转，
   // 落盘的仍是具体数值——渲染器不认这个标志，旧版本读到的也是对齐好的画面。
   // 新增字段带默认值（additive default），故不必升 schemaVersion。

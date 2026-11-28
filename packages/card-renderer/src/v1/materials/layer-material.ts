@@ -162,13 +162,13 @@ export function createLayerMaterial(p: LayerMaterialParams): ShaderMaterial {
   const maskUv = maskUvParams(p.aspect, imageMask, maskImageAspect(imageMask, p.mask))
 
   // 图片效果：纹理与变换参数。尺寸看纹理的自然宽高比；无尺寸信息时按方图兜底。
-  // 填充方式与卡面底图、图蒙版共用 fitSpan（缺省 contain = 加 fit 字段之前的画面）。
+  // 填充方式与卡面底图、图蒙版共用 fitSpan；schema 默认 cover。
   const imageTexture = p.image?.texture ?? null
   const imageParams = p.image?.params ?? null
   const texWidth = Number(imageTexture?.image?.width)
   const texHeight = Number(imageTexture?.image?.height)
   const imageAspect = texWidth > 0 && texHeight > 0 ? texWidth / texHeight : 1
-  const [fitWidth, fitHeight] = fitSpan(imageAspect, p.aspect, imageParams?.fit ?? "contain")
+  const [fitWidth, fitHeight] = fitSpan(imageAspect, p.aspect, imageParams?.fit ?? "cover")
   const imageScale = imageParams?.scale ?? 1
 
   // 法线（bump）：本层图片自带就用自己的（来源 1），否则继承背景图层的（来源 2）。

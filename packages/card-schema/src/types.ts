@@ -444,10 +444,10 @@ export interface ImageParams {
   /** 缩放倍数，1 = 自适应尺寸。默认 1。 */
   scale: number
   /**
-   * 填充方式（见 {@link FrontFit}）。默认 `contain`。
+   * 填充方式（见 {@link FrontFit}）。默认 `cover`：等比铺满卡面，超出部分裁掉。
    *
-   * 缺省 `contain`：加该字段之前图片按「完整可见」铺，默认值必须复现旧画面
-   * （additive default 的意义），否则存量图层图片会被裁掉一圈。
+   * 显式落盘过 `contain` 的旧图片保持完整可见；只有从未写过 `fit` 的极旧图片会按新默认
+   * 变成覆盖。
    */
   fit: FrontFit
   /**

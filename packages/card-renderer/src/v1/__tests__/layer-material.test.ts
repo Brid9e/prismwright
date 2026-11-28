@@ -490,7 +490,14 @@ describe("createLayerMaterial", () => {
   })
 
   it("有图片时按纹理宽高比与 scale 计算 uImageSize，并接线中心 / 旋转", () => {
-    const effect = image({ path: "assets/pic.png", x: 0.1, y: -0.2, rotation: 90, scale: 2 })
+    const effect = image({
+      path: "assets/pic.png",
+      fit: "contain",
+      x: 0.1,
+      y: -0.2,
+      rotation: 90,
+      scale: 2,
+    })
     const m = build({
       effects: [effect],
       image: { texture: imageTexture, params: effect.params as ImageParams },
@@ -508,7 +515,7 @@ describe("createLayerMaterial", () => {
   // 尺寸换算必须吃调用方给的卡面宽高比：build() 默认 aspect = 1，若材质里写死 1 也照样通过，
   // 故这里用真实卡面比例（2.5 / 3.5）再断言一次。
   it("尺寸换算用图层实际的卡面宽高比（非单位 aspect）", () => {
-    const effect = image()
+    const effect = image({ fit: "contain" })
     const m = build({
       aspect: CARD_ASPECT,
       effects: [effect],
@@ -520,7 +527,7 @@ describe("createLayerMaterial", () => {
   })
 
   // 填充方式与卡面底图共用 fitSpan：cover 溢满卡面、stretch 拉伸、contain 完整可见。
-  // 缺省 contain 与加 fit 之前的 fitImageSize 逐值相同——存量图层图片不因新字段变形。
+  // 显式写 contain 的旧图片仍保持完整可见；新图片默认 cover。
   it("图片的填充方式走 fitSpan：cover 铺满、stretch 拉伸", () => {
     const sizeFor = (fit: "cover" | "contain" | "stretch") => {
       const effect = image({ path: "assets/pic.png", fit })

@@ -6,14 +6,14 @@ const mk = (params: Record<string, unknown> = {}, enabled = true): Effect =>
   EffectSchema.parse({ kind: "image", id: "img", enabled, params }) as Effect
 
 describe("ImageParamsSchema", () => {
-  it("缺省时补 path 空串、位置/旋转 0、缩放 1，填充 contain、不跟随卡面", () => {
+  it("缺省时补 path 空串、位置/旋转 0、缩放 1，填充 cover", () => {
     expect(ImageParamsSchema.parse({})).toEqual({
       path: "",
       x: 0,
       y: 0,
       rotation: 0,
       scale: 1,
-      fit: "contain",
+      fit: "cover",
       bumpStrength: 0,
       bumpDetail: 0.01,
       bumpFlow: 0.5,
@@ -26,7 +26,7 @@ describe("ImageParamsSchema", () => {
     })
   })
 
-  // 缺省必须复现加 fit 之前的画面（fitImageSize 等价 contain）；取 cover 会把存量图片裁一圈。
+  // 产品默认取覆盖；显式写 contain 的旧数据仍保持完整可见。
   it("fit 接受三种填充方式、拒绝非法值", () => {
     expect(ImageParamsSchema.parse({ fit: "cover" }).fit).toBe("cover")
     expect(ImageParamsSchema.parse({ fit: "stretch" }).fit).toBe("stretch")
@@ -102,7 +102,7 @@ describe("EffectSchema image 分支", () => {
       y: 0,
       rotation: 0,
       scale: 1,
-      fit: "contain",
+      fit: "cover",
       bumpStrength: 0,
       bumpDetail: 0.01,
       bumpFlow: 0.5,
@@ -135,7 +135,7 @@ describe("resolveImage", () => {
       y: 0,
       rotation: 0,
       scale: 1,
-      fit: "contain",
+      fit: "cover",
       bumpStrength: 0,
       bumpDetail: 0.01,
       bumpFlow: 0.5,
