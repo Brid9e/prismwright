@@ -30,3 +30,10 @@ describe("Layer.children 递归结构", () => {
     expect(MAX_NEST_DEPTH).toBe(4)
   })
 })
+
+describe("图层锁定", () => {
+  it("缺省 locked=false，显式 true 可解析", () => {
+    expect(LayerSchema.parse({ id: "l1" }).locked).toBe(false)
+    expect(LayerSchema.parse({ id: "l1", locked: true }).locked).toBe(true)
+  })
+})

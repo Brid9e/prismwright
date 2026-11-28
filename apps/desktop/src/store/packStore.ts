@@ -64,13 +64,16 @@ import {
 import { packFs } from "../tauri/pack-fs"
 import {
   defaultAdjustmentLayerName,
+  defaultGroupLayerName,
   defaultLayerName,
   defaultTextLayerName,
   fillDefaultLayerNames,
   nextAdjustmentLayerNum,
+  nextGroupLayerNum,
   nextLayerNum,
   nextTextLayerNum,
 } from "./layer-naming"
+import { toDisplayOrder } from "../features/layers/order"
 import { collectCardRels, collectPackRels } from "./resources"
 import { useUiStore } from "./uiStore"
 
@@ -219,8 +222,10 @@ export interface PackStoreState {
   lastError: string | null
   /** 当前选中的卡片 ID；`null` 表示未选中。 */
   selectedCardId: string | null
-  /** 当前选中的图层 ID；`null` 表示未选中。 */
+  /** 当前选中的图层 ID（多选时的主选层）；`null` 表示未选中。 */
   selectedLayerId: string | null
+  /** 当前选中的图层集合（Shift 多选）；主选层 {@link selectedLayerId} 也在其中。 */
+  selectedLayerIds: string[]
   /**
    * 图层剪贴板：`copyLayer` 存下的深拷贝快照（见 {@link PackStoreState.copyLayer}）。
    *
@@ -378,6 +383,11 @@ export interface PackStoreState {
    */
   selectLayer: (id: string | null) => void
   /**
+   * 选中一组图层（Shift 多选）。`primaryId` 是检查器显示的主选层；省略时取数组末位。
+   * 空数组等价于清空选择。
+   */
+  selectLayers: (ids: string[], primaryId?: string | null) => void
+  /**
    * 追加一个空图层到指定卡面，并选中它。
    *
    * @param ref - 目标卡面（卡片正面或系列级背面）。
@@ -410,6 +420,31 @@ export interface PackStoreState {
    * @returns 新图层的 ID；目标不存在时返回 `null`。
    */
   addAdjustmentLayer: (ref: FaceRef) => string | null
+  /**
+   * 新建一个空分组（普通图层，之后可把图层拖进去），并选中它。
+   *
+   * @param ref - 目标卡面。
+   * @returns 新分组图层的 ID；目标不存在时返回 `null`。
+   */
+  addGroupLayer: (ref: FaceRef) => string | null
+  /**
+   * 批量删除选中图层。祖先与后代同时选中时只删祖先；锁定的图层跳过。
+   * 一次提交、一个撤销点；删除后清空选择。
+   */
+  deleteLayers: (ref: FaceRef, layerIds: readonly string[]) => void
+  /**
+   * 批量复制选中图层。祖先与后代同时选中时只复制祖先；锁定的图层跳过。
+   * 每个副本插在原层之后，一次提交；复制后选中所有新副本。
+   */
+  duplicateLayers: (ref: FaceRef, layerIds: readonly string[]) => string[]
+  /**
+   * 把选中图层收进一个新分组。分组插在最高选中层的位置；锁定的图层跳过。
+   *
+   * @returns 新分组 ID；没有可分组图层时返回 `null`。
+   */
+  groupLayers: (ref: FaceRef, layerIds: readonly string[]) => string | null
+  /** 锁定 / 解锁一个图层（一次提交）。锁定后拖拽、拖入与行内编辑均被禁用。 */
+  setLayerLocked: (ref: FaceRef, layerId: string, locked: boolean) => void
   /**
    * 更新文字层的排版参数。
    *
@@ -739,6 +774,7 @@ type PackStoreData = Pick<
   | "lastError"
   | "selectedCardId"
   | "selectedLayerId"
+  | "selectedLayerIds"
   | "layerClipboard"
   | "past"
   | "future"
@@ -766,6 +802,29 @@ function cloneLayerDeep(layer: Layer, name: string): Layer {
   }
 }
 
+/** 自身或任一祖先被锁：锁是向下继承的，锁住分组等于锁住整棵子树。 */
+function isLayerLocked(layers: readonly Layer[], id: string): boolean {
+  const entry = flattenLayers(layers).find((e) => e.layer.id === id)
+  return entry ? entry.layer.locked || entry.ancestors.some((a) => a.locked) : false
+}
+
+/**
+ * 从一组选中 id 里取「根」：祖先也被选中的后代不单独算，避免批量操作重复处理子树。
+ * 返回顺序是数组的绘制顺序（下 → 上）。
+ */
+function selectedRootLayers(layers: readonly Layer[], ids: readonly string[]): Layer[] {
+  const selected = new Set(ids)
+  const roots: Layer[] = []
+  const walk = (list: readonly Layer[]): void => {
+    for (const layer of list) {
+      if (selected.has(layer.id)) roots.push(layer)
+      else walk(layer.children)
+    }
+  }
+  walk(layers)
+  return roots
+}
+
 /**
  * 构造一份全新的初始（空）状态。
  *
@@ -786,6 +845,7 @@ function createInitialState(): PackStoreData {
     lastError: null,
     selectedCardId: null,
     selectedLayerId: null,
+    selectedLayerIds: [],
     layerClipboard: null,
     past: [],
     future: [],
@@ -927,7 +987,7 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
     const selected = get().selectedLayerId
     if (selected) {
       const op = plan.ops.find((o) => o.layerIds.includes(selected))
-      if (op) set({ selectedLayerId: op.layer.id })
+      if (op) set({ selectedLayerId: op.layer.id, selectedLayerIds: [op.layer.id] })
     }
     return plan.ops.length
   },
@@ -1061,7 +1121,7 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
       ;(hidden ? d.hiddenCards : d.cards).push(card)
     })
     // 新增后直接选中它，并默认选中其预置的首个图层，让用户即刻可编辑。
-    set({ selectedCardId: card.id, selectedLayerId: card.layers[0]?.id ?? null })
+    set({ selectedCardId: card.id, selectedLayerId: card.layers[0]?.id ?? null, selectedLayerIds: card.layers[0] ? [card.layers[0].id] : [] })
     return card.id
   },
 
@@ -1105,7 +1165,7 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
     })
     // 若被删的正是当前选中卡片，改选普通列表首张（无则清空选择）。
     if (get().selectedCardId === cardId) {
-      set({ selectedCardId: get().pack?.cards[0]?.id ?? null, selectedLayerId: null })
+      set({ selectedCardId: get().pack?.cards[0]?.id ?? null, selectedLayerId: null, selectedLayerIds: [] })
     }
   },
 
@@ -1120,12 +1180,18 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
     get().commit((d) => {
       d.back = null
     })
-    if (selectedInBack) set({ selectedLayerId: null })
+    if (selectedInBack) set({ selectedLayerId: null, selectedLayerIds: [] })
   },
 
   setSaveStatus: (status) => set({ saveStatus: status }),
-  selectCard: (id) => set({ selectedCardId: id, selectedLayerId: null }),
-  selectLayer: (id) => set({ selectedLayerId: id }),
+  selectCard: (id) =>
+    set({ selectedCardId: id, selectedLayerId: null, selectedLayerIds: [] }),
+  selectLayer: (id) => set({ selectedLayerId: id, selectedLayerIds: id ? [id] : [] }),
+  selectLayers: (ids, primaryId) => {
+    const unique = [...new Set(ids)]
+    const primary = primaryId !== undefined ? primaryId : (unique[unique.length - 1] ?? null)
+    set({ selectedLayerIds: unique, selectedLayerId: primary })
+  },
 
   addLayer: (ref) => {
     const { pack } = get()
@@ -1136,7 +1202,7 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
     get().commit((d) => {
       withFace(d, ref, (f) => f.layers.push(layer))
     })
-    set({ selectedLayerId: layer.id })
+    set({ selectedLayerId: layer.id, selectedLayerIds: [layer.id] })
     return layer.id
   },
 
@@ -1157,7 +1223,7 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
     get().commit((d) => {
       withFace(d, ref, (f) => (atBottom ? f.layers.unshift(layer) : f.layers.push(layer)))
     })
-    set({ selectedLayerId: layer.id })
+    set({ selectedLayerId: layer.id, selectedLayerIds: [layer.id] })
     return { layerId: layer.id, effectId: effect.id }
   },
 
@@ -1170,7 +1236,7 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
     get().commit((d) => {
       withFace(d, ref, (f) => f.layers.push(layer))
     })
-    set({ selectedLayerId: layer.id })
+    set({ selectedLayerId: layer.id, selectedLayerIds: [layer.id] })
     return layer.id
   },
 
@@ -1185,21 +1251,155 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
     get().commit((d) => {
       withFace(d, ref, (f) => f.layers.push(layer))
     })
-    set({ selectedLayerId: layer.id })
+    set({ selectedLayerId: layer.id, selectedLayerIds: [layer.id] })
     return layer.id
+  },
+
+  addGroupLayer: (ref) => {
+    const { pack } = get()
+    if (!pack || !canWriteFace(pack, ref)) return null
+    const existing = flattenLayers(findFace(pack, ref)?.layers ?? []).map((e) => e.layer)
+    // 分组就是普通图层：之后可以把图层拖进它的 children，也允许挂效果。
+    const layer = createLayer(defaultGroupLayerName(nextGroupLayerNum(existing)))
+    get().commit((d) => {
+      withFace(d, ref, (f) => f.layers.push(layer))
+    })
+    set({ selectedLayerId: layer.id, selectedLayerIds: [layer.id] })
+    return layer.id
+  },
+
+  setLayerLocked: (ref, layerId, locked) => {
+    const { pack } = get()
+    const layer = pack ? findLayerById(findFace(pack, ref)?.layers ?? [], layerId) : null
+    if (!layer || layer.locked === locked) return
+    get().commit((d) => {
+      withFace(d, ref, (f) => {
+        const target = findLayerById(f.layers, layerId)
+        if (target) target.locked = locked
+      })
+    })
+  },
+
+  deleteLayers: (ref, layerIds) => {
+    const { pack } = get()
+    const face = pack ? findFace(pack, ref) : null
+    if (!face) return
+    const roots = selectedRootLayers(face.layers, layerIds).filter(
+      (layer) => !isLayerLocked(face.layers, layer.id),
+    )
+    if (roots.length === 0) return
+    get().commit((d) => {
+      withFace(d, ref, (f) => {
+        for (const root of roots) detachLayer(f.layers, root.id)
+      })
+    })
+    set({ selectedLayerId: null, selectedLayerIds: [] })
+  },
+
+  duplicateLayers: (ref, layerIds) => {
+    const { pack } = get()
+    const face = pack ? findFace(pack, ref) : null
+    if (!face) return []
+    const rootIds = selectedRootLayers(face.layers, layerIds)
+      .filter((layer) => !isLayerLocked(face.layers, layer.id))
+      .map((layer) => layer.id)
+    if (rootIds.length === 0) return []
+
+    const newIds: string[] = []
+    const roots = new Set(rootIds)
+    get().commit((d) => {
+      withFace(d, ref, (f) => {
+        const duplicateInList = (list: Layer[]): void => {
+          for (let i = 0; i < list.length; i++) {
+            const layer = list[i]
+            if (roots.has(layer.id)) {
+              const existing = flattenLayers(f.layers).map((e) => e.layer)
+              const copy = cloneLayerDeep(layer, defaultLayerName(nextLayerNum(existing)))
+              list.splice(i + 1, 0, copy)
+              newIds.push(copy.id)
+              i += 1
+            } else {
+              duplicateInList(layer.children)
+            }
+          }
+        }
+        duplicateInList(f.layers)
+      })
+    })
+    if (newIds.length > 0) {
+      set({ selectedLayerIds: newIds, selectedLayerId: newIds[newIds.length - 1] })
+    }
+    return newIds
+  },
+
+  groupLayers: (ref, layerIds) => {
+    const { pack } = get()
+    const face = pack ? findFace(pack, ref) : null
+    if (!face) return null
+    const roots = selectedRootLayers(face.layers, layerIds).filter(
+      (layer) => !isLayerLocked(face.layers, layer.id),
+    )
+    if (roots.length === 0) return null
+
+    const rootIds = new Set(roots.map((layer) => layer.id))
+    const display = toDisplayOrder(face.layers).filter((row) => rootIds.has(row.id))
+    const top = display[0]
+    if (!top) return null
+    const parentId = top.parentId
+    // 分组要落在「最高选中层」原来的位置。先数一下同一父级里、排在它下面且会被摘走的
+    // 选中层，摘除后插入下标要相应左移。
+    const topLocation = findLayerLocation(face.layers, top.id)
+    const removedBefore = topLocation
+      ? topLocation.siblings
+          .slice(0, topLocation.index)
+          .filter((layer) => rootIds.has(layer.id)).length
+      : 0
+    const insertIndex = Math.max(0, top.indexInParent - removedBefore)
+    const existing = flattenLayers(face.layers).map((e) => e.layer)
+    const group = createLayer(defaultGroupLayerName(nextGroupLayerNum(existing)))
+    // children 数组是绘制顺序（下→上），展示顺序（上→下）要反过来。
+    const orderedIds = display.map((row) => row.id).reverse()
+
+    get().commit((d) => {
+      withFace(d, ref, (f) => {
+        const removed = new Map<string, Layer>()
+        for (const id of rootIds) {
+          const layer = detachLayer(f.layers, id)
+          if (layer) removed.set(id, layer)
+        }
+        const siblings = parentId
+          ? (findLayerById(f.layers, parentId)?.children ?? f.layers)
+          : f.layers
+        group.children = orderedIds
+          .map((id) => removed.get(id))
+          .filter((layer): layer is Layer => Boolean(layer))
+        siblings.splice(Math.min(insertIndex, siblings.length), 0, group)
+      })
+    })
+    set({ selectedLayerId: group.id, selectedLayerIds: [group.id] })
+    return group.id
   },
 
   deleteLayer: (ref, layerId) => {
     const { pack } = get()
     const face = pack ? findFace(pack, ref) : null
     if (!face || !findLayerById(face.layers, layerId)) return
+    if (isLayerLocked(face.layers, layerId)) return
     get().commit((d) => {
       withFace(d, ref, (f) => {
         // 摘除即删除：连同整棵子树一起消失（确认框已告知子层数量，见 InspectorPanel）。
         detachLayer(f.layers, layerId)
       })
     })
-    if (get().selectedLayerId === layerId) set({ selectedLayerId: null })
+    const { selectedLayerId, selectedLayerIds } = get()
+    if (selectedLayerIds.includes(layerId)) {
+      const nextIds = selectedLayerIds.filter((id) => id !== layerId)
+      set({
+        selectedLayerIds: nextIds,
+        selectedLayerId:
+          selectedLayerId === layerId ? (nextIds[nextIds.length - 1] ?? null) : selectedLayerId,
+      })
+    }
   },
 
   duplicateLayer: (ref, layerId) => {
@@ -1207,7 +1407,7 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
     if (!pack) return null
     const face = findFace(pack, ref)
     const source = face ? findLayerById(face.layers, layerId) : null
-    if (!source || !face) return null
+    if (!source || !face || isLayerLocked(face.layers, layerId)) return null
     // 整棵子树深拷贝并重编所有 id；根另取一个新默认名（沿用原名会让列表里出现两行同名）。
     const existing = flattenLayers(face.layers).map((e) => e.layer)
     const copy = cloneLayerDeep(source, defaultLayerName(nextLayerNum(existing)))
@@ -1217,7 +1417,7 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
         if (located) located.siblings.splice(located.index + 1, 0, copy)
       })
     })
-    set({ selectedLayerId: copy.id })
+    set({ selectedLayerId: copy.id, selectedLayerIds: [copy.id] })
     return copy.id
   },
 
@@ -1225,7 +1425,7 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
     const { pack } = get()
     const face = pack ? findFace(pack, ref) : null
     const source = face ? findLayerById(face.layers, layerId) : null
-    if (!source || !face) return false
+    if (!source || !face || isLayerLocked(face.layers, layerId)) return false
     // 快照而不是引用：复制之后用户继续改源层（甚至删掉它），粘出来的仍是这一刻的样子，
     // 而且不会和源层共享 effects / children 的引用。
     set({ layerClipboard: structuredClone(source) })
@@ -1244,7 +1444,7 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
         f.layers.push(copy)
       })
     })
-    set({ selectedLayerId: copy.id })
+    set({ selectedLayerId: copy.id, selectedLayerIds: [copy.id] })
     return copy.id
   },
 
@@ -1254,6 +1454,9 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
     if (!face) return
     const moved = findLayerById(face.layers, layerId)
     if (!moved) return
+    // 锁定的层不能拖出，也不能拖进锁定层（含锁定分组）里。
+    if (isLayerLocked(face.layers, layerId)) return
+    if (targetParentId !== null && isLayerLocked(face.layers, targetParentId)) return
 
     // 目标父必须存在，且不能是被移动子树自身或其后代（否则会把子树挂进自己里面形成环）。
     if (targetParentId !== null) {
@@ -1291,7 +1494,10 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
 
   setLayerEnabled: (ref, layerId, enabled) => {
     const { pack } = get()
-    const layer = pack ? findLayerById(findFace(pack, ref)?.layers ?? [], layerId) : null
+    if (!pack) return
+    const layers = findFace(pack, ref)?.layers ?? []
+    if (isLayerLocked(layers, layerId)) return
+    const layer = findLayerById(layers, layerId)
     if (!layer || layer.enabled === enabled) return
     get().commit((d) => {
       withFace(d, ref, (f) => {
@@ -1707,7 +1913,7 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
         card.num = i + 1
       })
     })
-    set({ selectedCardId: copy.id, selectedLayerId: null })
+    set({ selectedCardId: copy.id, selectedLayerId: null, selectedLayerIds: [] })
     return copy.id
   },
 
@@ -1731,7 +1937,7 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
         c.num = i + 1
       })
     })
-    set({ selectedCardId: copy.id, selectedLayerId: null })
+    set({ selectedCardId: copy.id, selectedLayerId: null, selectedLayerIds: [] })
     return copy.id
   },
 }))

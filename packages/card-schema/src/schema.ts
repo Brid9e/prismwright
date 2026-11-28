@@ -638,6 +638,8 @@ export const LayerSchema: z.ZodType<Layer, z.ZodTypeDef, unknown> = z.object({
   id: z.string().min(1),
   name: z.string().default(""),
   enabled: z.boolean().default(true),
+  // 锁定是 additive default（旧数据解析为 false），不必升 schemaVersion。
+  locked: z.boolean().default(false),
   holoMix: z.number().min(0).max(1).default(0.9),
   holoAlpha: z.number().min(0).max(1).default(1),
   blend: BlendModeSchema.default("add"),

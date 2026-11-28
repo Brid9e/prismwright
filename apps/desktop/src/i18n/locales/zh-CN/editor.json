@@ -174,6 +174,8 @@
     "deleteLayerTitle": "删除图层",
     "deleteLayerBody": "将删除「{{name}}」。",
     "deleteLayerBodyWithChildren": "将删除「{{name}}」及其 {{count}} 个子层。",
+    "deleteLayersTitle": "删除选中图层",
+    "deleteLayersBody": "将删除选中的 {{count}} 个图层（含子层）。",
     "deleteBackTitle": "删除卡背",
     "deleteBackBodyDefault": "删除后本系列将改用全系列共用的默认卡背；素材文件保留，可撤销。",
     "deleteBackBodyEmpty": "删除后本系列的背面将变为空白；素材文件保留，可撤销。"

@@ -33,6 +33,7 @@ function layer(over: Partial<Layer> = {}): Layer {
     id: "l1",
     name: "",
     enabled: true,
+    locked: false,
     holoMix: 0.9,
     holoAlpha: 1,
     blend: "add",

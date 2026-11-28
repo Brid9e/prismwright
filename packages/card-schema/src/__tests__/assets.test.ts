@@ -69,6 +69,7 @@ const layer = (id: string, effects: Effect[] = [], children: Layer[] = []): Laye
   name: "",
   children,
   enabled: true,
+  locked: false,
   holoMix: 0.9,
   holoAlpha: 1,
   blend: "normal",

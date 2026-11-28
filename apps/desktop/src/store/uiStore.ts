@@ -31,6 +31,7 @@ export type SettingsCategory = (typeof SETTINGS_CATEGORIES)[number]
 export type PendingConfirm =
   | { kind: "delete-card"; cardId: string }
   | { kind: "delete-layer"; ref: FaceRef; layerId: string }
+  | { kind: "delete-layers"; ref: FaceRef; layerIds: string[] }
   | { kind: "delete-back" }
 
 /**

@@ -3,16 +3,23 @@
   "unnamedText": "文字 {{num}}",
   "unnamedLayer": "未命名图层",
   "unnamedAdjustment": "调整层 {{num}}",
+  "unnamedGroup": "分组 {{num}}",
   "section": { "layers": "图层" },
   "action": {
     "add": "添加图层",
     "addText": "添加文字",
     "addImage": "添加图片",
     "addAdjustment": "添加调整层",
+    "addGroup": "新建分组",
+    "groupSelected": "分组选中图层",
+    "duplicateSelected": "复制选中图层",
+    "deleteSelected": "删除选中图层",
     "rename": "重命名图层",
     "duplicate": "复制图层",
     "delete": "删除图层",
-    "toggle": "启用/禁用"
+    "toggle": "启用/禁用",
+    "lock": "锁定图层",
+    "unlock": "解锁图层"
   },
   "maskPreset": {
     "preset": {

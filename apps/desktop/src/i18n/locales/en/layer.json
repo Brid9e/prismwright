@@ -3,16 +3,23 @@
   "unnamedText": "Text {{num}}",
   "unnamedLayer": "Unnamed layer",
   "unnamedAdjustment": "Adjustment {{num}}",
+  "unnamedGroup": "Group {{num}}",
   "section": { "layers": "Layers" },
   "action": {
     "add": "Add layer",
     "addText": "Add text",
     "addImage": "Add image",
     "addAdjustment": "Add adjustment layer",
+    "addGroup": "New group",
+    "groupSelected": "Group selected layers",
+    "duplicateSelected": "Duplicate selected layers",
+    "deleteSelected": "Delete selected layers",
     "rename": "Rename layer",
     "duplicate": "Duplicate layer",
     "delete": "Delete layer",
-    "toggle": "Enable/disable"
+    "toggle": "Enable/disable",
+    "lock": "Lock layer",
+    "unlock": "Unlock layer"
   },
   "maskPreset": {
     "preset": {

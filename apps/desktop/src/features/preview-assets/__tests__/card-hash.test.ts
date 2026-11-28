@@ -15,6 +15,7 @@ function sampleLayer(): Layer {
     id: "l1",
     name: "图层 1",
     enabled: true,
+    locked: false,
     holoMix: 0.9,
     holoAlpha: 1,
     blend: "normal",

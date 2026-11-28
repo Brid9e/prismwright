@@ -656,6 +656,8 @@ export interface Layer {
   name: string
   /** 是否启用该图层。默认 `true`。 */
   enabled: boolean
+  /** 是否锁定：锁定后禁止拖拽、禁止作为拖放目标，行内编辑与批量操作也跳过。默认 `false`。 */
+  locked: boolean
   /** 全息混合度，0–1，默认 0.9。越大全息越压过底图。 */
   holoMix: number
   /** 全息不透明度，0–1，默认 1。 */

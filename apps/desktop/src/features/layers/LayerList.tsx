@@ -7,7 +7,19 @@
  */
 import { useState, type MouseEvent } from "react"
 import { useTranslation } from "react-i18next"
-import { Copy, Eye, EyeOff, ImagePlus, Plus, SlidersHorizontal, Trash2, Type } from "lucide-react"
+import {
+  Copy,
+  Eye,
+  EyeOff,
+  FolderPlus,
+  ImagePlus,
+  Lock,
+  Plus,
+  SlidersHorizontal,
+  Trash2,
+  Type,
+  Unlock,
+} from "lucide-react"
 import {
   MAX_NEST_DEPTH,
   ancestorChain,
@@ -41,14 +53,20 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
   const addLayer = usePackStore((s) => s.addLayer)
   const addTextLayer = usePackStore((s) => s.addTextLayer)
   const addAdjustmentLayer = usePackStore((s) => s.addAdjustmentLayer)
+  const addGroupLayer = usePackStore((s) => s.addGroupLayer)
   const addImageLayer = usePackStore((s) => s.addImageLayer)
   const importAsset = usePackStore((s) => s.importAsset)
   const duplicateLayer = usePackStore((s) => s.duplicateLayer)
+  const duplicateLayers = usePackStore((s) => s.duplicateLayers)
+  const groupLayers = usePackStore((s) => s.groupLayers)
   const moveLayer = usePackStore((s) => s.moveLayer)
   const setLayerEnabled = usePackStore((s) => s.setLayerEnabled)
+  const setLayerLocked = usePackStore((s) => s.setLayerLocked)
   const updateLayer = usePackStore((s) => s.updateLayer)
   const selectedLayerId = usePackStore((s) => s.selectedLayerId)
+  const selectedLayerIds = usePackStore((s) => s.selectedLayerIds)
   const selectLayer = usePackStore((s) => s.selectLayer)
+  const selectLayers = usePackStore((s) => s.selectLayers)
   const requestConfirm = useUiStore((s) => s.requestConfirm)
   const openContextMenu = useUiStore((s) => s.openContextMenu)
   const missingAssets = useUiStore((s) => s.missingAssets)
@@ -56,14 +74,22 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(() => new Set())
   /** 正在就地重命名的图层 id（局部 UI 状态）。 */
   const [renamingId, setRenamingId] = useState<string | null>(null)
+  /** Shift 多选的锚点：普通点击时更新，Shift 点击时从它扩到目标行。 */
+  const [anchorId, setAnchorId] = useState<string | null>(null)
   const selectedLayer = selectedLayerId
     ? findLayerById(face.layers, selectedLayerId)
     : undefined
 
+  function startRename(id: string) {
+    const layer = findLayerById(face.layers, id)
+    if (!layer || layer.locked) return
+    setRenamingId(id)
+  }
+
   function commitRename(id: string, name: string) {
     const layer = findLayerById(face.layers, id)
     // 名字没变就不入历史点（双击后又原样提交是常见操作）。
-    if (layer && layer.name !== name) updateLayer(faceRef, id, { name })
+    if (layer && !layer.locked && layer.name !== name) updateLayer(faceRef, id, { name })
     setRenamingId(null)
   }
 
@@ -101,14 +127,38 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
   for (const row of toDisplayOrder(face.layers, collapsed)) {
     const layer = findLayerById(face.layers, row.id)
     if (!layer) continue
+    const ancestors = ancestorChain(face.layers, row.id) ?? []
     // 图蒙版与图片都挂在效果列表里，故从效果解析而非图层字段；任一有图且该图缺失时告警。
     rows.push({
       ...row,
       label: displayLayerName(layer, t),
-      selected: row.id === selectedLayerId,
+      selected: selectedLayerIds.includes(row.id),
+      locked: layer.locked || ancestors.some((a) => a.locked),
       warn: layerHasMissingAsset(layer.effects, missingAssets),
       expanded: !collapsed.has(row.id),
     })
+  }
+
+  function handleSelect(id: string, shiftKey: boolean) {
+    if (shiftKey && anchorId && anchorId !== id) {
+      const ids = rows.map((row) => row.id)
+      const a = ids.indexOf(anchorId)
+      const b = ids.indexOf(id)
+      if (a >= 0 && b >= 0) {
+        const [lo, hi] = a < b ? [a, b] : [b, a]
+        // 锁定行不可选；区间里跳过它们，主选仍是这次点击的行。
+        selectLayers(
+          rows
+            .slice(lo, hi + 1)
+            .filter((row) => !row.locked)
+            .map((row) => row.id),
+          id,
+        )
+        return
+      }
+    }
+    selectLayer(id)
+    setAnchorId(id)
   }
 
   /** 落位前复核深度上限：超限则提示并拒绝，不静默改结构。 */
@@ -142,25 +192,40 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
       items: layerContextItems({
         layerId,
         t,
-        renameLayer: setRenamingId,
+        renameLayer: startRename,
         duplicateLayer: (id) => duplicateLayer(faceRef, id),
         deleteLayer: (id) => requestConfirm({ kind: "delete-layer", ref: faceRef, layerId: id }),
       }),
     })
   }
 
-  function trailingFor(layerId: string, enabled: boolean) {
+  function trailingFor(layerId: string, enabled: boolean, locked: boolean) {
+    const disabledClass = "disabled:cursor-not-allowed disabled:opacity-40"
     return (
       <>
+        <Tooltip label={locked ? t("action.unlock") : t("action.lock")}>
+          <button
+            type="button"
+            aria-label={locked ? t("action.unlock") : t("action.lock")}
+            onClick={(e) => {
+              e.stopPropagation()
+              setLayerLocked(faceRef, layerId, !locked)
+            }}
+            className="flex h-5 w-5 items-center justify-center rounded-chip text-muted hover:bg-elevated hover:text-foreground"
+          >
+            {locked ? <Lock size={12} /> : <Unlock size={12} />}
+          </button>
+        </Tooltip>
         <Tooltip label={t("action.toggle")}>
           <button
             type="button"
             aria-label={t("action.toggle")}
+            disabled={locked}
             onClick={(e) => {
               e.stopPropagation()
               setLayerEnabled(faceRef, layerId, !enabled)
             }}
-            className="flex h-5 w-5 items-center justify-center rounded-chip text-muted hover:bg-elevated hover:text-foreground"
+            className={`flex h-5 w-5 items-center justify-center rounded-chip text-muted hover:bg-elevated hover:text-foreground ${disabledClass}`}
           >
             {enabled ? <Eye size={12} /> : <EyeOff size={12} />}
           </button>
@@ -169,11 +234,12 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
           <button
             type="button"
             aria-label={t("action.duplicate")}
+            disabled={locked}
             onClick={(e) => {
               e.stopPropagation()
               duplicateLayer(faceRef, layerId)
             }}
-            className="flex h-5 w-5 items-center justify-center rounded-chip text-muted hover:bg-elevated hover:text-foreground"
+            className={`flex h-5 w-5 items-center justify-center rounded-chip text-muted hover:bg-elevated hover:text-foreground ${disabledClass}`}
           >
             <Copy size={12} />
           </button>
@@ -182,11 +248,12 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
           <button
             type="button"
             aria-label={t("action.delete")}
+            disabled={locked}
             onClick={(e) => {
               e.stopPropagation()
               requestConfirm({ kind: "delete-layer", ref: faceRef, layerId })
             }}
-            className="flex h-5 w-5 items-center justify-center rounded-chip text-muted hover:bg-elevated hover:text-danger"
+            className={`flex h-5 w-5 items-center justify-center rounded-chip text-muted hover:bg-elevated hover:text-danger ${disabledClass}`}
           >
             <Trash2 size={12} />
           </button>
@@ -248,25 +315,55 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
           label={t("action.addAdjustment")}
           onClick={() => addAdjustmentLayer(faceRef)}
         />
+        <IconButton
+          icon={FolderPlus}
+          label={t("action.addGroup")}
+          onClick={() => addGroupLayer(faceRef)}
+        />
         <IconButton icon={Plus} label={t("action.add")} onClick={() => addLayer(faceRef)} />
       </div>
+      {selectedLayerIds.length > 1 && (
+        <div className="flex shrink-0 items-center gap-2 px-3 pb-2">
+          <IconButton
+            icon={FolderPlus}
+            label={t("action.groupSelected")}
+            onClick={() => groupLayers(faceRef, selectedLayerIds)}
+          />
+          <IconButton
+            icon={Copy}
+            label={t("action.duplicateSelected")}
+            onClick={() => duplicateLayers(faceRef, selectedLayerIds)}
+          />
+          <IconButton
+            icon={Trash2}
+            label={t("action.deleteSelected")}
+            onClick={() =>
+              requestConfirm({
+                kind: "delete-layers",
+                ref: faceRef,
+                layerIds: [...selectedLayerIds],
+              })
+            }
+          />
+        </div>
+      )}
       {/* 纵向滚动的树列表同样不该出现横向滚动条（行内文本已 `truncate`）：只放开 y、裁掉 x，
           避免极窄栏 + 深层嵌套时挤出一条横向滚动条。滚动条走覆盖式。 */}
       <ScrollArea className="min-h-0 flex-1 bg-sunken">
         <LayerTree
           rows={rows}
-          onSelect={selectLayer}
+          onSelect={handleSelect}
           onToggleExpand={toggleExpand}
           onMove={handleMove}
           onContextMenu={handleContextMenu}
           emptyText={t("empty")}
           renamingId={renamingId}
-          onStartRename={setRenamingId}
+          onStartRename={startRename}
           onCommitRename={commitRename}
           onCancelRename={() => setRenamingId(null)}
           trailing={(row) => {
             const layer = findLayerById(face.layers, row.id)
-            return layer ? trailingFor(row.id, layer.enabled) : null
+            return layer ? trailingFor(row.id, layer.enabled, row.locked) : null
           }}
         />
       </ScrollArea>

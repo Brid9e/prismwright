@@ -34,6 +34,8 @@ export interface LayerTreeRow extends LayerRow {
   /** 展示文本（调用方负责翻译与回退）。 */
   label: string
   selected: boolean
+  /** 自身或祖先被锁定：整行禁用拖拽与拖入，行内操作只留解锁。 */
+  locked: boolean
   /** 是否显示资源缺失警示徽标。 */
   warn: boolean
   /** 是否处于展开态（仅对有子层的行有意义）。 */
@@ -57,7 +59,7 @@ function Row({
   row: LayerTreeRow
   zone: DropZone | null
   renaming: boolean
-  onSelect: (id: string) => void
+  onSelect: (id: string, shiftKey: boolean) => void
   onToggleExpand: (id: string) => void
   onContextMenu?: (id: string, event: MouseEvent<HTMLDivElement>) => void
   onStartRename: (id: string) => void
@@ -70,8 +72,9 @@ function Row({
   // 拖拽节点是整行（overlay 才有正确宽度）；监听器只挂在把手上，点行其它位置仍是选中。
   const { attributes, listeners, setNodeRef: setDragRef, isDragging } = useDraggable({
     id: row.id,
+    disabled: row.locked,
   })
-  const { setNodeRef: setDropRef } = useDroppable({ id: row.id })
+  const { setNodeRef: setDropRef } = useDroppable({ id: row.id, disabled: row.locked })
   const setRef = useCallback(
     (el: HTMLDivElement | null) => {
       setDragRef(el)
@@ -84,10 +87,12 @@ function Row({
   return (
     <div
       ref={setRef}
-      onClick={() => onSelect(row.id)}
+      onClick={(event) => {
+        if (!row.locked) onSelect(row.id, event.shiftKey)
+      }}
       onDoubleClick={(event) => {
-        // 双击行名进入就地重命名；点到按钮 / 输入框时不抢。
-        if ((event.target as HTMLElement).closest("button,input")) return
+        // 双击行名进入就地重命名；锁定行与按钮 / 输入框不抢。
+        if (row.locked || (event.target as HTMLElement).closest("button,input")) return
         onStartRename(row.id)
       }}
       onContextMenu={(event) => {
@@ -99,7 +104,7 @@ function Row({
       }}
       className={`group relative mx-1 flex h-row items-center gap-1 rounded-control pr-1 text-body ${
         row.selected ? "bg-accent-soft text-foreground" : "text-muted hover:bg-elevated"
-      } ${isDragging ? "opacity-50" : ""}`}
+      } ${isDragging ? "opacity-50" : ""} ${row.locked ? "opacity-60" : ""}`}
     >
       {zone === "top" && (
         <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-accent" />
@@ -116,7 +121,8 @@ function Row({
         {...attributes}
         {...listeners}
         aria-label={t("tree.drag")}
-        className="flex h-full w-4 shrink-0 cursor-grab items-center justify-center text-disabled"
+        disabled={row.locked}
+        className="flex h-full w-4 shrink-0 cursor-grab items-center justify-center text-disabled disabled:cursor-not-allowed disabled:opacity-40"
         onClick={(e) => e.stopPropagation()}
       >
         <GripVertical size={12} />
@@ -158,7 +164,11 @@ function Row({
           <AlertTriangle size={12} />
         </span>
       )}
-      <span className="flex shrink-0 items-center gap-0.5 opacity-0 group-hover:opacity-100">
+      <span
+        className={`flex shrink-0 items-center gap-0.5 ${
+          row.locked ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+        }`}
+      >
         {trailing}
       </span>
     </div>
@@ -205,7 +215,7 @@ function RenameInput({
 
 export interface LayerTreeProps {
   rows: LayerTreeRow[]
-  onSelect: (id: string) => void
+  onSelect: (id: string, shiftKey: boolean) => void
   onToggleExpand: (id: string) => void
   /** 落位回调：一次拖拽解析出的「重挂父级 + 同级下标」。 */
   onMove: (layerId: string, targetParentId: string | null, targetIndex: number) => void
@@ -261,6 +271,7 @@ export function LayerTree({
     // 找指针下的行；落在行间空隙时保留上一次有效目标，不跳到 closestCenter 的最近行。
     let hit: { id: string; relativeY: number } | null = null
     for (const row of rows) {
+      if (row.locked) continue
       const el = rowEls.current.get(row.id)
       if (!el) continue
       const rect = el.getBoundingClientRect()

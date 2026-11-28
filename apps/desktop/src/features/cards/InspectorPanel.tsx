@@ -62,6 +62,7 @@ export function InspectorPanel() {
   const selectedCardId = usePackStore((s) => s.selectedCardId)
   const selectedLayerId = usePackStore((s) => s.selectedLayerId)
   const deleteLayer = usePackStore((s) => s.deleteLayer)
+  const deleteLayers = usePackStore((s) => s.deleteLayers)
   const deleteBack = usePackStore((s) => s.deleteBack)
   const updateCard = usePackStore((s) => s.updateCard)
 
@@ -286,6 +287,24 @@ export function InspectorPanel() {
         onConfirm={() => {
           if (pendingConfirm?.kind === "delete-layer") {
             deleteLayer(pendingConfirm.ref, pendingConfirm.layerId)
+          }
+          resolveConfirm()
+        }}
+      />
+
+      <ConfirmDialog
+        open={pendingConfirm?.kind === "delete-layers"}
+        destructive
+        title={t("confirm.deleteLayersTitle")}
+        body={t("confirm.deleteLayersBody", {
+          count: pendingConfirm?.kind === "delete-layers" ? pendingConfirm.layerIds.length : 0,
+        })}
+        confirmLabel={tm("action.delete")}
+        cancelLabel={tm("action.cancel")}
+        onCancel={resolveConfirm}
+        onConfirm={() => {
+          if (pendingConfirm?.kind === "delete-layers") {
+            deleteLayers(pendingConfirm.ref, pendingConfirm.layerIds)
           }
           resolveConfirm()
         }}
