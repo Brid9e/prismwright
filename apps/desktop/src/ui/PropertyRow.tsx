@@ -29,7 +29,7 @@ export function PropertyRow({
   reserveControlSpace = false,
 }: PropertyRowProps) {
   return (
-    <div className="flex min-h-row items-center gap-2 px-2">
+    <div className="flex min-h-row items-center gap-2 px-0">
       {/*
         标签宽 60px（`w-label`），但仍是「首选」而非「固定」：配合 `min-w-0 shrink` 让它在
         极窄面板下让位给控件。若写死不可收缩，1024px 窗口把右栏拖窄时，滑杆尾部的复位图标

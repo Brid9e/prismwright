@@ -76,7 +76,7 @@ function StopRow({
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={`flex items-center gap-1.5 rounded-control px-1 py-0.5 ${
+      className={`flex items-center gap-2 rounded-control px-1 py-1 ${
         isDragging ? "relative z-10 bg-elevated shadow" : ""
       }`}
     >
@@ -137,7 +137,7 @@ export function ColorStops({ colors, onChange }: ColorStopsProps) {
   }
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-2">
       {/* 只读预览：颜色排列的示意。渲染器在 linear-light 里插值，这里退回 sRGB，不追求逐像素一致。 */}
       <div
         role="img"
@@ -165,7 +165,7 @@ export function ColorStops({ colors, onChange }: ColorStopsProps) {
         </SortableContext>
       </DndContext>
 
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-2">
         <Tooltip label={full ? t("colors.max") : t("colors.add")}>
           <button
             type="button"

@@ -32,7 +32,7 @@ export function SectionCard({
 
   return (
     <div className="overflow-hidden rounded-card border border-line bg-elevated/40">
-      <div className="flex h-row items-center gap-1 px-2">
+      <div className="flex h-row items-center gap-2 px-3">
         {collapsible && (
           <button
             type="button"

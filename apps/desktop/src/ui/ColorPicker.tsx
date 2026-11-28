@@ -129,7 +129,7 @@ export function ColorPicker({
           type="button"
           aria-label={ariaLabel}
           aria-haspopup="dialog"
-          className={`flex shrink-0 items-center gap-1.5 rounded-control border border-line-soft bg-sunken px-1 outline-none hover:border-line focus-visible:ring-2 focus-visible:ring-accent/50 ${
+          className={`flex shrink-0 items-center gap-2 rounded-control border border-line-soft bg-sunken px-1 outline-none hover:border-line focus-visible:ring-2 focus-visible:ring-accent/50 ${
             showHex ? "h-control" : "h-7"
           }`}
         >

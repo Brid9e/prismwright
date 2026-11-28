@@ -57,14 +57,14 @@ export function TextDetail({
   const shadow = text.shadow
 
   return (
-    <div className="py-1">
+    <div className="flex flex-col gap-2">
       <Section title={t("text.section.content")}>
         <PropertyRow label={t("text.field.content")} grow>
           <textarea
             value={text.content}
             onChange={(e) => update({ content: e.target.value })}
             rows={3}
-            className="min-h-14 w-full min-w-0 resize-y rounded-control border border-line bg-sunken px-1.5 py-1 text-body outline-none focus:border-accent"
+            className="min-h-14 w-full min-w-0 resize-y rounded-control border border-line-soft bg-sunken px-2 py-1 text-body outline-none focus:border-accent"
           />
         </PropertyRow>
         <PropertyRow label={t("text.mask.label")} reserveControlSpace>
@@ -75,7 +75,7 @@ export function TextDetail({
           />
         </PropertyRow>
         {text.asMask && (
-          <p className="px-2 pb-1 text-num leading-tight text-disabled">{t("text.mask.hint")}</p>
+          <p className="px-0 pb-1 text-num leading-tight text-disabled">{t("text.mask.hint")}</p>
         )}
       </Section>
 
@@ -91,10 +91,10 @@ export function TextDetail({
           <input
             value={text.fontFamily}
             onChange={(e) => update({ fontFamily: e.target.value })}
-            className="h-6 min-w-0 flex-1 rounded-control border border-line bg-sunken px-1.5 text-body outline-none focus:border-accent"
+            className="h-control min-w-0 flex-1 rounded-control border border-line-soft bg-sunken px-2 text-body outline-none focus:border-accent"
           />
         </PropertyRow>
-        <p className="px-2 pb-1 text-num leading-tight text-disabled">{t("text.field.fontHint")}</p>
+        <p className="px-0 pb-1 text-num leading-tight text-disabled">{t("text.field.fontHint")}</p>
       </Section>
 
       <Section title={t("text.section.appearance")}>

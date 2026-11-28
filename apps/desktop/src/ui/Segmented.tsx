@@ -58,7 +58,7 @@ export function Segmented({ value, options, onChange, ariaLabel, disabled }: Seg
             tabIndex={active || (selectedIndex === -1 && index === 0) ? 0 : -1}
             onClick={() => onChange(option.value)}
             onKeyDown={(event) => handleKeyDown(event, index)}
-            className={`inline-flex h-control items-center gap-1.5 rounded-control px-2.5 text-body outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent/50 disabled:cursor-not-allowed disabled:opacity-40 ${
+            className={`inline-flex h-control items-center gap-2 rounded-control px-3 text-body outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent/50 disabled:cursor-not-allowed disabled:opacity-40 ${
               active
                 ? "bg-elevated text-foreground shadow-sm"
                 : "text-muted hover:bg-elevated/60 hover:text-foreground"

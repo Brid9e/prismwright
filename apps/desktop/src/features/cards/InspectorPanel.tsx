@@ -119,7 +119,7 @@ export function InspectorPanel() {
       </div>
 
       {hasFace && !usingDefaultBack && (
-        <div className="no-scrollbar shrink-0 overflow-x-auto border-b border-line px-2 py-1.5">
+        <div className="no-scrollbar shrink-0 overflow-x-auto border-b border-line px-3 py-2">
           <Segmented
             value={activeTab}
             ariaLabel={t("panel.inspector")}
@@ -146,7 +146,7 @@ export function InspectorPanel() {
         ) : !hasFace || !face ? (
           <div className="p-3 text-body text-disabled">{t("preview.noCard")}</div>
         ) : activeTab === "design" ? (
-          <div className="flex flex-col gap-2 p-2">
+          <div className="flex flex-col gap-2 p-3">
             <SectionCard title={t("inspector.design")} collapsible={false}>
               <CardFaceFields
                 face={face}
@@ -162,7 +162,7 @@ export function InspectorPanel() {
             )}
           </div>
         ) : activeTab === "layers" ? (
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-2 p-3">
             <LayerList face={face} faceRef={faceRef} />
             {selectedLayer ? (
               <LayerDetail face={face} faceRef={faceRef} layerId={selectedLayer.id} section="properties" />
@@ -177,7 +177,7 @@ export function InspectorPanel() {
             <div className="p-3 text-body text-disabled">{t("inspector.noLayer")}</div>
           )
         ) : (
-          <div className="flex flex-col gap-2 p-2">
+          <div className="flex flex-col gap-2 p-3">
             <SectionCard title={t("inspector.exportCard")} collapsible={false}>
               <div className="flex flex-col gap-2">
                 <Button variant="secondary" onClick={() => openExportDialog("png")}>

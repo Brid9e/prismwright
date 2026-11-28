@@ -324,10 +324,9 @@ function AddEffectMenu({
   return (
     <DropdownMenu.Root>
       {/* 触发按钮占满一整行、底色取面板之上更亮的一档（`elevated`），作分组末尾的收尾动作。
-          横向内边距只由这层容器给（`px-2`），与分组标题对齐；`w-full` 显式铺满——`<button>`
-          默认按内容收缩，光靠 `flex` 在 WebView 里未必撑开。 */}
-      <div className="px-2 pb-1 pt-0.5">
-        <DropdownMenu.Trigger className="flex h-6 w-full items-center justify-center gap-1 rounded-control bg-elevated px-1.5 text-body text-muted outline-none hover:text-foreground focus:ring-1 focus:ring-ring data-[state=open]:text-foreground">
+          负外边距让底色延伸到卡片边缘，内容仍与分组标题对齐；`w-full` 显式铺满。 */}
+      <div className="-mx-3 px-3 pb-1 pt-2">
+        <DropdownMenu.Trigger className="flex h-control w-full items-center justify-center gap-2 rounded-control bg-elevated px-2 text-body text-muted outline-none hover:text-foreground focus:ring-1 focus:ring-ring data-[state=open]:text-foreground">
           <Plus size={13} />
           {t("add")}
         </DropdownMenu.Trigger>
@@ -401,8 +400,8 @@ function EffectRow({
   const name = t(EFFECT_REGISTRY[effect.kind].labelKey)
 
   return (
-    <div className="border-b border-line last:border-b-0">
-      <div className="flex items-center gap-1 px-2 py-1">
+    <div>
+      <div className="-mx-3 flex min-h-row items-center gap-2 px-3 py-1">
         <Switch checked={effect.enabled} onChange={() => onToggle(effect.id)} ariaLabel={name} />
 
         {/* 调序只对相位组开放——其它两组在着色器里是无序通路，顺序不影响画面。 */}
@@ -446,7 +445,7 @@ function EffectRow({
 
       {/* 被覆盖提示：置于展开区之上，无论是否展开都能看到（用户需要先知道它当前不生效）。 */}
       {overridden && (
-        <div className="px-2 pb-1 text-num text-warning">{t("imageMask.overridden")}</div>
+        <div className="px-0 pb-1 text-num text-warning">{t("imageMask.overridden")}</div>
       )}
       {expanded && (
         <EffectFields
@@ -487,8 +486,8 @@ export function EffectStack({
   const imageMaskOverridden = hasEnabledKind(effects, "maskPreset")
 
   return (
-    <div className="py-1">
-      <div className="select-none px-2 py-1 text-num font-medium uppercase tracking-wide text-disabled">
+    <div className="flex flex-col gap-3">
+      <div className="select-none px-0 py-1 text-num font-medium uppercase tracking-wide text-disabled">
         {t("title")}
       </div>
 
@@ -500,8 +499,8 @@ export function EffectStack({
         if (group.length === 0 && kinds.length === 0) return null
 
         return (
-          <div key={role} className="border-b border-line last:border-b-0">
-            <div className="select-none px-2 py-1 text-num font-medium uppercase tracking-wide text-muted">
+          <div key={role} className="flex flex-col gap-1">
+            <div className="-mx-3 select-none px-3 py-1 text-num font-medium uppercase tracking-wide text-muted">
               {t(`role.${role}`)}
             </div>
 

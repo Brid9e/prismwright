@@ -174,13 +174,13 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
   }
 
   return (
-    <div className="flex min-h-0 flex-col border-b border-line">
-      <div className="flex shrink-0 items-center px-2 pb-1 pt-2">
+    <div className="flex min-h-0 flex-col">
+      <div className="flex shrink-0 items-center px-3 pb-1 pt-2">
         <span className="select-none text-body font-semibold text-muted">
           {t("section.layers")}
         </span>
       </div>
-      <div className="grid shrink-0 grid-cols-2 gap-1 px-2 pb-2">
+      <div className="grid shrink-0 grid-cols-2 gap-2 px-3 pb-2">
         <Button variant="secondary" size="sm" align="start" onClick={() => void addImage(true)}>
           <Image size={13} />
           {t("action.addBackground")}
@@ -205,7 +205,7 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
       </div>
       {/* 纵向滚动的树列表同样不该出现横向滚动条（行内文本已 `truncate`）：只放开 y、裁掉 x，
           避免极窄栏 + 深层嵌套时挤出一条横向滚动条。 */}
-      <div className="max-h-48 overflow-y-auto overflow-x-hidden">
+      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
         <LayerTree
           rows={rows}
           onSelect={selectLayer}

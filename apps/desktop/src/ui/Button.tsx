@@ -52,7 +52,7 @@ export function Button({
   return (
     <button
       type={type}
-      className={`inline-flex h-button shrink-0 items-center gap-1.5 rounded-control font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent/50 disabled:cursor-not-allowed disabled:opacity-40 ${
+      className={`inline-flex h-button shrink-0 items-center gap-2 rounded-control font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent/50 disabled:cursor-not-allowed disabled:opacity-40 ${
         align === "start" ? "justify-start" : "justify-center"
       } ${SIZE_CLASS[size]} ${VARIANT_CLASS[variant]} ${className}`}
       {...rest}

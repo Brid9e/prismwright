@@ -155,7 +155,7 @@ export function LayerDetail({
       )
     }
     return (
-      <div className="p-2">
+      <div className="flex flex-col gap-2">
         <SectionCard title={displayLayerName(layer, t)}>
           <EffectStack
             scope="layer"
@@ -179,8 +179,8 @@ export function LayerDetail({
   }
 
   return (
-    <div className="py-1">
-      <div className="select-none px-2 py-1 text-num font-medium uppercase tracking-wide text-disabled">
+    <div className="flex flex-col gap-2">
+      <div className="select-none px-0 py-1 text-num font-medium uppercase tracking-wide text-disabled">
         {displayLayerName(layer, t)}
       </div>
 
