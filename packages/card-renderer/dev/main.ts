@@ -31,24 +31,19 @@ const layer: Layer = {
   holoAlpha: 1,
   blend: "add",
   opacity: 1,
-  // 色标随数据层改造自图层字段迁入 palette 效果条目，取产品默认调色板（金→蓝→紫，即 DEFAULT_STOPS）。
+  // schema v10 起色标与相位参数都在 gradient 里：取产品默认调色板（金→蓝→紫，即 DEFAULT_STOPS）。
   // 各效果按 kind 依次叠加，顺序由着色器固定，与列表位置无关。渐变空间用产品默认（平行、count 31、
-  // angle 38.4），本页拖控件即改；相位全局项（扭曲 / 流速 / 噪声 / 偏移）也迁进 gradient 的 params。
+  // angle 38.4），本页拖控件即改；相位全局项（扭曲 / 流速 / 噪声 / 偏移）也在 gradient 的 params。
   // 几何刻纹本页没有控件、产品默认又关闭，故不挂效果条目；刻纹的观感在桌面应用里验收。
   // 图蒙版同样作为效果条目挂上（path 指向 line 样例图），其模式 / 反转由本页控件在 apply() 里改写。
   effects: [
-    {
-      id: "fx-palette",
-      enabled: true,
-      kind: "palette",
-      params: { colors: DEFAULT_STOPS.map((s) => ({ ...s })) },
-    },
     {
       id: "fx-gradient",
       enabled: true,
       kind: "gradient",
       // 这一页是给「与 buling 对照校准」用的，故噪声取满档（产品默认 0）；相位偏移取产品默认 0。
       params: {
+        colors: DEFAULT_STOPS.map((s) => ({ ...s })),
         mode: "parallel",
         count: 31,
         angle: 38.4,
@@ -130,6 +125,8 @@ function apply(): void {
     enabled: true,
     kind: "gradient",
     params: {
+      // 色标本页无对应控件：沿用产品默认调色板。
+      colors: DEFAULT_STOPS.map((s) => ({ ...s })),
       mode: el<HTMLSelectElement>("gradientMode").value as PatternMode,
       count: Number(el<HTMLInputElement>("gradientCount").value),
       angle: Number(el<HTMLInputElement>("gradientAngle").value),
@@ -141,13 +138,6 @@ function apply(): void {
       offsetX: Number(el<HTMLInputElement>("offsetX").value),
       offsetY: Number(el<HTMLInputElement>("offsetY").value),
     },
-  }
-  // 色标由 palette 效果承载（原为图层字段），本页无对应控件，故用产品默认调色板。
-  const paletteEffect: Effect = {
-    id: "fx-palette",
-    enabled: true,
-    kind: "palette",
-    params: { colors: DEFAULT_STOPS.map((s) => ({ ...s })) },
   }
   const mp = maskPresetParams()
   // 图蒙版并入效果栈：模式取自 maskMode 控件，path 随之在 line / fill 两张样例图之间切换；
@@ -165,15 +155,14 @@ function apply(): void {
       invert: el<HTMLInputElement>("invert").checked,
     },
   }
-  // palette / gradient / imageMask（及程序化蒙版）各按 kind 依次叠加——顺序由着色器固定，与列表位置无关。
+  // gradient / imageMask（及程序化蒙版）各按 kind 依次叠加——顺序由着色器固定，与列表位置无关。
   const layerEffects: Effect[] = mp
     ? [
-        paletteEffect,
         gradientEffect,
         imageMaskEffect,
         { id: "fx-mask", enabled: true, kind: "maskPreset", params: mp },
       ]
-    : [paletteEffect, gradientEffect, imageMaskEffect]
+    : [gradientEffect, imageMaskEffect]
   const nextLayer: Layer = {
     ...layer,
     blend: el<HTMLSelectElement>("blend").value as Layer["blend"],
@@ -183,14 +172,14 @@ function apply(): void {
     effects: layerEffects,
   }
   const nestOn = el<HTMLInputElement>("nest").checked
-  // 子层不挂 imageMask（效果只留 palette + gradient）→ 自身整卡出全息，只有「祖先软裁切」这一条在决定它的形状：
+  // 子层不挂 imageMask（效果只留 gradient）→ 自身整卡出全息，只有「祖先软裁切」这一条在决定它的形状：
   // 勾上 nest 后，特效只应出现在父层线稿（暗线）处。子层会继承 nextLayer.effects（其中含 imageMask），
   // 故显式覆盖 effects 把图蒙版撇掉。
   const child: Layer = {
     ...nextLayer,
     id: "l1-child",
     name: "",
-    effects: [paletteEffect, gradientEffect],
+    effects: [gradientEffect],
     children: [],
   }
   const next: CardFace = {

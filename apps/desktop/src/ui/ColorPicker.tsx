@@ -28,7 +28,8 @@ export interface ColorPickerProps {
   showHex?: boolean
 }
 
-const FALLBACK_HEX = "#ffffff"
+/** 无有效色值时的种子：白色（HSV 表达，避免在组件里写 hex 字面量）。 */
+const FALLBACK_HSV: Hsv = { h: 0, s: 0, v: 1 }
 
 function clamp01(value: number): number {
   return Math.min(1, Math.max(0, value))
@@ -37,7 +38,7 @@ function clamp01(value: number): number {
 /** 取色器的内部状态：无有效色值时从一个白色种子开始，但触发器仍显示为空。 */
 function seed(value: string): { hsv: Hsv; alpha: number } {
   const normalized = normalizeHexInput(value)
-  if (!normalized) return { hsv: hexToHsv(FALLBACK_HEX), alpha: 1 }
+  if (!normalized) return { hsv: FALLBACK_HSV, alpha: 1 }
   return { hsv: hexToHsv(normalized), alpha: alphaOf(normalized) }
 }
 

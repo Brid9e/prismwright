@@ -4,7 +4,7 @@
  * 卡面已没有独立前景图 / 面级效果；图片与效果都在图层上。这里只钉住底色的 uniform 接线。
  */
 import { describe, it, expect } from "vitest"
-import { Color } from "three"
+import type { Color } from "three"
 import { createBaseMaterial } from "../materials/base-material"
 import { BASE_FRAGMENT } from "../shaders/base"
 
