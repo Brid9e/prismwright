@@ -4,7 +4,7 @@
  * 单独成模块而不是写在 `InspectorPanel` 里：UI store 要存当前页签、测试要钉顺序，
  * 两边都消费同一份常量，避免各写一套字符串。
  */
-export const INSPECTOR_TABS = ["design", "layers", "effects", "export"] as const
+export const INSPECTOR_TABS = ["design", "layers", "effects"] as const
 
 export type InspectorTab = (typeof INSPECTOR_TABS)[number]
 

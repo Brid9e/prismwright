@@ -25,7 +25,8 @@
  */
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Redo2, Undo2 } from "lucide-react"
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu"
+import { ChevronDown, Redo2, Undo2 } from "lucide-react"
 import PrismwrightLogoSmall from "../../assets/prismwright-logo-small.svg?react"
 import { findCard, usePackStore } from "../../store/packStore"
 import { useUiStore } from "../../store/uiStore"
@@ -223,13 +224,47 @@ export function TitleBar({
             />
             <SaveIndicator />
             <LayoutControls />
-            <Button
-              variant="primary"
-              className="ml-1"
-              onClick={() => dispatch("file.export.series")}
-            >
-              {te("topbar.export")}
-            </Button>
+            <DropdownMenu.Root>
+              <DropdownMenu.Trigger asChild>
+                <Button variant="primary" className="ml-1">
+                  {te("topbar.export")}
+                  <ChevronDown size={12} />
+                </Button>
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Portal>
+                <DropdownMenu.Content
+                  align="end"
+                  sideOffset={6}
+                  className="z-50 min-w-40 rounded-control border border-line-soft bg-elevated py-1 popover-shadow"
+                >
+                  <DropdownMenu.Item
+                    onSelect={() => dispatch("file.export.png")}
+                    className="flex cursor-default items-center px-2 py-1 text-body text-foreground outline-none data-[highlighted]:bg-accent-soft"
+                  >
+                    {tc("menu.exportPng")}
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item
+                    onSelect={() => dispatch("file.export.gif")}
+                    className="flex cursor-default items-center px-2 py-1 text-body text-foreground outline-none data-[highlighted]:bg-accent-soft"
+                  >
+                    {tc("menu.exportGif")}
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item
+                    onSelect={() => dispatch("file.export.webm")}
+                    className="flex cursor-default items-center px-2 py-1 text-body text-foreground outline-none data-[highlighted]:bg-accent-soft"
+                  >
+                    {tc("menu.exportWebm")}
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Separator className="my-1 h-px bg-line" />
+                  <DropdownMenu.Item
+                    onSelect={() => dispatch("file.export.series")}
+                    className="flex cursor-default items-center px-2 py-1 text-body text-foreground outline-none data-[highlighted]:bg-accent-soft"
+                  >
+                    {tc("menu.exportSeries")}
+                  </DropdownMenu.Item>
+                </DropdownMenu.Content>
+              </DropdownMenu.Portal>
+            </DropdownMenu.Root>
           </>
         )}
         <SettingsButton />

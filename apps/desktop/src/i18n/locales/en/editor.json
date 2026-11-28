@@ -124,10 +124,7 @@
     "design": "Design",
     "layers": "Properties",
     "effects": "Effects",
-    "export": "Export",
-    "noLayer": "Select a layer in the Layers panel first",
-    "exportCard": "Export this card",
-    "exportSeries": "Export series package"
+    "noLayer": "Select a layer in the Layers panel first"
   },
   "library": {
     "title": "Cards",

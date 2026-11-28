@@ -57,8 +57,6 @@ export function InspectorPanel() {
   const pendingConfirm = useUiStore((s) => s.pendingConfirm)
   const resolveConfirm = useUiStore((s) => s.resolveConfirm)
   const requestConfirm = useUiStore((s) => s.requestConfirm)
-  const openExportDialog = useUiStore((s) => s.openExportDialog)
-  const openBundleExport = useUiStore((s) => s.openBundleExport)
 
   const pack = usePackStore((s) => s.pack)
   const selectedCardId = usePackStore((s) => s.selectedCardId)
@@ -155,35 +153,12 @@ export function InspectorPanel() {
         />
       ) : null}
     </div>
-  ) : shownTab === "effects" ? (
-    selectedLayer ? (
-      <div className="p-3">
-        <LayerDetail face={face} faceRef={faceRef} layerId={selectedLayer.id} />
-      </div>
-    ) : (
-      <div className="p-3 text-body text-disabled">{t("inspector.noLayer")}</div>
-    )
-  ) : (
-    <div className="flex flex-col gap-2 p-3">
-      <SectionCard title={t("inspector.exportCard")} collapsible={false}>
-        <div className="flex flex-col gap-2">
-          <Button variant="secondary" onClick={() => openExportDialog("png")}>
-            {tm("menu.exportPng")}
-          </Button>
-          <Button variant="secondary" onClick={() => openExportDialog("gif")}>
-            {tm("menu.exportGif")}
-          </Button>
-          <Button variant="secondary" onClick={() => openExportDialog("webm")}>
-            {tm("menu.exportWebm")}
-          </Button>
-        </div>
-      </SectionCard>
-      <SectionCard title={t("inspector.exportSeries")} collapsible={false}>
-        <Button className="w-full" onClick={() => openBundleExport(null)}>
-          {t("inspector.exportSeries")}
-        </Button>
-      </SectionCard>
+  ) : selectedLayer ? (
+    <div className="p-3">
+      <LayerDetail face={face} faceRef={faceRef} layerId={selectedLayer.id} />
     </div>
+  ) : (
+    <div className="p-3 text-body text-disabled">{t("inspector.noLayer")}</div>
   )
 
   const showDock = hasFace && !usingDefaultBack && Boolean(face)
