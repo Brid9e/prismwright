@@ -14,15 +14,17 @@ const token = (name: string): string => `rgb(var(${name}) / <alpha-value>)`
 export default {
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
-    // 圆角覆盖默认刻度：只留设计规范里的五档。旧代码里的 `rounded-sm/md/lg` 会因此
+    // 圆角覆盖默认刻度：只留设计规范里的六档。旧代码里的 `rounded-sm/md/lg` 会因此
     // 失去圆角（而不是悄悄换成另一档），由样式守卫测试逐处暴露后改为语义类。
+    // `sidepanel` 只给左右两栏用：其余面板 / 输入 / 滑轨 / 按钮整体收小一档。
     borderRadius: {
       none: "0",
       DEFAULT: "0",
-      chip: "4px",
-      control: "7px",
-      card: "10px",
-      panel: "14px",
+      chip: "3px",
+      control: "5px",
+      card: "8px",
+      panel: "12px",
+      sidepanel: "14px",
       full: "9999px",
     },
     extend: {

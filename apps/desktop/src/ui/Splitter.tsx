@@ -110,7 +110,7 @@ export function Splitter({
         collapsedSize={0}
         className="min-w-0 overflow-hidden"
       >
-        <div className="panel-shadow flex h-full flex-col overflow-hidden rounded-panel border border-line-soft bg-panel">
+        <div className="panel-shadow flex h-full flex-col overflow-hidden rounded-sidepanel border border-line-soft bg-panel">
           {left}
         </div>
       </ResizePanel>
@@ -132,7 +132,7 @@ export function Splitter({
         collapsedSize={0}
         className="min-w-0 overflow-hidden"
       >
-        <div className="panel-shadow flex h-full flex-col overflow-hidden rounded-panel border border-line-soft bg-panel">
+        <div className="panel-shadow flex h-full flex-col overflow-hidden rounded-sidepanel border border-line-soft bg-panel">
           {right}
         </div>
       </ResizePanel>

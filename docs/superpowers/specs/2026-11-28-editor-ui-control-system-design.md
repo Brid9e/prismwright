@@ -90,10 +90,11 @@
 
 | 元素 | 圆角 |
 | --- | --- |
-| 小徽标 / 色块 / 滑杆手柄 | 4 |
-| **所有紧凑控件**（输入、数字、滑轨与填充、颜色、按钮） | **7** |
-| 分区卡（检查器里的分组） | 10 |
-| 浮层面板 / 顶栏 / 对话框 | 14 |
+| 小徽标 / 色块 / 滑杆手柄 | 3 |
+| **所有紧凑控件**（输入、数字、滑轨与填充、颜色、按钮） | **5** |
+| 分区卡（检查器里的分组） | 8 |
+| 浮层面板 / 对话框 | 12 |
+| 左右两栏的外壳 | 14 |
 
 ### 5.5 字级
 
@@ -106,7 +107,7 @@
 
 - 颜色：`bg-app` `bg-panel` `bg-elevated` `bg-sunken` `bg-track` `bg-accent` `text-foreground` `text-muted` `border-line` `border-line-soft` …
 - 高度：`h-control`（24）`h-button`（28）`h-row`（32）`h-topbar`（46）
-- 圆角：`rounded-chip`（4）`rounded-control`（7）`rounded-card`（10）`rounded-panel`（14）
+- 圆角：`rounded-chip`（3）`rounded-control`（5）`rounded-card`（8）`rounded-panel`（12）`rounded-sidepanel`（14）
 - 字级：`text-label`（11）`text-body`（12）`text-title`（13）
 
 禁止在 `src/ui` 与 `src/features` 里写 `rounded-[…]`、`h-[…]`、`gap-[…]`、`text-[…px]` 这类任意值；由守卫测试兜底（见 §10）。
@@ -126,23 +127,23 @@
 
 ### 6.1 滑杆（重点）
 
-- 轨道：高 24、圆角 7、底 `--color-track`、描边 `--color-line-soft`、内阴影 `inset 0 1px 2px rgb(0 0 0 / .35)`。
+- 轨道：高 24、圆角 5、底 `--color-track`、描边 `--color-line-soft`、内阴影 `inset 0 1px 2px rgb(0 0 0 / .35)`。
 - 已滑过部分：同高、同圆角，实心 `--color-track-fill`。**必须与未滑过部分明显区分**。
-- 手柄：8 × 16、圆角 4、近白 `#f4f1eb`，投影 `0 1px 4px rgb(0 0 0 / .45)`；聚焦时加 2px 绿色环。
-- 数字框：43 × 24、圆角 7、等宽 10–11px、右对齐；与轨道同高、同圆角。
+- 手柄：8 × 16、圆角 3、近白 `#f4f1eb`，投影 `0 1px 4px rgb(0 0 0 / .45)`；聚焦时加 2px 绿色环。
+- 数字框：43 × 24、圆角 5、等宽 10–11px、右对齐；与轨道同高、同圆角。
 - 一行布局：标签（左）— 轨道（撑满）— 数字框（右）— 可选复位图标。
 - 拖动期间持续 `onChange`；`onCommit` 语义不变。
 
 ### 6.2 其他控件
 
-- 按钮：28 高，圆角 7；主按钮绿底深字，次按钮透明底 + `--color-line-soft` 描边，危险按钮红字。
-- 分段控件：容器 28 高、圆角 7、`--color-surface-elevated` 底加 1px 描边；选中项底 `--color-surface-panel`、文字主色、轻微投影。
+- 按钮：28 高，圆角 5；主按钮绿底深字，次按钮透明底 + `--color-line-soft` 描边，危险按钮红字。
+- 分段控件：容器 28 高、圆角 5、`--color-surface-elevated` 底加 1px 描边；选中项底 `--color-surface-panel`、文字主色、轻微投影。
 - 开关：30 × 17，关闭态中性；开态 `--color-accent-soft` 底 + 白色圆钮。
-- 颜色字段：28 高；色块 15 × 15 圆角 4；右侧拾色图标。
-- 下拉：28 高，圆角 7，右侧 chevron；菜单面板圆角 10、`--color-surface-panel`、投影。
-- 分区卡：圆角 10、1px `--color-line` 描边、`--color-surface-elevated/40` 底；标题行 32 高，可折叠。
-- 树行：高 30、圆角 7；选中态左侧 2px 绿条 + `--color-accent-soft` 底。
-- 标签（稀有度）：圆角 4、9px、色底 15% 透明。
+- 颜色字段：28 高；色块 15 × 15 圆角 3；右侧拾色图标。
+- 下拉：28 高，圆角 5，右侧 chevron；菜单面板圆角 8、`--color-surface-panel`、投影。
+- 分区卡：圆角 8、1px `--color-line` 描边、`--color-surface-elevated/40` 底；标题行 32 高，可折叠。
+- 树行：高 30、圆角 5；选中态左侧 2px 绿条 + `--color-accent-soft` 底。
+- 标签（稀有度）：圆角 3、9px、色底 15% 透明。
 
 ## 7. 布局与信息架构
 

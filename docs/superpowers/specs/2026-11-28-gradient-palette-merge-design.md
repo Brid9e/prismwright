@@ -137,6 +137,7 @@
 - 手柄高度改为与轨道一致（`h-control`，24px），宽度保持 8px、`rounded-chip`；去掉 `thumb-shadow` 投影，与扁平轨道一致。
 - 新取色器里的色相 / 透明度滑杆复用同一套轨道与手柄样式，不再出现细轨 + 高出轨道的小手柄。
 - 禁用态仍由 Root 统一降透明度 + `cursor-not-allowed`；可访问名与键盘行为不变。
+- 圆角整体下调一档：`chip 3 / control 5 / card 8 / panel 12`；左右两栏外壳单独用 `sidepanel 14`。
 
 ## 8. 统一颜色控件
 
