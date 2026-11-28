@@ -14,11 +14,15 @@ export interface TreeNode {
   id: string
   /** 展示文本（调用方负责翻译与回退处理）。 */
   label: string
+  /** 名字下方的补充行（编号、档位等）；不参与行高下限，行会被内容撑高。 */
+  sublabel?: string
   /** 分组标题；与上一条不同时插入标题行。 */
   section?: string
   selected?: boolean
   /** 是否显示警示徽标（资源缺失）。 */
   warn?: boolean
+  /** 名字左侧的图形（卡片缩略图），不参与截断。 */
+  leading?: ReactNode
   /** 名字右侧的小标记（如稀有度色标），不参与截断。 */
   tag?: ReactNode
   /** 行尾操作位。 */
@@ -47,14 +51,20 @@ function Row({
         event.stopPropagation()
         onContextMenu(node.id, event)
       }}
-      className={`group relative flex h-row items-center gap-1 rounded-control pl-2 pr-1 text-body ${
+      className={`group relative flex min-h-row items-center gap-2 rounded-control px-2 py-1 text-body ${
         node.selected
           ? "bg-accent-soft text-foreground before:absolute before:inset-y-1.5 before:left-0 before:w-0.5 before:rounded-full before:bg-accent"
           : "text-muted hover:bg-elevated"
       }`}
     >
-      <span className="min-w-0 flex-1 truncate" title={node.label}>
-        {node.label}
+      {node.leading}
+      <span className="min-w-0 flex-1">
+        <span className="block truncate" title={node.label}>
+          {node.label}
+        </span>
+        {node.sublabel && (
+          <span className="mt-0.5 block truncate text-num text-disabled">{node.sublabel}</span>
+        )}
       </span>
       {node.tag}
       {node.warn && (

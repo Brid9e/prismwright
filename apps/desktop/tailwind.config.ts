@@ -73,6 +73,8 @@ export default {
         panelhead: "40px",
         topbar: "46px",
         switch: "17px",
+        // 卡片库缩略图（约 5:7 的卡面比例）。
+        thumb: "42px",
       },
       width: {
         switch: "30px",
@@ -80,6 +82,7 @@ export default {
         label: "60px",
         // Windows 自绘窗口按钮的宽度（原生 Fluent 度量）。
         window: "46px",
+        thumb: "30px",
       },
       fontSize: {
         num: ["10px", { lineHeight: "12px" }],

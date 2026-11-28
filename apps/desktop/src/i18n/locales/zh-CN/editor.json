@@ -114,6 +114,15 @@
   "topbar": {
     "export": "导出"
   },
+  "library": {
+    "title": "卡片",
+    "search": "搜索卡片",
+    "all": "全部",
+    "hidden": "隐藏款",
+    "back": "卡背",
+    "newCard": "新建卡片",
+    "noMatch": "没有匹配的卡片"
+  },
   "preview": {
     "front": "正面",
     "back": "背面",

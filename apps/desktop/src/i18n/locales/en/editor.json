@@ -114,6 +114,15 @@
   "topbar": {
     "export": "Export"
   },
+  "library": {
+    "title": "Cards",
+    "search": "Search cards",
+    "all": "All",
+    "hidden": "Hidden",
+    "back": "Back",
+    "newCard": "New card",
+    "noMatch": "No matching cards"
+  },
   "preview": {
     "front": "Front",
     "back": "Back",

@@ -1,27 +1,60 @@
 /**
- * 卡片树：普通卡与隐藏款两组，名字右侧的稀有度色标、行尾操作、缺失卡面徽标。
+ * 卡片库列表：缩略图 + 名字 + 编号，行尾操作与缺失资源徽标。
+ *
+ * 只负责「把过滤后的卡片画出来」；搜索词与分组由 `HierarchyPanel` 持有——那里还有
+ * 搜索框与分段控件，状态跟着控件走，列表只消费结果。
  */
 import type { MouseEvent } from "react"
 import { useTranslation } from "react-i18next"
-import { Copy, Download, Plus, Trash2 } from "lucide-react"
+import { Copy, Download, SearchX, Trash2 } from "lucide-react"
 import { collectCardAssets, type Card } from "@prismwright/schema"
 import { usePackStore } from "../../store/packStore"
 import { useUiStore } from "../../store/uiStore"
 import { cardContextItems } from "../../ui/contextMenuModel"
-import { TreeList, type TreeNode } from "../../ui/TreeList"
+import { EmptyState } from "../../ui/EmptyState"
+import { Tag } from "../../ui/Tag"
 import { Tooltip } from "../../ui/Tooltip"
+import { TreeList, type TreeNode } from "../../ui/TreeList"
+import { filterCards, type CardSection } from "./cardFilter"
 import { displayCardName } from "./display"
-import { rarityTone } from "./rarity"
+import { useCardThumbnail } from "./useCardThumbnail"
 
-export function CardTree() {
+export interface CardTreeProps {
+  /** 当前分组（全部 / 隐藏款 / 卡背）。 */
+  section: CardSection
+  /** 搜索词；空串表示不筛。 */
+  query: string
+}
+
+/**
+ * 行首缩略图：有预览 PNG 就显示，没有就退回「编号 + 稀有度色」的色块。
+ *
+ * 单独成组件是为了让 `useCardThumbnail` 的 Hook 只跟随**这一张卡**——放进循环里手写
+ * Hook 会把所有卡的加载状态挤在同一个组件里，一张图变化就让整列重渲染。
+ */
+function Thumbnail({ card }: { card: Card }) {
+  const url = useCardThumbnail(card)
+  return (
+    <span className="flex h-thumb w-thumb shrink-0 items-center justify-center overflow-hidden rounded-chip border border-line-soft bg-sunken">
+      {url ? (
+        <img src={url} alt="" className="h-full w-full object-cover" />
+      ) : (
+        <span className="text-num text-disabled">{card.num}</span>
+      )}
+    </span>
+  )
+}
+
+export function CardTree({ section, query }: CardTreeProps) {
   const { t } = useTranslation("card")
   const { t: te } = useTranslation("editor")
 
   const pack = usePackStore((s) => s.pack)
   const selectedCardId = usePackStore((s) => s.selectedCardId)
   const selectCard = usePackStore((s) => s.selectCard)
-  const addCard = usePackStore((s) => s.addCard)
   const duplicateCard = usePackStore((s) => s.duplicateCard)
+  const previewSide = useUiStore((s) => s.previewSide)
+  const setPreviewSide = useUiStore((s) => s.setPreviewSide)
   const requestConfirm = useUiStore((s) => s.requestConfirm)
   const openBundleExport = useUiStore((s) => s.openBundleExport)
   const openContextMenu = useUiStore((s) => s.openContextMenu)
@@ -29,30 +62,62 @@ export function CardTree() {
 
   if (!pack) {
     return (
-      <div className="p-3 text-[12px] leading-relaxed text-disabled">{te("pack.emptyHint")}</div>
+      <div className="p-3 text-body leading-relaxed text-disabled">{te("pack.emptyHint")}</div>
     )
   }
 
-  // 两个分组拼成一个列表：TreeList 在 section 变化处自动插标题，故「普通卡 / 隐藏款」
-  // 两组共用一个实例即可，不必各建一个。
-  const nodes: TreeNode[] = [
-    ...pack.cards.map((card) => toNode(card, t("section.normal"))),
-    ...pack.hiddenCards.map((card) => toNode(card, t("section.hidden"))),
-  ]
+  // 卡背不在卡片池里：它是系列级的单个对象，选中即切预览到背面。
+  if (section === "back") {
+    return (
+      <div className="p-1">
+        <button
+          type="button"
+          onClick={() => setPreviewSide("back")}
+          aria-pressed={previewSide === "back"}
+          className={`flex w-full items-center gap-2 rounded-control px-2 py-3 text-left text-body ${
+            previewSide === "back"
+              ? "bg-accent-soft text-foreground"
+              : "text-muted hover:bg-elevated"
+          }`}
+        >
+          <span className="flex h-thumb w-thumb shrink-0 items-center justify-center rounded-chip border border-line-soft bg-sunken text-num text-disabled">
+            ⇄
+          </span>
+          <span>{te("library.back")}</span>
+        </button>
+      </div>
+    )
+  }
 
-  function toNode(card: Card, section: string): TreeNode {
-    const tone = rarityTone(card.rarity)
+  const cards = filterCards(pack, { query, section })
+  // 只有「全部」把两个池子混在一起，才需要分组标题；隐藏款单独一屏时标题是噪声。
+  const showSections = section === "all"
+
+  if (cards.length === 0) {
+    return <EmptyState icon={SearchX} title={te("library.noMatch")} />
+  }
+
+  const nodes: TreeNode[] = cards.map((card) =>
+    toNode(
+      card,
+      showSections
+        ? pack.cards.includes(card)
+          ? t("section.normal")
+          : t("section.hidden")
+        : undefined,
+    ),
+  )
+
+  function toNode(card: Card, sectionLabel: string | undefined): TreeNode {
     return {
       id: card.id,
-      label: `${card.num}. ${displayCardName(card, t)}`,
-      section,
+      label: displayCardName(card, t),
+      sublabel: `e${String(card.num).padStart(2, "0")}`,
+      section: sectionLabel,
       selected: card.id === selectedCardId,
-      // 稀有度小色标：一眼看出每张卡挂的档位，颜色与卡册、小程序一致。
-      tag: (
-        <span className={`shrink-0 rounded-sm px-1 text-[9px] leading-4 ${tone.text} ${tone.tint}`}>
-          {t(`rarity.${card.rarity}`)}
-        </span>
-      ),
+      leading: <Thumbnail card={card} />,
+      // 稀有度：一眼看出每张卡挂的档位，颜色与卡册、小程序一致。
+      tag: <Tag tone={card.rarity}>{t(`rarity.${card.rarity}`)}</Tag>,
       warn: collectCardAssets(card).some((rel) => missingAssets[rel] === true),
       trailing: (
         <>
@@ -64,7 +129,7 @@ export function CardTree() {
                 e.stopPropagation()
                 openBundleExport(card.id)
               }}
-              className="flex h-5 w-5 items-center justify-center rounded-sm text-muted hover:text-foreground"
+              className="flex h-5 w-5 items-center justify-center rounded-chip text-muted hover:bg-panel hover:text-foreground"
             >
               <Download size={12} />
             </button>
@@ -77,7 +142,7 @@ export function CardTree() {
                 e.stopPropagation()
                 duplicateCard(card.id)
               }}
-              className="flex h-5 w-5 items-center justify-center rounded-sm text-muted hover:text-foreground"
+              className="flex h-5 w-5 items-center justify-center rounded-chip text-muted hover:bg-panel hover:text-foreground"
             >
               <Copy size={12} />
             </button>
@@ -90,7 +155,7 @@ export function CardTree() {
                 e.stopPropagation()
                 requestConfirm({ kind: "delete-card", cardId: card.id })
               }}
-              className="flex h-5 w-5 items-center justify-center rounded-sm text-muted hover:text-danger"
+              className="flex h-5 w-5 items-center justify-center rounded-chip text-muted hover:bg-panel hover:text-danger"
             >
               <Trash2 size={12} />
             </button>
@@ -98,6 +163,12 @@ export function CardTree() {
         </>
       ),
     }
+  }
+
+  /** 选中卡片时回到正面：用户点卡片列表的意图是看这张卡的正面。 */
+  function handleSelect(cardId: string): void {
+    selectCard(cardId)
+    setPreviewSide("front")
   }
 
   /** 右键某一行：先选中它（与系统列表一致），再按这张卡出菜单。 */
@@ -117,33 +188,13 @@ export function CardTree() {
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex shrink-0 items-center gap-1 border-b border-border px-1 py-1">
-        {[
-          { hidden: false, label: t("section.normal") },
-          { hidden: true, label: t("section.hidden") },
-        ].map((group) => (
-          <Tooltip key={group.label} label={`${t("common:action.new")} · ${group.label}`}>
-            <button
-              type="button"
-              aria-label={`${t("common:action.new")} · ${group.label}`}
-              onClick={() => addCard(group.hidden)}
-              className="flex h-5 items-center gap-0.5 rounded-sm px-1.5 text-[11px] text-muted hover:bg-elevated hover:text-foreground"
-            >
-              <Plus size={12} />
-              {group.label}
-            </button>
-          </Tooltip>
-        ))}
-      </div>
-      <div className="min-h-0 flex-1 overflow-auto">
-        <TreeList
-          nodes={nodes}
-          onSelect={selectCard}
-          onContextMenu={handleContextMenu}
-          emptyText={te("pack.emptyHint")}
-        />
-      </div>
+    <div className="py-1">
+      <TreeList
+        nodes={nodes}
+        onSelect={handleSelect}
+        onContextMenu={handleContextMenu}
+        emptyText={te("pack.emptyHint")}
+      />
     </div>
   )
 }
