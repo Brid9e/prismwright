@@ -230,7 +230,8 @@
 - 两段之间用竖向 `PanelResizeHandle` 分隔，可拖高度；默认 34%，最小 20%，最大 60%，`autoSaveId` 持久化。
 - 图层面板只在「有可编辑卡面且不是默认卡背占位」时出现；无卡面 / 使用默认卡背时隐藏，检查器占满整栏。
 - 底部面板复用 `LayerList`：标题「图层」+ **选中层属性**（混合模式下拉 + 一个图层不透明度）+ 一排添加图标 + 可滚动的图层树。树不再写死 `max-h-48`，改为 `min-h-0 flex-1` 填满面板并滚动。
-- 选中层属性直接放在图层面板顶部，像 PS：只保留 `blend` 与 `opacity`；`holoMix` / `holoAlpha` 的 UI 控件删除（数据字段保留在 schema 里，渲染器继续用默认值，避免破坏旧系列）。
+- 选中层属性直接放在图层面板顶部，像 PS：`blend` 与 `opacity` **同一行**；未选中图层时两个控件保留但禁用（不隐藏，面板高度不跳动）。`holoMix` / `holoAlpha` 的 UI 控件删除（数据字段保留在 schema 里，渲染器继续用默认值，避免破坏旧系列）。
+- 图层面板顶部保留一条 1px 分割线；列表区域底色用 `--color-surface-sunken`（比面板的 `surface-panel` 稍深）。
 - 图层名不再占属性行：**双击行名**或右键「重命名图层」进入行内编辑；回车 / 失焦提交，Esc 取消。
 - 添加动作收成一排图标（图片 / 文字 / 图层），删除「添加底图」长按钮。
 - 原「图层」页签更名为「属性」，且**只对文字层显示**，内容只剩 `TextDetail`（字体 / 字号 / 颜色 / 描边 / 投影）；普通层的属性已在图层面板顶部。页签顺序为 设计 / 属性（仅文字层）/ 效果 / 导出。
@@ -239,7 +240,7 @@
 ### 11.2 落点
 
 - `features/cards/InspectorPanel.tsx`：在页签内容与底部面板之间插入竖向 `PanelGroup`；移除 `layers` 页签里的 `LayerList`；`layers` 页签只渲染 `TextDetail`，并按选中层是否为文字层过滤页签。
-- `features/layers/LayerList.tsx`：根节点 `flex h-full min-h-0 flex-col`；顶部渲染混合下拉 + 透明度滑杆；添加动作改 `IconButton` 图标行；树容器 `min-h-0 flex-1`；管理行内重命名状态。
+- `features/layers/LayerList.tsx`：根节点 `flex h-full min-h-0 flex-col border-t border-line bg-sunken`；顶部一行渲染混合下拉 + 透明度滑杆（无选中层时禁用）；添加动作改 `IconButton` 图标行；树容器 `min-h-0 flex-1`；管理行内重命名状态。
 - `features/layers/LayerDetail.tsx`：只剩效果栈（`section` prop 删除），名称 / 混合 / 透明度的旧属性分支删除。
 - `features/layers/LayerTree.tsx`：行支持双击重命名与 `RenameInput`。
 - `features/cards/inspectorTabs.ts`：`layers` 的展示文案改为「属性」；`INSPECTOR_TABS` 顺序不变，标签变。
