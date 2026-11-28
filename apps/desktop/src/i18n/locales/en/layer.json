@@ -2,11 +2,13 @@
   "unnamed": "Layer {{num}}",
   "unnamedText": "Text {{num}}",
   "unnamedLayer": "Unnamed layer",
+  "unnamedAdjustment": "Adjustment {{num}}",
   "section": { "layers": "Layers" },
   "action": {
     "add": "Add layer",
     "addText": "Add text",
     "addImage": "Add image",
+    "addAdjustment": "Add adjustment layer",
     "rename": "Rename layer",
     "duplicate": "Duplicate layer",
     "delete": "Delete layer",

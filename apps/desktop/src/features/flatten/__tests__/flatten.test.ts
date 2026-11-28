@@ -5,7 +5,7 @@
  * 以及离屏画布的尺寸与摆放换算。像素合成与 PNG 落盘在 `compose.ts`，需 DOM，故不在此处。
  */
 import { describe, it, expect } from "vitest"
-import { createLayer, GradientParamsSchema, type Effect, type Layer } from "@prismwright/schema"
+import { createLayer, GradientParamsSchema, LayerSchema, type Effect, type Layer } from "@prismwright/schema"
 import { CARD_ASPECT } from "@prismwright/renderer/v1"
 import {
   findFlattenGroups,
@@ -120,6 +120,13 @@ describe("findFlattenGroups", () => {
   it("孤零零一层不合并——一层换一层没有收益，却多一次重采样", () => {
     expect(findFlattenGroups([imageLayer()])).toEqual([])
     expect(findFlattenGroups([])).toEqual([])
+  })
+
+  it("存在调整层时整卡不烤平——调整层会影响下方图片", () => {
+    const adjustment = LayerSchema.parse({ id: "adj", kind: "adjustment" })
+    expect(
+      findFlattenGroups([imageLayer({}, "assets/a.png"), imageLayer({}, "assets/b.png"), adjustment]),
+    ).toEqual([])
   })
 
   it("三层连在一组", () => {

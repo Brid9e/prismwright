@@ -2,11 +2,13 @@
   "unnamed": "图层 {{num}}",
   "unnamedText": "文字 {{num}}",
   "unnamedLayer": "未命名图层",
+  "unnamedAdjustment": "调整层 {{num}}",
   "section": { "layers": "图层" },
   "action": {
     "add": "添加图层",
     "addText": "添加文字",
     "addImage": "添加图片",
+    "addAdjustment": "添加调整层",
     "rename": "重命名图层",
     "duplicate": "复制图层",
     "delete": "删除图层",

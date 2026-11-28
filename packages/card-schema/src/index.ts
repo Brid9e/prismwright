@@ -14,11 +14,11 @@
  * - 卡面形状缺省：`DEFAULT_CARD_ASPECT` / `DEFAULT_CORNER_RADIUS`；
  * - 色标工具：`evenlySpacedStops`、默认调色板 `DEFAULT_PALETTE` / `DEFAULT_STOPS` 与
  *   渐变相位默认 `DEFAULT_GRADIENT_PHASE`（渲染器侧共用，见 `@prismwright/renderer` 的 `palette.ts`）；
- * - 默认值工厂：`newId` / `createLayer` / `createTextLayer` / `createCard` / `createCardFace` / `createEmptyPack`；
+ * - 默认值工厂：`newId` / `createLayer` / `createTextLayer` / `createAdjustmentLayer` / `createCard` / `createCardFace` / `createEmptyPack`；
  * - 迁移：`CURRENT_SCHEMA_VERSION` / `migrate` / `parsePack`；
  * - 图层树工具：`flattenLayers` / `findLayerById` / `detachLayer` 等（见 `tree.ts`）；
  * - 效果查询：`resolveImageMask` / `resolveEraseMask` / `resolveImage` / `resolveGradient` /
- *   `resolveHoloGradient`（见 `effects.ts`）。
+ *   `resolveHoloGradient` / `resolveEffectiveEffects`（见 `effects.ts`）。
  * - 资源收集：`collectFaceAssets` / `collectCardAssets` / `collectPackAssets` / `collectCoverAssets`（见 `assets.ts`，桌面端与小程序共用同一份判定）。
  */
 export type {
@@ -108,6 +108,7 @@ export {
   newId,
   createLayer,
   createTextLayer,
+  createAdjustmentLayer,
   createCard,
   createCardFace,
   createEmptyPack,
@@ -136,4 +137,5 @@ export {
   resolveImage,
   resolveGradient,
   resolveHoloGradient,
+  resolveEffectiveEffects,
 } from "./effects.js"

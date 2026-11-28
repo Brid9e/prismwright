@@ -5,7 +5,8 @@
  * 各工厂统一「以 schema 解析"最小种子对象"」的方式构造返回值，从而让默认值
  * 只在 `schema.ts` 中定义一份，避免此处与 schema 重复维护。
  *
- * 对外暴露：`newId` / `createLayer` / `createTextLayer` / `createCard` / `createCardFace` / `createEmptyPack`。
+ * 对外暴露：`newId` / `createLayer` / `createTextLayer` / `createAdjustmentLayer` / `createCard` /
+ * `createCardFace` / `createEmptyPack`。
  */
 import type { Card, CardFace, Layer, Pack } from "./types.js"
 import { CardFaceSchema, CardSchema, LayerSchema, PackSchema } from "./schema.js"
@@ -52,6 +53,23 @@ export function createTextLayer(name: string, content: string): Layer {
     blend: "normal",
     kind: "text",
     text: { content },
+  })
+}
+
+/**
+ * 创建一个调整层：本身不绘制，只装效果并作用于同组下方。
+ *
+ * 默认没有效果；用户之后在效果栈里加渐变 / 摩尔纹等。`blend` / `opacity` 仍按普通图层
+ * 默认值落盘（调整层不渲染自身，这两个值不参与画面），保持数据结构统一。
+ *
+ * @param name - 图层名（调用方按当前语言生成，如「调整层 1」）。
+ */
+export function createAdjustmentLayer(name: string): Layer {
+  return LayerSchema.parse({
+    id: newId(),
+    name,
+    blend: "normal",
+    kind: "adjustment",
   })
 }
 

@@ -53,6 +53,8 @@ import {
 export interface EffectStackProps {
   /** 本面板所编辑目标的类型，用于过滤「＋ 添加效果」菜单（见注册表的 `scope`）。 */
   scope: "layer" | "face"
+  /** 调整层只承载相位 / 颜色效果；内容与 alpha 类效果对它没有意义。 */
+  adjustment?: boolean
   /** 待编辑的效果列表（按列表序；组内顺序即此顺序）。 */
   effects: readonly Effect[]
   onAdd: (kind: EffectKind) => void
@@ -462,6 +464,7 @@ function EffectRow({
 
 export function EffectStack({
   scope,
+  adjustment = false,
   effects,
   onAdd,
   onRemove,
@@ -491,7 +494,9 @@ export function EffectStack({
         {t("title")}
       </div>
 
-      {groupByRole(effects).map(({ role, effects: group }) => {
+      {groupByRole(effects)
+        .filter(({ role }) => !adjustment || role === "phase" || role === "color")
+        .map(({ role, effects: group }) => {
         // 该分组在当前目标上可加的 kind：既决定「＋ 添加效果」的候选，也决定空组是否值得
         // 渲染。图片只在图层上存在，卡面的 content 组既无条目也无入口——隐藏它，别留一个
         // 只有标题的空区块。

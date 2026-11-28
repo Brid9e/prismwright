@@ -77,6 +77,17 @@ describe("packStore 图层结构操作", () => {
     expect(usePackStore.getState().past.length).toBe(pastBefore + 1)
   })
 
+  it("addAdjustmentLayer 建立调整层并选中，默认没有效果", async () => {
+    const { cardId } = await setup()
+    const ref = { kind: "card" as const, cardId }
+    const id = usePackStore.getState().addAdjustmentLayer(ref)
+    const card = usePackStore.getState().pack!.cards.find((c) => c.id === cardId)!
+    const layer = card.layers.find((l) => l.id === id)!
+    expect(layer.kind).toBe("adjustment")
+    expect(layer.effects).toEqual([])
+    expect(usePackStore.getState().selectedLayerId).toBe(id)
+  })
+
   it("addLayer 到背面时懒创建 pack.back", async () => {
     await usePackStore.getState().newPack("P", "/tmp/p")
     expect(usePackStore.getState().pack!.back).toBeNull()

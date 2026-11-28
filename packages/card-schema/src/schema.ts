@@ -519,7 +519,7 @@ export const HoloGridParamsSchema = z.object({
 export const TextAlignSchema = z.enum(["left", "center", "right"])
 
 /** 图层形态枚举，取值与手写类型 `LayerKind` 一致。 */
-export const LayerKindSchema = z.enum(["normal", "text"])
+export const LayerKindSchema = z.enum(["normal", "text", "adjustment"])
 
 /** 文字描边 schema：颜色 + 宽度（卡高比例）。 */
 export const TextStrokeParamsSchema = z.object({

@@ -87,6 +87,7 @@ export function LayerDetail({
       <SectionCard title={displayLayerName(layer, t)}>
         <EffectStack
           scope="layer"
+          adjustment={layer.kind === "adjustment"}
           effects={layer.effects}
           onAdd={(kind) => addEffect(faceRef, effectTarget, kind)}
           onRemove={(id) => removeEffect(faceRef, effectTarget, id)}

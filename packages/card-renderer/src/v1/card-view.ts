@@ -36,6 +36,7 @@ import {
   flattenLayers,
   isLayerVisible,
   resolveEraseMask,
+  resolveEffectiveEffects,
   resolveImage,
   resolveImageMask,
   type CardFace,
@@ -307,7 +308,10 @@ export function createCardView(opts: CardViewOptions): CardView {
       baseColor: face.baseColor,
     })
 
+    const effectiveEffects = resolveEffectiveEffects(face.layers)
     const entries = flattenLayers(face.layers).filter(isLayerVisible)
+    // 调整层没有自己的网格，只把效果传给下方；绘制序列里跳过它们。
+    const renderEntries = entries.filter(({ layer }) => layer.kind !== "adjustment")
     // 最靠下的可见 image 图层作为整卡背景：颜色源蒙版 / shadow / tint / bump / moire 继承都读它。
     const backgroundEntry = entries.find(({ layer }) => {
       const image = resolveImage(layer.effects)
@@ -337,8 +341,8 @@ export function createCardView(opts: CardViewOptions): CardView {
     const nextMeshes: Mesh[] = []
     const nextMats: ShaderMaterial[] = []
     let z = LAYER_Z_STEP
-    for (let i = 0; i < entries.length; i++) {
-      const { layer, ancestors } = entries[i]
+    for (let i = 0; i < renderEntries.length; i++) {
+      const { layer, ancestors } = renderEntries[i]
       // 本层与祖先的图蒙版路径都从各自的效果列表解析（不再是一等字段）。
       const layerMaskPath = resolveImageMask(layer.effects)?.path ?? ""
       // 本层图片效果（若有）：与蒙版一并解析，纹理走 sRGB（卡面内容，不是蒙版数据）。
@@ -374,8 +378,10 @@ export function createCardView(opts: CardViewOptions): CardView {
         // 祖先的「作为蒙版」光泽（光带场 → 覆盖率，子层参数化重算，故传参数而非纹理）。
         glossMasks: glossMaskParams(a.effects),
       }))
+      const effective = effectiveEffects.get(layer.id) ?? layer.effects
       const mat = createLayerMaterial({
-        layer,
+        // 渐变 / 摩尔纹 / 光泽读有效效果（含调整层继承）；图片 / 蒙版 / 擦除仍读本层自有。
+        layer: effective === layer.effects ? layer : { ...layer, effects: effective },
         mask: masks[0],
         ancestors: ancestorMasks,
         // 未使用的祖先槽位复用同一份占位纹理（hasMask=0，采样值不被采用）。
@@ -387,7 +393,7 @@ export function createCardView(opts: CardViewOptions): CardView {
         // 绘画辅助底色只作用于本层自己的擦除图。
         erasePreview: erasePreviewEnabled,
         // 本层效果 + 背景图层的 moire 集合（作为继承源：本层无 moire 时整体取它）。
-        effects: layer.effects,
+        effects: effective,
         inheritedMoire,
         // 图片只在纹理与参数都在场时启用；缺图时材质置 uHasImage = 0。
         image: imageTexture && image ? { texture: imageTexture, params: image } : null,

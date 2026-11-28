@@ -7,7 +7,7 @@
  */
 import { useState, type MouseEvent } from "react"
 import { useTranslation } from "react-i18next"
-import { Copy, Eye, EyeOff, ImagePlus, Plus, Trash2, Type } from "lucide-react"
+import { Copy, Eye, EyeOff, ImagePlus, Plus, SlidersHorizontal, Trash2, Type } from "lucide-react"
 import {
   MAX_NEST_DEPTH,
   ancestorChain,
@@ -40,6 +40,7 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
   const { t: tEffect } = useTranslation("effect")
   const addLayer = usePackStore((s) => s.addLayer)
   const addTextLayer = usePackStore((s) => s.addTextLayer)
+  const addAdjustmentLayer = usePackStore((s) => s.addAdjustmentLayer)
   const addImageLayer = usePackStore((s) => s.addImageLayer)
   const importAsset = usePackStore((s) => s.importAsset)
   const duplicateLayer = usePackStore((s) => s.duplicateLayer)
@@ -208,7 +209,7 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
           <span className="text-label text-muted">{t("blend.label")}</span>
           <Select
             value={selectedLayer?.blend ?? "normal"}
-            disabled={!selectedLayer}
+            disabled={!selectedLayer || selectedLayer.kind === "adjustment"}
             grow
             onChange={(value) => {
               if (selectedLayer) updateLayer(faceRef, selectedLayer.id, { blend: value as BlendMode })
@@ -223,7 +224,7 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
           <span className="text-label text-muted">{t("field.opacity")}</span>
           <Slider
             value={selectedLayer?.opacity ?? 1}
-            disabled={!selectedLayer}
+            disabled={!selectedLayer || selectedLayer.kind === "adjustment"}
             min={0}
             max={1}
             step={0.01}
@@ -241,6 +242,11 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
           icon={Type}
           label={t("action.addText")}
           onClick={() => addTextLayer(faceRef, t("text.defaultContent"))}
+        />
+        <IconButton
+          icon={SlidersHorizontal}
+          label={t("action.addAdjustment")}
+          onClick={() => addAdjustmentLayer(faceRef)}
         />
         <IconButton icon={Plus} label={t("action.add")} onClick={() => addLayer(faceRef)} />
       </div>

@@ -560,8 +560,14 @@ export interface ColorStop {
   at: number
 }
 
-/** 图层形态（见 {@link Layer.kind}）。 */
-export type LayerKind = "normal" | "text"
+/**
+ * 图层形态（见 {@link Layer.kind}）。
+ *
+ * - `normal`：普通内容层（图片 / 文字 / 效果都可挂）；
+ * - `text`：文字层；
+ * - `adjustment`：调整层——本身不绘制，效果作用于**同组下方**的图层（PS 式调整层）。
+ */
+export type LayerKind = "normal" | "text" | "adjustment"
 
 /** 多行文本在文字块内的对齐方式。 */
 export type TextAlign = "left" | "center" | "right"
@@ -658,9 +664,9 @@ export interface Layer {
   blend: BlendMode
   /** 图层整体不透明度，0–1，默认 1。 */
   opacity: number
-  /** 图层形态。默认 "normal"（普通全息图层）。 */
+  /** 图层形态。默认 "normal"（普通全息图层）。调整层本身不绘制，只把效果传给同组下方。 */
   kind: LayerKind
-  /** 文字参数；仅 kind === "text" 时参与渲染，普通图层恒为 null。默认 null。 */
+  /** 文字参数；仅 kind === "text" 时参与渲染，其余图层恒为 null。默认 null。 */
   text: TextParams | null
   /**
    * 效果列表。渐变 / 网格 / 程序化蒙版等效果都以此挂载（见 {@link Effect}），

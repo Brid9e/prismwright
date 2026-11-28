@@ -16,6 +16,8 @@ import { initI18n } from "../../i18n/init"
 import {
   defaultLayerName,
   defaultTextLayerName,
+  defaultAdjustmentLayerName,
+  nextAdjustmentLayerNum,
   nextLayerNum,
   nextTextLayerNum,
   fillDefaultLayerNames,
@@ -127,5 +129,21 @@ describe("文字层的默认名", () => {
     expect(nextLayerNum(layers)).toBe(2)
     expect(nextTextLayerNum(layers)).toBe(2)
     expect(nextTextLayerNum([{ name: "文字 1" }, { name: "文字 2" }])).toBe(3)
+  })
+})
+
+describe("调整层的默认名", () => {
+  it("按当前语言生成「调整层 N」", () => {
+    expect(defaultAdjustmentLayerName(1)).toBe("调整层 1")
+    initI18n("en")
+    expect(defaultAdjustmentLayerName(2)).toBe("Adjustment 2")
+    initI18n("zh-CN")
+  })
+
+  it("与普通 / 文字层各用各的编号池", () => {
+    const layers = [{ name: "图层 1" }, { name: "文字 1" }, { name: "调整层 1" }]
+    expect(nextLayerNum(layers)).toBe(2)
+    expect(nextTextLayerNum(layers)).toBe(2)
+    expect(nextAdjustmentLayerNum(layers)).toBe(2)
   })
 })

@@ -70,7 +70,16 @@ export function isFlattenable(layer: Layer): boolean {
  * @param layers - 卡面顶层的图层数组（绘制顺序）。
  * @returns 每组是图层下标，长度均 ≥ 2（单层没有合并收益，反而多一次重采样）。
  */
+/** 树里是否有调整层：调整层会影响下方图层，烤平会把它的效果丢掉。 */
+function hasAdjustmentLayer(layers: readonly Layer[]): boolean {
+  return layers.some(
+    (layer) => layer.kind === "adjustment" || hasAdjustmentLayer(layer.children),
+  )
+}
+
 export function findFlattenGroups(layers: readonly Layer[]): number[][] {
+  // 有调整层时整个卡面不参与烤平：调整层可能作用于下方任意图片层，逐层判据看不出来。
+  if (hasAdjustmentLayer(layers)) return []
   const groups: number[][] = []
   let run: number[] = []
   let runBlend: Layer["blend"] | null = null

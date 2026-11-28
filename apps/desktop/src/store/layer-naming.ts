@@ -41,6 +41,12 @@ export function defaultTextLayerName(num: number): string {
   return i18n.t("layer:unnamedText", { num })
 }
 
+/** 调整层的默认名（「调整层 3」）。与普通 / 文字层各用一个编号池。 */
+export function defaultAdjustmentLayerName(num: number): string {
+  if (!i18n.isInitialized) initI18n()
+  return i18n.t("layer:unnamedAdjustment", { num })
+}
+
 /** 「取第一个未占用编号」的共用实现：两类图层各传自己的取名函数。 */
 function nextFreeNum(
   layers: readonly { name: string }[],
@@ -73,6 +79,11 @@ export function nextLayerNum(layers: readonly { name: string }[]): number {
  */
 export function nextTextLayerNum(layers: readonly { name: string }[]): number {
   return nextFreeNum(layers, defaultTextLayerName)
+}
+
+/** 下一个可用的调整层默认名序号（规则同 {@link nextLayerNum}，池子独立）。 */
+export function nextAdjustmentLayerNum(layers: readonly { name: string }[]): number {
+  return nextFreeNum(layers, defaultAdjustmentLayerName)
 }
 
 /**

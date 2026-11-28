@@ -30,6 +30,7 @@ import {
 import {
   flattenLayers,
   isLayerVisible,
+  resolveEffectiveEffects,
   resolveEraseMask,
   resolveImage,
   resolveImageMask,
@@ -189,7 +190,10 @@ export async function createCardFrameRenderer(
 
   try {
     // 卡面只有底色；图片 / 蒙版 / 效果都在图层上。
+    const effectiveEffects = resolveEffectiveEffects(card.layers)
     const entries = flattenLayers(card.layers).filter(isLayerVisible)
+    // 调整层没有自己的网格；导出与预览同一口径地跳过它们。
+    const renderEntries = entries.filter(({ layer }) => layer.kind !== "adjustment")
     // 最靠下的可见 image 图层作为整卡背景（与交互视图同一规则）。
     const backgroundEntry = entries.find(({ layer }) => {
       const image = resolveImage(layer.effects)
@@ -218,8 +222,8 @@ export async function createCardFrameRenderer(
     // 树 → 线性绘制序列：深度优先、父在前子随后；禁用的层连同整棵子树一起跳过。z 与 renderOrder
     // 用过滤后的连续下标驱动（与交互视图同一套编号规则），保证图层前后关系两处一致。
     let z = LAYER_Z_STEP
-    for (let i = 0; i < entries.length; i++) {
-      const { layer, ancestors } = entries[i]
+    for (let i = 0; i < renderEntries.length; i++) {
+      const { layer, ancestors } = renderEntries[i]
       // 本层图片效果：与蒙版一并解析，走 sRGB（与交互视图同构）。
       const image = resolveImage(layer.effects)
       // 本层蒙版 + 全部祖先蒙版 + 本层图片 + 本层与祖先的擦除图一并解析（父在子前摊平，
@@ -246,8 +250,10 @@ export async function createCardFrameRenderer(
         // 祖先的「作为蒙版」光泽（与交互视图同构）。
         glossMasks: glossMaskParams(a.effects),
       }))
+      const effective = effectiveEffects.get(layer.id) ?? layer.effects
       const mat = createLayerMaterial({
-        layer,
+        // 与交互视图同构：相位 / 色标读有效效果，图片 / 蒙版 / 擦除读本层自有。
+        layer: effective === layer.effects ? layer : { ...layer, effects: effective },
         mask: masks[0],
         ancestors: ancestorMasks,
         maskPlaceholder: placeholderTexture,
@@ -255,7 +261,7 @@ export async function createCardFrameRenderer(
         front: background?.texture ?? null,
         // 本层自己的擦除图；整卡擦除现在是祖先 group 的擦除。
         layerErase: ownErase,
-        effects: layer.effects,
+        effects: effective,
         // 背景图层 moire 作为继承源。
         inheritedMoire,
         image: imageTexture && image ? { texture: imageTexture, params: image } : null,

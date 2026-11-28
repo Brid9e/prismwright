@@ -22,6 +22,7 @@ import {
   createCard,
   createCardFace,
   createEmptyPack,
+  createAdjustmentLayer,
   createLayer,
   createTextLayer,
   detachLayer,
@@ -62,9 +63,11 @@ import {
 } from "../features/pack/probability"
 import { packFs } from "../tauri/pack-fs"
 import {
+  defaultAdjustmentLayerName,
   defaultLayerName,
   defaultTextLayerName,
   fillDefaultLayerNames,
+  nextAdjustmentLayerNum,
   nextLayerNum,
   nextTextLayerNum,
 } from "./layer-naming"
@@ -400,6 +403,13 @@ export interface PackStoreState {
    * @returns 新图层的 ID；目标不存在时返回 `null`。
    */
   addTextLayer: (ref: FaceRef, content: string) => string | null
+  /**
+   * 新建一个调整层：本身不绘制，效果作用于同组下方。
+   *
+   * @param ref - 目标卡面。
+   * @returns 新图层的 ID；目标不存在时返回 `null`。
+   */
+  addAdjustmentLayer: (ref: FaceRef) => string | null
   /**
    * 更新文字层的排版参数。
    *
@@ -1157,6 +1167,21 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
     // 文字层有自己的编号池，避免与普通图层抢号。
     const existing = flattenLayers(findFace(pack, ref)?.layers ?? []).map((e) => e.layer)
     const layer = createTextLayer(defaultTextLayerName(nextTextLayerNum(existing)), content)
+    get().commit((d) => {
+      withFace(d, ref, (f) => f.layers.push(layer))
+    })
+    set({ selectedLayerId: layer.id })
+    return layer.id
+  },
+
+  addAdjustmentLayer: (ref) => {
+    const { pack } = get()
+    if (!pack || !canWriteFace(pack, ref)) return null
+    // 调整层也用自己的编号池，名字能一眼看出是效果层。
+    const existing = flattenLayers(findFace(pack, ref)?.layers ?? []).map((e) => e.layer)
+    const layer = createAdjustmentLayer(
+      defaultAdjustmentLayerName(nextAdjustmentLayerNum(existing)),
+    )
     get().commit((d) => {
       withFace(d, ref, (f) => f.layers.push(layer))
     })

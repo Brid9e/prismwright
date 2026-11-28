@@ -9,6 +9,7 @@ import type {
   Effect,
   GradientParams,
   ImageParams,
+  Layer,
   MaskEraseParams,
   MaskImageParams,
 } from "./types.js"
@@ -83,4 +84,56 @@ export function resolveHoloGradient(effects: readonly Effect[]): GradientParams 
     if (e.kind === "gradient" && e.enabled) return e.params
   }
   return null
+}
+
+/**
+ * 调整层可以向下传播的效果种类：相位 / 颜色类。
+ *
+ * 内容类（image）与 alpha 类（各种蒙版）是「这一层画什么 / 怎么裁」的语义，传给下方图层
+ * 会变成另一回事；调整层只承载「怎么长」的效果。
+ */
+const ADJUSTMENT_EFFECT_KINDS: ReadonlySet<Effect["kind"]> = new Set([
+  "gradient",
+  "moire",
+  "gloss",
+  "holoGrid",
+])
+
+/** 某个图层向上收到、由调整层传下来的效果。 */
+function adjustableEffects(effects: readonly Effect[]): Effect[] {
+  return effects.filter((e) => e.enabled && ADJUSTMENT_EFFECT_KINDS.has(e.kind))
+}
+
+/**
+ * 计算每个图层的**有效效果列表**：自有效果 + 同组上方调整层传下来的效果。
+ *
+ * 规则（PS 调整层语义，作用范围限定「同组下方」）：
+ * - 同一父层内，调整层只影响它**下方**的兄弟；不影响上方，也不越过父层影响别的组。
+ * - 祖先组上方的调整层会随递归传进整个子树（因为组整体在调整层下方）。
+ * - 调整层自身不绘制；它的效果按 `ADJUSTMENT_EFFECT_KINDS` 过滤，且只有 `enabled` 的条目传播。
+ * - 有效列表把继承来的效果放在自有之前——单槽位效果（如渐变）由更靠上的调整层优先；
+ *   多槽位效果（摩尔纹 / 光泽）继续由自有条目补齐。
+ *
+ * @param layers - 顶层图层数组（数组顺序是绘制顺序：末位在上）。
+ * @returns 每个图层 id → 有效效果列表；未出现的图层（理论上不存在）调用方应回落自有列表。
+ */
+export function resolveEffectiveEffects(layers: readonly Layer[]): Map<string, Effect[]> {
+  const out = new Map<string, Effect[]>()
+
+  const walk = (siblings: readonly Layer[], inherited: readonly Effect[]): void => {
+    // 展示顺序是数组倒序：从最上层往下走，遇到调整层就把它加到「给下方」的集合里。
+    let active = inherited
+    for (let i = siblings.length - 1; i >= 0; i--) {
+      const layer = siblings[i]
+      out.set(layer.id, [...active, ...layer.effects])
+      if (layer.kind === "adjustment" && layer.enabled) {
+        active = [...active, ...adjustableEffects(layer.effects)]
+      }
+      // 组的子树整体在祖先调整层下方；调整层自己的子树也吃自己的效果。
+      walk(layer.children, active)
+    }
+  }
+
+  walk(layers, [])
+  return out
 }
