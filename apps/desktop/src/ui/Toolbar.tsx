@@ -16,6 +16,8 @@ export interface ToolbarButtonProps {
   /** 是否为激活态（如开关已打开）。 */
   active?: boolean
   disabled?: boolean
+  /** `sm` 用于 28px 胶囊内部（留 2px 上下内边距）；默认 `md` 是 28×28。 */
+  size?: "sm" | "md"
 }
 
 export function ToolbarButton({
@@ -24,6 +26,7 @@ export function ToolbarButton({
   onClick,
   active,
   disabled,
+  size = "md",
 }: ToolbarButtonProps) {
   return (
     <Tooltip label={label}>
@@ -33,7 +36,9 @@ export function ToolbarButton({
         disabled={disabled}
         aria-label={label}
         aria-pressed={active}
-        className={`flex h-7 w-7 items-center justify-center rounded-control outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent/50 ${
+        className={`flex items-center justify-center rounded-control outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent/50 ${
+          size === "sm" ? "h-6 w-6" : "h-7 w-7"
+        } ${
           active
             ? "bg-accent-soft text-accent"
             : "text-muted hover:bg-elevated hover:text-foreground"

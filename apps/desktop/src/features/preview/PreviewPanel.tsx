@@ -613,7 +613,7 @@ export function PreviewPanel() {
         </div>
         {/* 底部视图胶囊：缩放与视图开关。浮在舞台上，不占据画面高度。 */}
         <div className="pointer-events-none absolute bottom-4 left-1/2 z-20 -translate-x-1/2">
-          <div className="pointer-events-auto flex h-button items-center gap-0.5 rounded-full border border-line-soft bg-panel/90 px-1.5 popover-shadow backdrop-blur">
+          <div className="pointer-events-auto flex h-8 items-center gap-1 rounded-full border border-line-soft bg-panel/90 px-2 py-1 popover-shadow backdrop-blur">
             {/* 绘画期间禁用空闲摆动：`idleSway` 是 `useCardView` 创建 effect 的依赖，
                 切换它会销毁并重建整个 CardView——绘画中的擦除图（挂在旧视图上的内存纹理）
                 随之丢失，笔迹「看不见但确实画上了」。 */}
@@ -622,21 +622,28 @@ export function PreviewPanel() {
               label={t("previewToggle.idleSway")}
               active={idleSway}
               disabled={paintActive}
+              size="sm"
               onClick={() => setIdleSway(!idleSway)}
             />
             <ToolbarButton
               icon={SquareDashed}
               label={t("preview.toggleChecker")}
               active={showChecker}
+              size="sm"
               onClick={() => setShowChecker(!showChecker)}
             />
-            <ToolbarButton icon={RotateCcw} label={t("preview.resetView")} onClick={resetView} />
+            <ToolbarButton
+              icon={RotateCcw}
+              label={t("preview.resetView")}
+              size="sm"
+              onClick={resetView}
+            />
             <span className="mx-1 h-4 w-px bg-line-soft" aria-hidden />
             <button
               type="button"
               aria-label={t("preview.zoomOut")}
               onClick={() => setZoom(Math.max(MIN_ZOOM, Math.round((zoom - 0.1) * 100) / 100))}
-              className="flex h-7 w-7 items-center justify-center rounded-control text-muted hover:bg-elevated hover:text-foreground"
+              className="flex h-6 w-6 items-center justify-center rounded-control text-muted hover:bg-elevated hover:text-foreground"
             >
               −
             </button>
@@ -647,7 +654,7 @@ export function PreviewPanel() {
               type="button"
               aria-label={t("preview.zoomIn")}
               onClick={() => setZoom(Math.min(MAX_ZOOM, Math.round((zoom + 0.1) * 100) / 100))}
-              className="flex h-7 w-7 items-center justify-center rounded-control text-muted hover:bg-elevated hover:text-foreground"
+              className="flex h-6 w-6 items-center justify-center rounded-control text-muted hover:bg-elevated hover:text-foreground"
             >
               +
             </button>
