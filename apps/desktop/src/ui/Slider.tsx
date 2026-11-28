@@ -87,7 +87,8 @@ export function Slider({
         {/* 扁平厚圆角矩形轨道：与数字框同高（24）同圆角（7）；已滑过部分用实心 track-fill，
             与未滑过的中性灰底形成明确区分。overflow-hidden 让填充在左端随轨道圆角收口。 */}
         <RadixSlider.Track className="relative h-control w-full grow overflow-hidden rounded-control bg-track">
-          <RadixSlider.Range className="absolute h-full rounded-control bg-track-fill" />
+          {/* 已滑过区域本身不圆角：左端由轨道 overflow-hidden 收口，右端保持直边贴着拇指。 */}
+          <RadixSlider.Range className="absolute h-full bg-track-fill" />
         </RadixSlider.Track>
         {/* 竖向圆角矩形手柄（8×24），与轨道同高、无投影。 */}
         <RadixSlider.Thumb className="block h-control w-2 rounded-chip bg-foreground outline-none focus-visible:ring-2 focus-visible:ring-accent/50" />

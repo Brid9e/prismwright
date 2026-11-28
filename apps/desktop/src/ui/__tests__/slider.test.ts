@@ -29,6 +29,9 @@ describe("Slider 轨道", () => {
     expect(html).toContain("rounded-control")
     expect(html).toContain("bg-track")
     expect(html).toContain("bg-track-fill")
+    // 已滑过区域不自己画圆角，由轨道 overflow-hidden 收口。
+    expect(html).toContain("absolute h-full bg-track-fill")
+    expect(html).not.toContain("absolute h-full rounded-control bg-track-fill")
     // 扁平：轨道不再有 inset-control 内阴影与描边。
     expect(html).not.toContain("inset-control")
     expect(html).toContain("overflow-hidden rounded-control bg-track")
