@@ -13,7 +13,7 @@ function fixture(): { pack: Pack; card: ReturnType<typeof createCard> } {
   const pack = createEmptyPack("示例系列")
   const card = createCard(1, "图层 1")
   card.name = "星辰"
-  card.front = "assets/front.png"
+  card.layers[0].effects = [{ id: "img", enabled: true, kind: "image", params: { path: "assets/front.png", x: 0, y: 0, rotation: 0, scale: 1, fit: "contain", bumpStrength: 0, bumpDetail: 0.01, bumpFlow: 0.5, bumpLight: 1, bumpLightAngle: 127, bumpLightColor: "#ffffff", bumpInvert: false, normalPath: "", normalFlipY: false } }]
   pack.cards.push(card)
   return { pack, card }
 }
@@ -55,7 +55,7 @@ describe("bundle model", () => {
   it("单卡条目只含这张卡的素材", () => {
     const { pack, card } = fixture()
     const extra = createCard(2, "图层 1")
-    extra.front = "assets/other.png"
+    extra.layers[0].effects = [{ id: "img", enabled: true, kind: "image", params: { path: "assets/other.png", x: 0, y: 0, rotation: 0, scale: 1, fit: "contain", bumpStrength: 0, bumpDetail: 0.01, bumpFlow: 0.5, bumpLight: 1, bumpLightAngle: 127, bumpLightColor: "#ffffff", bumpInvert: false, normalPath: "", normalFlipY: false } }]
     pack.cards.push(extra)
     const manifest = buildCardManifest(pack, card, "0.1.0", CREATED)
     const entries = buildCardEntries(card, manifest)

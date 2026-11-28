@@ -143,7 +143,8 @@ describe("customizeBackFlow", () => {
   beforeEach(reset)
 
   it("把默认卡背拷进本系列，素材一并搬过来", async () => {
-    const back = { ...createDefaultBackFace(), front: "assets/x.png" }
+    const back = createDefaultBackFace()
+    back.layers[0].effects = [{ id: "img", enabled: true, kind: "image", params: { path: "assets/x.png", x: 0, y: 0, rotation: 0, scale: 1, fit: "contain", bumpStrength: 0, bumpDetail: 0.01, bumpFlow: 0.5, bumpLight: 1, bumpLightAngle: 127, bumpLightColor: "#ffffff", bumpInvert: false, normalPath: "", normalFlipY: false } }]
     vi.mocked(packFs.readText).mockResolvedValue(packJson("我的系列"))
     await usePackStore.getState().openPack(SERIES_ROOT)
     useDefaultBackStore.setState({ rootDir: DEFAULT_ROOT, face: back, loaded: true })

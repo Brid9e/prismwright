@@ -60,7 +60,7 @@
     "depth": "Depth",
     "twist": "Twist",
     "twistSeed": "Twist seed",
-    "faceStrength": "Face Relief"
+    "contentRelief": "Content relief"
   },
   "gloss": {
     "label": "Gloss",
@@ -116,7 +116,6 @@
     "edge0": "Lower threshold",
     "edge1": "Upper threshold",
     "invert": "Invert",
-    "followFront": "Follow card face",
     "fit": "Fill mode",
     "fitCover": "Cover",
     "fitContain": "Contain",
@@ -151,7 +150,6 @@
   "image": {
     "label": "Image",
     "path": "Image",
-    "followFront": "Follow card face",
     "fit": "Fill mode",
     "fitCover": "Cover",
     "fitContain": "Contain",

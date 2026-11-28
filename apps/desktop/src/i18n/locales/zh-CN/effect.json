@@ -60,7 +60,7 @@
     "depth": "深度",
     "twist": "扭曲",
     "twistSeed": "扭曲种子",
-    "faceStrength": "卡面浮雕"
+    "contentRelief": "内容浮雕"
   },
   "gloss": {
     "label": "光泽",
@@ -116,7 +116,6 @@
     "edge0": "阈值下限",
     "edge1": "阈值上限",
     "invert": "反转",
-    "followFront": "跟随卡面",
     "fit": "填充方式",
     "fitCover": "覆盖",
     "fitContain": "适应",
@@ -151,7 +150,6 @@
   "image": {
     "label": "图片",
     "path": "图片",
-    "followFront": "跟随卡面",
     "fit": "填充方式",
     "fitCover": "覆盖",
     "fitContain": "适应",

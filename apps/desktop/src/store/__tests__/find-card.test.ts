@@ -41,30 +41,13 @@ function card(id: string): Card {
     name: "",
     notes: "",
     rarity: "common",
-    front: "",
     baseColor: "#282830",
     // 底图调整字段：本测试只查 id，取 schema 默认值即可。
-    frontFit: "cover",
-    frontOffsetX: 0,
-    frontOffsetY: 0,
-    frontScale: 1,
-    frontRotation: 0,
-    frontBumpStrength: 0,
-    frontBumpDetail: 0.01,
-    frontBumpFlow: 0.5,
-    frontBumpLight: 1,
-    frontBumpLightAngle: 127,
-    frontBumpLightColor: "#ffffff",
-    frontBumpInvert: false,
-    frontNormalPath: "",
-    frontNormalFlipY: false,
     finish: "standard",
     glassStrength: 0.6,
     glassRoughness: 0.15,
     glassTint: "#ffffff",
     cornerRadius: 0.06,
-    // 效果栈列表默认为空；本测试仅断言 id 查找，不涉及效果。
-    effects: [],
     layers: [],
   }
 }
@@ -72,7 +55,7 @@ function card(id: string): Card {
 /** 手写一个最小可用的系列；两份卡片列表由调用方分别注入。 */
 function pack(cards: Card[], hiddenCards: Card[]): Pack {
   return {
-    schemaVersion: 8,
+    schemaVersion: 9,
     editorVersion: "v1",
     id: "pack-1",
     name: "P",

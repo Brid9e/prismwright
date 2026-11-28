@@ -36,9 +36,7 @@ import {
   type Effect,
   type EffectKind,
   type EffectParams,
-  type ImageParams,
   type Layer,
-  type MaskImageParams,
   type Pack,
   type PackArtStyle,
   type TextParams,
@@ -137,19 +135,15 @@ export function findCard(pack: Pack | null, cardId: string | null): Card | null 
 /**
  * 资源导入的目标位置。
  *
- * - `front` 写卡面主图（`CardFace.front`）；
- * - `faceNormal` 写卡面法线图（`CardFace.frontNormalPath`）；
- * - `maskEffect` 指向一条既存的 `imageMask` 效果条目（图层或卡面）；
- * - `imageEffect` 指向一条既存的 `image` 效果条目（只在图层上，`layerId` 必填）；
+ * - `maskEffect` 指向一条既存的 `imageMask` 效果条目（图层）；
+ * - `imageEffect` 指向一条既存的 `image` 效果条目（图层）；
  * - `normalEffect` 指向同一条 `image` 效果的**法线图字段**（`params.normalPath`）。
  *
  * 后两者同指一个 `image` 效果、只是字段不同：合并成一种会把法线图写进主图（画面变、不报错）。
  * `effectId` 是该效果的 id。
  */
 export type AssetTarget =
-  | { kind: "front" }
-  | { kind: "faceNormal" }
-  | { kind: "maskEffect"; layerId: string | null; effectId: string }
+  | { kind: "maskEffect"; layerId: string; effectId: string }
   | { kind: "imageEffect"; layerId: string; effectId: string }
   | { kind: "normalEffect"; layerId: string; effectId: string }
 
@@ -197,7 +191,7 @@ export type FaceRef = { kind: "card"; cardId: string } | { kind: "back" }
  * 与 {@link FaceRef} 正交——效果列表挂在「卡面」或「某个图层」上，
  * 前者对应 `CardFace.effects`，后者对应 `Layer.effects`。
  */
-export type EffectTarget = { scope: "face" } | { scope: "layer"; layerId: string }
+export type EffectTarget = { scope: "layer"; layerId: string }
 
 /**
  * {@link updateEffect} 可写入的一条效果的字段：启用开关 + 该 kind 的参数补丁。
@@ -395,7 +389,7 @@ export interface PackStoreState {
    * @param ref - 目标卡面。
    * @returns 新图层与图片效果的 id；目标不存在时返回 `null`。
    */
-  addImageLayer: (ref: FaceRef) => { layerId: string; effectId: string } | null
+  addImageLayer: (ref: FaceRef, atBottom?: boolean) => { layerId: string; effectId: string } | null
   /**
    * 新建一个文字图层，并选中它。
    *
@@ -538,9 +532,7 @@ export interface PackStoreState {
    */
   updatePackArtStyle: (patch: Partial<PackArtStyle>, opts?: UpdateOptions) => void
   /**
-   * 更新卡面字段（卡面图 / 卡面法线图 / 卡面蒙版）。
-   *
-   * 法线贴图与其绿通道翻转也在其中：它们与法线强度同属卡面自身的渲染参数。
+   * 更新卡面字段（底色 / 圆角 / 表面材质）。图片与法线都在图层效果里。
    *
    * @param ref - 目标卡面。
    * @param patch - 要改的字段。
@@ -551,22 +543,7 @@ export interface PackStoreState {
     patch: Partial<
       Pick<
         CardFace,
-        | "front"
         | "baseColor"
-        | "frontFit"
-        | "frontOffsetX"
-        | "frontOffsetY"
-        | "frontScale"
-        | "frontRotation"
-        | "frontBumpStrength"
-        | "frontBumpDetail"
-        | "frontBumpFlow"
-        | "frontBumpLight"
-        | "frontBumpLightAngle"
-        | "frontBumpLightColor"
-        | "frontBumpInvert"
-        | "frontNormalPath"
-        | "frontNormalFlipY"
         | "finish"
         | "glassStrength"
         | "glassRoughness"
@@ -1153,7 +1130,7 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
     return layer.id
   },
 
-  addImageLayer: (ref) => {
+  addImageLayer: (ref, atBottom = false) => {
     const { pack } = get()
     if (!pack || !canWriteFace(pack, ref)) return null
     // 与 addLayer 同一套默认名规则：新层取「第一个没被占用的默认名」。
@@ -1168,7 +1145,7 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
     layer.effects.push(effect)
     // 建层 + 加效果放在同一个 commit 里：一次撤销即可完整消失。
     get().commit((d) => {
-      withFace(d, ref, (f) => f.layers.push(layer))
+      withFace(d, ref, (f) => (atBottom ? f.layers.unshift(layer) : f.layers.push(layer)))
     })
     set({ selectedLayerId: layer.id })
     return { layerId: layer.id, effectId: effect.id }
@@ -1355,8 +1332,6 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
       Object.keys(patch),
       (face) => {
         Object.assign(face, patch)
-        // 跟随卡面的图蒙版与卡面共用同一套变换：在同一个 recipe 里抄过去，撤销时一并回退。
-        if (FRONT_TRANSFORM_FIELDS.some((k) => k in patch)) syncFollowFrontEffects(face)
       },
       opts,
     )
@@ -1427,11 +1402,6 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
           paramsPatch.colors = paramsPatch.colors.map((s) => ({ color: s.color, at: s.at }))
         // 参数补丁是按判别式联合收窄的部分字段，与具体 `params` 分支的对应关系 TS 证不出来，故收窄。
         e.params = { ...e.params, ...paramsPatch } as EffectParams
-        // 跟随卡面：开关打开的一刻就把卡面当前值抄进来；此后任何参数写入也会被卡面值覆盖——
-        // 跟随时面板上不显示这些控件，能写到这里的只有旧前端或程序调用。
-        if (e.kind === "imageMask" && e.params.followFront) applyFrontTransformToMask(face, e.params)
-        else if (e.kind === "image" && e.params.followFront)
-          applyFrontTransformToImage(face, e.params)
       },
       opts,
     )
@@ -1510,11 +1480,9 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
      * 写入落到不存在的效果上。
      */
     const effectTargetOk = (p: Pack): boolean => {
-      if (target.kind === "front" || target.kind === "faceNormal") return true
       const face = findFace(p, ref)
       if (!face) return false
-      const list =
-        target.layerId === null ? face.effects : findLayerById(face.layers, target.layerId)?.effects
+      const list = findLayerById(face.layers, target.layerId)?.effects
       if (!list) return false
       const expected = target.kind === "maskEffect" ? "imageMask" : "image"
       return list.some((e) => e.id === target.effectId && e.kind === expected)
@@ -1566,21 +1534,7 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
     // （无 mergeKey 的 commit 必定新开一个历史点）。
     get().commit((d) => {
       withFace(d, ref, (face) => {
-        if (target.kind === "front") {
-          face.front = rel
-          return
-        }
-        if (target.kind === "faceNormal") {
-          // 首次选图时把强度从 0 抬到 1：强度为 0 时法线图被整体关掉，画面毫无变化，
-          // 用户会以为「选了没生效」。已有值时不动——那是用户自己调过的参数。
-          if (!face.frontNormalPath && face.frontBumpStrength <= 0) face.frontBumpStrength = 1
-          face.frontNormalPath = rel
-          return
-        }
-        const list =
-          target.layerId === null
-            ? face.effects
-            : findLayerById(face.layers, target.layerId)?.effects
+        const list = findLayerById(face.layers, target.layerId)?.effects
         const effect = list?.find((e) => e.id === target.effectId)
         if (target.kind === "maskEffect" && effect?.kind === "imageMask") effect.params.path = rel
         if (target.kind === "imageEffect" && effect?.kind === "image") effect.params.path = rel
@@ -1668,8 +1622,7 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
     const eraseTargetOk = (p: Pack): boolean => {
       const face = findFace(p, ref)
       if (!face) return false
-      const list =
-        target.scope === "face" ? face.effects : findLayerById(face.layers, target.layerId)?.effects
+      const list = findLayerById(face.layers, target.layerId)?.effects
       return list?.some((e) => e.id === effectId && e.kind === "maskErase") ?? false
     }
 
@@ -1696,10 +1649,7 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
     // （无 mergeKey 的 commit 必定新开一个历史点）。
     get().commit((d) => {
       withFace(d, ref, (face) => {
-        const list =
-          target.scope === "face"
-            ? face.effects
-            : findLayerById(face.layers, target.layerId)?.effects
+        const list = findLayerById(face.layers, target.layerId)?.effects
         const effect = list?.find((e) => e.id === effectId)
         if (effect?.kind === "maskErase") effect.params.path = path
       })
@@ -1931,66 +1881,6 @@ function commitFace(
   })
 }
 
-/** 卡面上参与「跟随卡面」联动的变换字段：改其中任一都要把值抄给跟随的图蒙版。 */
-const FRONT_TRANSFORM_FIELDS = [
-  "frontFit",
-  "frontOffsetX",
-  "frontOffsetY",
-  "frontScale",
-  "frontRotation",
-] as const
-
-/**
- * 把卡面的填充方式 / 位移 / 缩放 / 旋转抄进图蒙版参数（就地）。
- *
- * 「跟随卡面」只是编辑期的联动标记：落盘参数始终是具体数值，渲染器不认这个标志。
- * 注意两张图宽高比不同时，同参数的画面也未必逐像素重合——这是参数级对齐的固有边界。
- *
- * @param face - 草稿卡面（取它的 `front*` 字段）。
- * @param params - 要按卡面覆盖的图蒙版参数。
- */
-function applyFrontTransformToMask(face: CardFace, params: MaskImageParams): void {
-  params.fit = face.frontFit
-  params.x = face.frontOffsetX
-  params.y = face.frontOffsetY
-  params.scale = face.frontScale
-  params.rotation = face.frontRotation
-}
-
-/**
- * 把卡面的填充方式 / 位移 / 缩放 / 旋转抄进图片贴片参数（就地）。
- *
- * 与 {@link applyFrontTransformToMask} 同一套字段：图层图片「对齐卡面图」要逐像素重合，
- * 填充方式也必须一致——只抄位置不抄 fit，比例不同的图会一大一小。
- *
- * @param face - 草稿卡面（取它的 `front*` 字段）。
- * @param params - 要按卡面覆盖的图片贴片参数。
- */
-function applyFrontTransformToImage(face: CardFace, params: ImageParams): void {
-  params.fit = face.frontFit
-  params.x = face.frontOffsetX
-  params.y = face.frontOffsetY
-  params.scale = face.frontScale
-  params.rotation = face.frontRotation
-}
-
-/**
- * 把卡面变换同步给该卡面上所有打开「跟随卡面」的图蒙版与图片贴片
- * （图蒙版两端都可挂，图片只在图层上，含嵌套）。
- *
- * @param face - 草稿卡面（已写入新变换）。
- */
-function syncFollowFrontEffects(face: CardFace): void {
-  const sync = (effects: readonly Effect[]): void => {
-    for (const e of effects) {
-      if (e.kind === "imageMask" && e.params.followFront) applyFrontTransformToMask(face, e.params)
-      else if (e.kind === "image" && e.params.followFront) applyFrontTransformToImage(face, e.params)
-    }
-  }
-  sync(face.effects)
-  for (const { layer } of flattenLayers(face.layers)) sync(layer.effects)
-}
-
 /**
  * 取目标持有的效果数组（就地引用）；目标 / 图层不存在时返回 null。
  *
@@ -1998,14 +1888,13 @@ function syncFollowFrontEffects(face: CardFace): void {
  * @param target - 效果挂载位置（卡面或某图层）。
  */
 function effectsArray(face: CardFace, target: EffectTarget): Effect[] | null {
-  if (target.scope === "face") return face.effects
   const layer = findLayerById(face.layers, target.layerId)
   return layer ? layer.effects : null
 }
 
 /** 效果目标的图层 id；卡面级为 `null`（与 {@link commitFace} 的 `layerId` 参数同义）。 */
-function effectLayerId(target: EffectTarget): string | null {
-  return target.scope === "layer" ? target.layerId : null
+function effectLayerId(target: EffectTarget): string {
+  return target.layerId
 }
 
 /**
@@ -2025,6 +1914,5 @@ function currentEffects(ref: FaceRef, target: EffectTarget): Effect[] | null {
   const { pack } = usePackStore.getState()
   if (!pack) return null
   const face = findFace(pack, ref)
-  if (face) return effectsArray(face, target)
-  return ref.kind === "back" && target.scope === "face" ? [] : null
+  return face ? effectsArray(face, target) : null
 }

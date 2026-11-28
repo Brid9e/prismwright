@@ -28,7 +28,7 @@ export interface EffectUniformArrays {
   uMoireDepth: number[]
   uMoireTwist: number[]
   uMoireTwistSeed: number[]
-  uMoireFaceStrength: number[]
+  uMoireContentRelief: number[]
   // 相位：渐变
   uGradientCount: number
   uGradientMode: number[]
@@ -168,7 +168,7 @@ export function toEffectUniforms(
     uMoireDepth: fill(MOIRE_MAX, pack(effectiveMoire, "depth")),
     uMoireTwist: fill(MOIRE_MAX, pack(effectiveMoire, "twist")),
     uMoireTwistSeed: fill(MOIRE_MAX, pack(effectiveMoire, "twistSeed")),
-    uMoireFaceStrength: fill(MOIRE_MAX, pack(effectiveMoire, "faceStrength")),
+    uMoireContentRelief: fill(MOIRE_MAX, pack(effectiveMoire, "contentRelief")),
 
     uGradientCount: gradientItems.length,
     uGradientMode: fill(GRADIENT_MAX, pack(gradientItems, "mode")),

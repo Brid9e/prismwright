@@ -19,7 +19,6 @@
  */
 import { describe, it, expect } from "vitest"
 import { GLSL_COMMON } from "../shaders/common"
-import { BASE_FRAGMENT } from "../shaders/base"
 import { LAYER_FRAGMENT } from "../shaders/layer"
 
 /** 默认卡面宽高比，与 card-view.ts 的 DEFAULT_ASPECT 同值。 */
@@ -43,7 +42,6 @@ describe("碎片场在卡面等比坐标里生成", () => {
   // 否则着色器编译不过——而这种错只会在真机上炸，测试里看不出来。
   it.each([
     ["LAYER_FRAGMENT", LAYER_FRAGMENT],
-    ["BASE_FRAGMENT", BASE_FRAGMENT],
   ])("%s 在拼入 GLSL_COMMON 之前声明了 uAspect", (_name, src) => {
     const decl = src.indexOf("uniform float uAspect")
     const common = src.indexOf("float shardField(")

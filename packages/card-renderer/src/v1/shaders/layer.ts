@@ -24,7 +24,7 @@
  * - 新增**图片贴片**：图层效果里的 image 条目把该层铺成可平移 / 旋转 / 缩放的图片；采样与越界遮罩
  *   和全息一起在片元里做 over 合成，故图片自动继承蒙版 / 不透明度 / 圆角与祖先裁剪。
  * - 新增**蒙版擦除**：卡面的黑白擦除图（黑 = 擦掉）按原始 vUv 乘进全息与图片两路 alpha，
- *   与蒙版种类无关（见 common.ts 的 eraseWeight）。图层自己也能挂一张：本层 × 祖先 × 卡面
+ *   与蒙版种类无关。图层自己也能挂一张：本层 × 祖先；整卡擦除由父级 group 的祖先擦除负责。
  *   三张相乘，故「擦掉父层」会连同其子树一起消失（与祖先蒙版同一个模型）。
  * - 新增**文字通路**：文字层多出一路与图片同构的 alpha（字形纹理），在图片与全息之上再做一次
  *   over 合成，故文字自动继承蒙版 / 不透明度 / 圆角 / 祖先裁剪与擦除。
@@ -90,7 +90,7 @@ function ancestorClipGLSL(): string {
       if (uAncestorHasMask[${i}] > 0.5) {
         vec3 aMs = maskSampleUv(vUv, uAspect, uAncestorCenter[${i}], uAncestorSize[${i}], uAncestorRotation[${i}]);
         if (uAncestorSource[${i}] > 0.5) {
-          aArt = texture2D(uFrontMap, clamp(aMs.xy, 0.0, 1.0)).rgb;
+          aArt = uHasFront > 0.5 ? texture2D(uFrontMap, clamp(aMs.xy, 0.0, 1.0)).rgb : uBackgroundColor;
         } else {
           aLum = dot(texture2D(uAncestorMask[${i}], clamp(aMs.xy, 0.0, 1.0)).rgb, vec3(0.299, 0.587, 0.114));
         }
@@ -152,7 +152,8 @@ uniform float uMaskMode;   // 1 = line, 0 = fill
 uniform float uMaskInvert; // 图蒙版（uMask）的反转；程序化蒙版的反转是逐条自带的 uMaskPresetInvert
 uniform float uLineEdge0;
 uniform float uLineEdge1;
-uniform sampler2D uFrontMap; // 卡面原图：颜色蒙版按此采样（原始 uv，不含底图变换）
+uniform sampler2D uFrontMap; // 整卡背景图：颜色蒙版按此采样（原始 uv，不含底图变换）
+uniform vec3 uBackgroundColor; // 没有背景图时的整卡底色（颜色蒙版 / shadow 回退）
 uniform float uMaskSource;   // 蒙版来源：1 = color，0 = image
 uniform vec3 uMaskColor;     // 吸管拾取的颜色（线性工作空间）
 // 图蒙版的位移 / 缩放 / 旋转（与卡面同构，见 common.ts 的 maskSampleUv）。
@@ -269,6 +270,7 @@ float faceBumpHeightAt(vec2 uv) {
 // 暗部颜色用：卡面原图（按底图变换采样）的亮度。图外按 1（亮）处理——宁可不显花纹，
 // 也不要把「没有底图」的地方当成暗部铺满。
 float baseFrontLum(vec2 uv) {
+  if (uHasFront < 0.5) return dot(uBackgroundColor, vec3(0.299, 0.587, 0.114));
   vec2 m = mat2(uFaceMapMatrix.xy, uFaceMapMatrix.zw) * (uv - 0.5) + 0.5 + uFaceMapOffset;
   if (any(lessThan(m, vec2(0.0))) || any(greaterThan(m, vec2(1.0)))) return 1.0;
   return dot(texture2D(uFrontMap, m).rgb, vec3(0.299, 0.587, 0.114));
@@ -380,7 +382,7 @@ void main() {
   if (uHasMask > 0.5 && uMaskPresetCount < 0.5) {
     vec3 ms = maskSampleUv(vUv, uAspect, uMaskCenter, uMaskSize, uMaskRotation);
     if (uMaskSource > 0.5) {
-      art = texture2D(uFrontMap, clamp(ms.xy, 0.0, 1.0)).rgb;
+      art = uHasFront > 0.5 ? texture2D(uFrontMap, clamp(ms.xy, 0.0, 1.0)).rgb : uBackgroundColor;
     } else {
       lum = dot(texture2D(uMask, clamp(ms.xy, 0.0, 1.0)).rgb, vec3(0.299, 0.587, 0.114));
     }
@@ -409,7 +411,7 @@ ${ancestorClipGLSL()}
   }
   float ancestorErase = 1.0;
 ${ancestorEraseGLSL()}
-  float erase = eraseWeight(vUv) * ownErase * ancestorErase;
+  float erase = ownErase * ancestorErase;
   // 全息通路：uHasHolo 为 0（调色板色标为空）时 alpha 归零 → 本层不出箔（纯蒙版）。
   // 颜色类效果不走这道门，它们作用在下面的内容（图片 / 文字）上。
   // 色标带的透明度（holo4.a）乘在最后：某个相位处的色标越透明，箔在那里越淡。
@@ -484,7 +486,7 @@ ${ancestorEraseGLSL()}
   }
   // 暗部颜色：只取图层的色相 / 饱和度，把它的亮度换成卡面底图的亮度，再按「暗度」给 alpha。
   // 于是暗处显花纹、亮处淡出；over 合成后像素亮度仍是底图亮度，卡牌明暗不变。
-  if (uShadowMode > 0.5 && uHasFront > 0.5) {
+  if (uShadowMode > 0.5) {
     float baseLum = baseFrontLum(vUv);
     float dark = 1.0 - clamp(baseLum, 0.0, 1.0);
     float styleLum = dot(outC, vec3(0.299, 0.587, 0.114));

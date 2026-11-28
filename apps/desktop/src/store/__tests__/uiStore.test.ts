@@ -116,7 +116,7 @@ describe("uiStore", () => {
   it("requestColorPick / resolveColorPick 成对", () => {
     const request = {
       ref: { kind: "card", cardId: "c1" } as const,
-      target: { scope: "face" } as const,
+      target: { scope: "layer", layerId: "l" } as const,
       effectId: "e1",
     }
     expect(useUiStore.getState().colorPick).toBeNull()
@@ -128,10 +128,10 @@ describe("uiStore", () => {
 
   it("requestErasePaint / resolveErasePaint 成对，且与拾色互不干扰", () => {
     const ref = { kind: "back" } as const
-    useUiStore.getState().requestErasePaint({ ref, target: { scope: "face" }, effectId: "e2" })
+    useUiStore.getState().requestErasePaint({ ref, target: { scope: "layer", layerId: "l" }, effectId: "e2" })
     expect(useUiStore.getState().erasePaint).toEqual({
       ref,
-      target: { scope: "face" },
+      target: { scope: "layer", layerId: "l" },
       effectId: "e2",
     })
     // 两种模式各自一个槽位：开绘画不应顺带清掉拾色请求（反之亦然）。
@@ -147,7 +147,7 @@ describe("uiStore", () => {
     const redo = () => {}
     useUiStore.getState().requestErasePaint({
       ref: { kind: "back" },
-      target: { scope: "face" },
+      target: { scope: "layer", layerId: "l" },
       effectId: "e3",
     })
     useUiStore.getState().setErasePaintHistory({ undo, redo })

@@ -188,50 +188,35 @@ export async function createCardFrameRenderer(
   let disposed = false
 
   try {
-    // 卡面与卡面蒙版一并解析（与交互视图同构：蒙版从效果列表取得，不再是卡面专属字段）。
-    // 法线贴图走 "data"（方向数据，不能 sRGB 解码），与交互视图同一口径。
-    const [front, frontMask, erase, faceNormal] = await Promise.all([
-      cache.get(card.front, "color"),
-      cache.get(resolveImageMask(card.effects)?.path ?? "", "data"),
-      // 擦除也要一起解析：漏了这条，导出结果会比预览里多出被擦掉的部分。
-      cache.get(resolveEraseMask(card.effects)?.path ?? "", "data"),
-      cache.get(card.frontNormalPath, "data"),
-    ])
+    // 卡面只有底色；图片 / 蒙版 / 效果都在图层上。
+    const entries = flattenLayers(card.layers).filter(isLayerVisible)
+    // 最靠下的可见 image 图层作为整卡背景（与交互视图同一规则）。
+    const backgroundEntry = entries.find(({ layer }) => {
+      const image = resolveImage(layer.effects)
+      return Boolean(image?.path)
+    })
+    const backgroundImage = backgroundEntry ? resolveImage(backgroundEntry.layer.effects) : null
+    const [backgroundTexture, backgroundNormal] = backgroundEntry && backgroundImage
+      ? await Promise.all([
+          cache.get(backgroundImage.path, "color"),
+          cache.get(backgroundImage.normalPath ?? "", "data"),
+        ])
+      : [null, null]
+    const background =
+      backgroundTexture && backgroundImage
+        ? { texture: backgroundTexture, params: backgroundImage, normal: backgroundNormal }
+        : null
+    const inheritedMoire = backgroundEntry?.layer.effects ?? []
+
     baseMat = createBaseMaterial({
-      map: front ?? placeholderTexture,
       aspect,
       cornerRadius,
-      effects: card.effects,
-      mask: frontMask,
-      erase,
-      // 与交互视图同构：无底图时按拉伸，避免占位纹理被「适应」裁掉。
-      frontFit: front ? card.frontFit : "stretch",
-      frontOffsetX: card.frontOffsetX,
-      frontOffsetY: card.frontOffsetY,
-      frontScale: card.frontScale,
-      frontRotation: card.frontRotation,
-      // 法线（bump）：与预览视图同构，导出画面才能和预览对上。
-      frontBumpStrength: card.frontBumpStrength,
-      frontBumpDetail: card.frontBumpDetail,
-      frontBumpFlow: card.frontBumpFlow,
-      frontBumpLight: card.frontBumpLight,
-      frontBumpLightAngle: card.frontBumpLightAngle,
-      frontBumpLightColor: card.frontBumpLightColor,
-      frontBumpInvert: card.frontBumpInvert,
-      // 法线贴图：导出与预览同源（选了就接替亮度伪法线）。
-      frontNormalPath: card.frontNormalPath,
-      frontNormalFlipY: card.frontNormalFlipY,
-      normal: faceNormal,
-      frontValid: front !== null,
       baseColor: card.baseColor,
     })
     baseMesh.material = baseMat
-    // 相机固定不动，故位置只需写入一次（交互视图则逐帧同步）。卡面与图层都读它做高光/反射。
-    baseMat.uniforms.uCameraPosition.value.copy(camera.position)
 
     // 树 → 线性绘制序列：深度优先、父在前子随后；禁用的层连同整棵子树一起跳过。z 与 renderOrder
     // 用过滤后的连续下标驱动（与交互视图同一套编号规则），保证图层前后关系两处一致。
-    const entries = flattenLayers(card.layers).filter(isLayerVisible)
     let z = LAYER_Z_STEP
     for (let i = 0; i < entries.length; i++) {
       const { layer, ancestors } = entries[i]
@@ -266,22 +251,22 @@ export async function createCardFrameRenderer(
         mask: masks[0],
         ancestors: ancestorMasks,
         maskPlaceholder: placeholderTexture,
-        front,
-        // 整卡擦除：与卡面材质同一张（与交互视图一致）。
-        erase,
-        // 本层自己的擦除图：与整卡那张相乘（与交互视图一致）。
+        // 整卡背景图：颜色源蒙版 / shadow / tint 采样它。
+        front: background?.texture ?? null,
+        // 本层自己的擦除图；整卡擦除现在是祖先 group 的擦除。
         layerErase: ownErase,
         effects: layer.effects,
-        // 卡面 moire 作为继承源：本层无 moire 时整体取它（与交互视图一致）。
-        inheritedMoire: card.effects,
+        // 背景图层 moire 作为继承源。
+        inheritedMoire,
         image: imageTexture && image ? { texture: imageTexture, params: image } : null,
         // 本层文字纹理：导出与预览走同一份缓存规则。
         text: textCache.get(layer),
         // 本层自己的法线贴图 / 本面的（继承用）：导出与预览同一口径。
         normal: layerNormal,
-        faceNormal,
-        // 本面数据：法线继承源（与预览视图一致）。
-        face: card,
+        faceNormal: background?.normal ?? null,
+        // 背景图层的 image 参数：法线继承源（与预览视图一致）。
+        face: background?.params ?? null,
+        backgroundColor: card.baseColor,
         aspect,
         cornerRadius,
       })

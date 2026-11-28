@@ -4,7 +4,7 @@
 import type { MouseEvent } from "react"
 import { useTranslation } from "react-i18next"
 import { Copy, Download, Plus, Trash2 } from "lucide-react"
-import type { Card } from "@prismwright/schema"
+import { collectCardAssets, type Card } from "@prismwright/schema"
 import { usePackStore } from "../../store/packStore"
 import { useUiStore } from "../../store/uiStore"
 import { cardContextItems } from "../../ui/contextMenuModel"
@@ -53,7 +53,7 @@ export function CardTree() {
           {t(`rarity.${card.rarity}`)}
         </span>
       ),
-      warn: card.front !== "" && missingAssets[card.front] === true,
+      warn: collectCardAssets(card).some((rel) => missingAssets[rel] === true),
       trailing: (
         <>
           <Tooltip label={t("bundle:export.titleCard")}>

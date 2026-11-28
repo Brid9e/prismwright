@@ -87,7 +87,7 @@ describe("LAYER_FRAGMENT 祖先裁切", () => {
     // 颜色源与图片源各走一支权重：祖先若是颜色蒙版，裁切必须按颜色距离算。
     expect(LAYER_FRAGMENT).toContain("? colorKeyWeight(aArt")
     expect(LAYER_FRAGMENT).toContain(": maskWeight(aLum")
-    expect(LAYER_FRAGMENT).toContain("aArt = texture2D(uFrontMap")
+    expect(LAYER_FRAGMENT).toContain("aArt = uHasFront > 0.5 ? texture2D(uFrontMap")
   })
 })
 
@@ -274,7 +274,7 @@ describe("LAYER_FRAGMENT 蒙版擦除", () => {
   // 擦除图整卡一张（挂在卡面），每一层都要乘上去——否则「只留想要的部分」只对卡面底图
   // 生效，全息层原样保留，看起来像完全没擦。两路 alpha（全息 / 图片）都不能漏。
   it("全息与图片两路 alpha 都乘 eraseWeight", () => {
-    expect(LAYER_FRAGMENT).toContain("float erase = eraseWeight(vUv) * ownErase * ancestorErase;")
+    expect(LAYER_FRAGMENT).toContain("float erase = ownErase * ancestorErase;")
     expect(LAYER_FRAGMENT).toContain(
       "float alpha = mw * uHoloMix * uHoloAlpha * uOpacity * uHasHolo * card * ancestorClip * erase * holo4.a;",
     )
@@ -303,8 +303,7 @@ describe("LAYER_FRAGMENT 蒙版擦除", () => {
   })
 
   it("擦除取样用卡面原始 vUv（不跟底图变换、不跟蒙版变换）", () => {
-    expect(LAYER_FRAGMENT).toContain("eraseWeight(vUv)")
-    expect(LAYER_FRAGMENT).not.toContain("eraseWeight(ms.xy)")
+    expect(LAYER_FRAGMENT).toContain("texture2D(uLayerEraseMap, vUv)")
   })
 })
 
@@ -354,7 +353,7 @@ describe("LAYER_FRAGMENT 暗部颜色", () => {
     expect(LAYER_FRAGMENT).toContain("uniform float uShadowMode;")
     expect(LAYER_FRAGMENT).toContain("uniform float uHasFront;")
     expect(LAYER_FRAGMENT).toContain("float baseFrontLum(vec2 uv)")
-    expect(LAYER_FRAGMENT).toContain("if (uShadowMode > 0.5 && uHasFront > 0.5)")
+    expect(LAYER_FRAGMENT).toContain("if (uShadowMode > 0.5)")
     // 保留底图亮度的关键：结果色亮度被换成 baseLum，而不是图层自己的亮度。
     expect(LAYER_FRAGMENT).toContain("outC * (baseLum / styleLum)")
   })

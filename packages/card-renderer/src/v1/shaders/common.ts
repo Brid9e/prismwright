@@ -86,7 +86,7 @@ uniform float uMoireDensity[MOIRE_MAX];
 uniform float uMoireDepth[MOIRE_MAX];
 uniform float uMoireTwist[MOIRE_MAX];
 uniform float uMoireTwistSeed[MOIRE_MAX];
-uniform float uMoireFaceStrength[MOIRE_MAX];
+uniform float uMoireContentRelief[MOIRE_MAX];
 // 本层**自有**的摩尔纹条数（不含从卡面继承来的那份）：内容浮雕只认它，见 layerContentHeight。
 // 卡面片元不绑定此 uniform（恒为 0，也不会调用图层专用函数）。
 uniform float uOwnMoireCount;
@@ -616,18 +616,6 @@ vec3 maskSampleUv(vec2 uv, float aspect, vec2 center, vec2 size, float rotation)
   return vec3(muv, inside);
 }
 
-// 蒙版擦除：一张与卡面同比例的黑白图（黑 = 擦掉、白 = 保留），按卡面原始 vUv 取样后
-// 直接乘进最终 alpha。它不看蒙版是图片、颜色还是程序化生成的——「只留想要的部分」
-// 对每种蒙版都成立，故作用点是「最终 alpha」而不是某条蒙版通路。
-uniform sampler2D uEraseMap;
-uniform float uHasErase;
-
-float eraseWeight(vec2 uv) {
-  if (uHasErase < 0.5) return 1.0;
-  // 取亮度而非单通道：图片编辑器里导出的图即便带轻微色彩偏移，也按肉眼亮度理解。
-  return dot(texture2D(uEraseMap, uv).rgb, vec3(0.299, 0.587, 0.114));
-}
-
 // 蒙版权重：与 TS 侧 mapping.maskWeight() 同构。hasMask=0 时整卡出全息。
 float maskWeight(float lum, float hasMask, float maskMode, float invert, float e0, float e1) {
   if (hasMask < 0.5) return 1.0;
@@ -670,20 +658,6 @@ float moireSliceSum(vec2 uv) {
   return s;
 }
 
-// 卡面浮雕用的摩尔纹场之和（高度场）：与 moireSliceSum 同源（都是本目标 uMoire* 数组各条的场之
-// 和），但每条再乘该条的 faceStrength——faceStrength = 0（默认）的条目对浮雕零贡献，于是存量系列
-// 卡面逐像素不变。base.ts 把本和当作卡面的一层「高度场」，见下方 moireRelief；光带切带仍走
-// moireSliceSum。
-float moireFaceSum(vec2 uv) {
-  float s = 0.0;
-  for (int m = 0; m < MOIRE_MAX; m++) {
-    if (float(m) < uMoireCount) {
-      s += moireField(uv, uMoireMode[m], uMoireAngle[m], uMoireDensity[m], uMoireTwist[m], uMoireTwistSeed[m])
-           * uMoireDepth[m] * uMoireFaceStrength[m];
-    }
-  }
-  return s;
-}
 
 // ── 法线（bump）──
 //
@@ -766,13 +740,6 @@ vec3 bumpShadeAmount(vec2 slope, float strength, float light, float angle, vec3 
   return clamp(vec3(1.0) + min(d, 0.0) + max(d, 0.0) * tint, 0.25, 1.75);
 }
 
-// 卡面浮雕的明暗因子：h0 与沿光向偏移一步处的 hL 之差（≈ 沿光向的方向导数）。无刻纹时 h≡0
-// ⇒ 恒返回 1.0，保证 faceStrength = 0（默认）的卡面逐像素不变。末端 clamp 防高密度下过冲。
-float moireRelief(vec2 uv) {
-  float h0 = moireFaceSum(uv);
-  float hL = moireFaceSum(uv + MOIRE_RELIEF_LIGHT * MOIRE_RELIEF_STEP);
-  return clamp(1.0 + (hL - h0) * MOIRE_RELIEF_GAIN, 0.25, 1.75);
-}
 
 // ── 图层内容浮雕（刻纹 / 摩尔纹）──
 //
@@ -788,7 +755,7 @@ float layerContentHeight(vec2 uv) {
   for (int m = 0; m < MOIRE_MAX; m++) {
     if (float(m) < uOwnMoireCount) {
       s += moireField(uv, uMoireMode[m], uMoireAngle[m], uMoireDensity[m], uMoireTwist[m], uMoireTwistSeed[m])
-           * uMoireDepth[m];
+           * uMoireDepth[m] * uMoireContentRelief[m];
     }
   }
   return s;

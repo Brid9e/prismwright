@@ -10,25 +10,25 @@
  * 规则错了的症状是「图层的法线拖了没反应」或「选了法线贴图还在按亮度算」——都不报错。
  */
 import { describe, it, expect } from "vitest"
-import { CardFaceSchema, ImageParamsSchema } from "@prismwright/schema"
+import { ImageParamsSchema, type ImageParams } from "@prismwright/schema"
 import { BUMP_OFF, resolveBump, resolveLayerBump } from "../bump"
 
 /** 开了亮度法线的卡面（没有法线贴图）。 */
-const bumpFace = CardFaceSchema.parse({
-  frontBumpStrength: 0.8,
-  frontBumpDetail: 0.03,
-  frontBumpFlow: 0.2,
-  frontBumpLight: 0.9,
-  frontBumpLightAngle: -30,
-  frontBumpLightColor: "#ffcc00",
-  frontBumpInvert: true,
+const bumpFace = ImageParamsSchema.parse({
+  bumpStrength: 0.8,
+  bumpDetail: 0.03,
+  bumpFlow: 0.2,
+  bumpLight: 0.9,
+  bumpLightAngle: -30,
+  bumpLightColor: "#ffcc00",
+  bumpInvert: true,
 })
 
 /** 开了法线贴图的卡面。 */
-const normalFace = CardFaceSchema.parse({
-  frontBumpStrength: 0.8,
-  frontNormalPath: "assets/normal.png",
-  frontNormalFlipY: true,
+const normalFace = ImageParamsSchema.parse({
+  bumpStrength: 0.8,
+  normalPath: "assets/normal.png",
+  normalFlipY: true,
 })
 
 /** 一组缺省的图片法线字段。 */
@@ -119,9 +119,9 @@ describe("resolveLayerBump", () => {
         image,
         hasImage: true,
         hasNormal: false,
-        face: bumpFace,
-        hasFaceImage: true,
-        hasFaceNormal: false,
+        background: bumpFace,
+        hasBackgroundImage: true,
+        hasBackgroundNormal: false,
       }),
     ).toEqual({
       source: 1,
@@ -147,9 +147,9 @@ describe("resolveLayerBump", () => {
       image,
       hasImage: true,
       hasNormal: true,
-      face: bumpFace,
-      hasFaceImage: true,
-      hasFaceNormal: false,
+      background: bumpFace,
+      hasBackgroundImage: true,
+      hasBackgroundNormal: false,
     })
     expect(r).toMatchObject({ source: 1, mode: "normal", flipY: true, strength: 0.7 })
   })
@@ -173,9 +173,9 @@ describe("resolveLayerBump", () => {
         image,
         hasImage: true,
         hasNormal: false,
-        face: bumpFace,
-        hasFaceImage: true,
-        hasFaceNormal: false,
+        background: bumpFace,
+        hasBackgroundImage: true,
+        hasBackgroundNormal: false,
       }),
     ).toEqual(expected)
     expect(
@@ -183,9 +183,9 @@ describe("resolveLayerBump", () => {
         image: null,
         hasImage: false,
         hasNormal: false,
-        face: bumpFace,
-        hasFaceImage: true,
-        hasFaceNormal: false,
+        background: bumpFace,
+        hasBackgroundImage: true,
+        hasBackgroundNormal: false,
       }),
     ).toEqual(expected)
   })
@@ -196,9 +196,9 @@ describe("resolveLayerBump", () => {
       image: null,
       hasImage: false,
       hasNormal: false,
-      face: normalFace,
-      hasFaceImage: true,
-      hasFaceNormal: true,
+      background: normalFace,
+      hasBackgroundImage: true,
+      hasBackgroundNormal: true,
     })
     expect(r).toMatchObject({ source: 2, mode: "normal", flipY: true, strength: 0.8 })
   })
@@ -208,26 +208,26 @@ describe("resolveLayerBump", () => {
       image: null,
       hasImage: false,
       hasNormal: false,
-      face: normalFace,
-      hasFaceImage: true,
-      hasFaceNormal: false,
+      background: normalFace,
+      hasBackgroundImage: true,
+      hasBackgroundNormal: false,
     })
     expect(r.mode).toBe("luma")
     expect(r.source).toBe(2)
   })
 
   it("卡面没有图 / 没开法线时整段关", () => {
-    const off = (face: ReturnType<typeof CardFaceSchema.parse> | null, hasFaceImage: boolean) =>
+    const off = (background: ImageParams | null, hasBackgroundImage: boolean) =>
       resolveLayerBump({
         image: null,
         hasImage: false,
         hasNormal: false,
-        face,
-        hasFaceImage,
-        hasFaceNormal: false,
+        background,
+        hasBackgroundImage,
+        hasBackgroundNormal: false,
       })
     expect(off(bumpFace, false)).toEqual(BUMP_OFF)
-    expect(off(CardFaceSchema.parse({}), true)).toEqual(BUMP_OFF)
+    expect(off(ImageParamsSchema.parse({}), true)).toEqual(BUMP_OFF)
     expect(off(null, true)).toEqual(BUMP_OFF)
   })
 })

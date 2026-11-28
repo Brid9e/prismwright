@@ -8,29 +8,11 @@
     "name": "名称",
     "notes": "备注",
     "rarity": "稀有度",
-    "front": "卡面图",
     "baseColor": "卡牌底色",
     "notSet": "未设置",
     "upload": "上传卡面图",
     "replace": "替换卡面图",
     "remove": "删除卡面图",
-    "frontFit": "填充方式",
-    "frontOffsetX": "水平偏移",
-    "frontOffsetY": "垂直偏移",
-    "frontScale": "缩放",
-    "frontRotation": "旋转",
-    "frontNormalPath": "法线贴图",
-    "frontNormalUpload": "上传法线图",
-    "frontNormalReplace": "替换法线图",
-    "frontNormalRemove": "删除法线图",
-    "frontNormalFlipY": "翻转绿通道",
-    "frontBumpStrength": "法线",
-    "frontBumpDetail": "法线细节",
-    "frontBumpFlow": "法线流向",
-    "frontBumpLight": "法线光照",
-    "frontBumpLightAngle": "光照方向",
-    "frontBumpLightColor": "光照颜色",
-    "frontBumpInvert": "反转法线",
     "finish": "表面",
     "glassStrength": "玻璃强度",
     "glassRoughness": "玻璃粗糙度",
@@ -50,10 +32,5 @@
     "epic": "史诗",
     "legendary": "传说"
   },
-  "missingAsset": "卡面图缺失",
-  "frontFit": {
-    "cover": "覆盖",
-    "contain": "适应",
-    "stretch": "拉伸"
-  }
+  "missingAsset": "卡面图缺失"
 }

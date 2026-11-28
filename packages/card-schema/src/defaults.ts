@@ -92,7 +92,7 @@ export function createCard(num: number, layerName: string): Card {
 export function createEmptyPack(name: string, editorVersion = "v1"): Pack {
   const now = new Date().toISOString()
   return PackSchema.parse({
-    schemaVersion: 8,
+    schemaVersion: 9,
     editorVersion,
     id: newId(),
     name,

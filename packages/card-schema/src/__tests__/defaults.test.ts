@@ -33,18 +33,17 @@ describe("createCard", () => {
 })
 
 describe("createCardFace", () => {
-  it("产出字段完整的空卡面，effects 取 schema 默认（空数组）", () => {
+  it("产出字段完整的空卡面：只有底色 / 形状 / 空图层", () => {
     const face = createCardFace()
-    expect(face.front).toBe("")
+    expect(face.baseColor).toBe("#282830")
     expect(face.layers).toEqual([])
-    expect(face.effects).toEqual([])
   })
 })
 
 describe("createEmptyPack", () => {
-  it("生成合法空系列，版本为 8", () => {
+  it("生成合法空系列，版本为 9", () => {
     const pack = createEmptyPack("星辰之约")
-    expect(pack.schemaVersion).toBe(8)
+    expect(pack.schemaVersion).toBe(9)
     expect(pack.editorVersion).toBe("v1")
     expect(pack.name).toBe("星辰之约")
     expect(pack.cards).toEqual([])

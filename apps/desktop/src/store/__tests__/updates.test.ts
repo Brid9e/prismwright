@@ -89,10 +89,10 @@ describe("packStore 参数与属性更新", () => {
     expect(usePackStore.getState().past.length).toBe(after1 + 1)
   })
 
-  it("updateFace 写卡片卡面图", async () => {
+  it("updateFace 写底色", async () => {
     const { cardId } = await setup()
-    usePackStore.getState().updateFace({ kind: "card", cardId }, { front: "assets/f.png" })
-    expect(usePackStore.getState().pack!.cards[0].front).toBe("assets/f.png")
+    usePackStore.getState().updateFace({ kind: "card", cardId }, { baseColor: "#123456" })
+    expect(usePackStore.getState().pack!.cards[0].baseColor).toBe("#123456")
   })
 
   it("不把调用方的数组与色标对象存进 state（updateEffect 的 palette 路径）", async () => {
@@ -122,7 +122,7 @@ describe("packStore 参数与属性更新", () => {
     const past = usePackStore.getState().past.length
     usePackStore.getState().updateCard("missing", { name: "x" })
     usePackStore.getState().updateLayer({ kind: "card", cardId }, "missing", { holoMix: 1 })
-    usePackStore.getState().updateFace({ kind: "card", cardId: "missing" }, { front: "x" })
+    usePackStore.getState().updateFace({ kind: "card", cardId: "missing" }, { baseColor: "x" })
     expect(usePackStore.getState().past).toHaveLength(past)
   })
 
@@ -130,10 +130,10 @@ describe("packStore 参数与属性更新", () => {
     expect(() => {
       usePackStore.getState().updateCard("c", { name: "x" })
       usePackStore.getState().updateLayer({ kind: "back" }, "l", { holoMix: 1 })
-      usePackStore.getState().updateFace({ kind: "back" }, { front: "x" })
+      usePackStore.getState().updateFace({ kind: "back" }, { baseColor: "#fff" })
       usePackStore
         .getState()
-        .updateEffect({ kind: "back" }, { scope: "face" }, "e", { enabled: false })
+        .updateEffect({ kind: "back" }, { scope: "layer", layerId: "l" }, "e", { enabled: false })
     }).not.toThrow()
     expect(usePackStore.getState().pack).toBeNull()
   })

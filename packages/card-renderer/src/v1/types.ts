@@ -104,7 +104,7 @@ export interface CardView {
    * @param layerId - 落在哪张擦除图上：省略 / `null` = 卡面那张（整卡擦除）；图层 id =
    *   该层**自己**的那张。两张图是相乘关系，互不替代。
    */
-  setEraseTexture(texture: Texture | null, layerId?: string | null): void
+  setEraseTexture(texture: Texture | null, layerId: string): void
   /** 擦除画布内容变化后调用：让 three 重新上传纹理并渲染一帧。 */
   refreshErase(): void
   /**

@@ -111,14 +111,14 @@ describe("Layer 退役字段", () => {
     expect("offsetY" in layer).toBe(false)
   })
 
-  it("PackSchema 的 schemaVersion 字面量为 8", () => {
+  it("PackSchema 的 schemaVersion 字面量为 9", () => {
     const base = {
       id: "p1",
       name: "包",
       createdAt: "2026-10-10T00:00:00.000Z",
       updatedAt: "2026-10-10T00:00:00.000Z",
     }
-    expect(PackSchema.parse({ ...base, schemaVersion: 8 }).schemaVersion).toBe(8)
+    expect(PackSchema.parse({ ...base, schemaVersion: 9 }).schemaVersion).toBe(9)
     expect(() => PackSchema.parse({ ...base, schemaVersion: 6 })).toThrow()
   })
 })

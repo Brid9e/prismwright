@@ -193,7 +193,7 @@ describe("placementFor", () => {
   const canvas = { width: 1000, height: 1400 }
 
   it("满卡图正好铺满画布", () => {
-    const p = placementFor({ path: "a", x: 0, y: 0, rotation: 0, scale: 1, fit: "contain", followFront: false, bumpStrength: 0, bumpDetail: 0.01, bumpFlow: 0.5, bumpLight: 1, bumpLightAngle: 127, bumpLightColor: "#ffffff", bumpInvert: false, normalPath: "", normalFlipY: false }, fullCard, canvas)
+    const p = placementFor({ path: "a", x: 0, y: 0, rotation: 0, scale: 1, fit: "contain", bumpStrength: 0, bumpDetail: 0.01, bumpFlow: 0.5, bumpLight: 1, bumpLightAngle: 127, bumpLightColor: "#ffffff", bumpInvert: false, normalPath: "", normalFlipY: false }, fullCard, canvas)
     expect(p.centerX).toBeCloseTo(500)
     expect(p.centerY).toBeCloseTo(700)
     expect(p.drawWidth).toBeCloseTo(1000)
@@ -202,13 +202,13 @@ describe("placementFor", () => {
   })
 
   it("偏移按卡高单位换算成像素，y 正向朝上", () => {
-    const p = placementFor({ path: "a", x: 0, y: 0.25, rotation: 0, scale: 1, fit: "contain", followFront: false, bumpStrength: 0, bumpDetail: 0.01, bumpFlow: 0.5, bumpLight: 1, bumpLightAngle: 127, bumpLightColor: "#ffffff", bumpInvert: false, normalPath: "", normalFlipY: false }, fullCard, canvas)
+    const p = placementFor({ path: "a", x: 0, y: 0.25, rotation: 0, scale: 1, fit: "contain", bumpStrength: 0, bumpDetail: 0.01, bumpFlow: 0.5, bumpLight: 1, bumpLightAngle: 127, bumpLightColor: "#ffffff", bumpInvert: false, normalPath: "", normalFlipY: false }, fullCard, canvas)
     // 0.25 卡高 = 350 像素，且向上 = 画布 y 变小。
     expect(p.centerY).toBeCloseTo(700 - 350)
   })
 
   it("角度转弧度，正值顺时针（画布 y 朝下，rotate 正角即顺时针）", () => {
-    const p = placementFor({ path: "a", x: 0, y: 0, rotation: 90, scale: 1, fit: "contain", followFront: false, bumpStrength: 0, bumpDetail: 0.01, bumpFlow: 0.5, bumpLight: 1, bumpLightAngle: 127, bumpLightColor: "#ffffff", bumpInvert: false, normalPath: "", normalFlipY: false }, fullCard, canvas)
+    const p = placementFor({ path: "a", x: 0, y: 0, rotation: 90, scale: 1, fit: "contain", bumpStrength: 0, bumpDetail: 0.01, bumpFlow: 0.5, bumpLight: 1, bumpLightAngle: 127, bumpLightColor: "#ffffff", bumpInvert: false, normalPath: "", normalFlipY: false }, fullCard, canvas)
     expect(p.rotationRad).toBeCloseTo(Math.PI / 2)
   })
 })
@@ -227,7 +227,7 @@ describe("可调宽高比", () => {
 
   it("居中坐标按卡面半宽（与片元的取点同一口径）", () => {
     const place = placementFor(
-      { path: "assets/a.png", x: 0, y: 0, rotation: 0, scale: 1, fit: "contain", followFront: false, bumpStrength: 0, bumpDetail: 0.01, bumpFlow: 0.5, bumpLight: 1, bumpLightAngle: 127, bumpLightColor: "#ffffff", bumpInvert: false, normalPath: "", normalFlipY: false },
+      { path: "assets/a.png", x: 0, y: 0, rotation: 0, scale: 1, fit: "contain", bumpStrength: 0, bumpDetail: 0.01, bumpFlow: 0.5, bumpLight: 1, bumpLightAngle: 127, bumpLightColor: "#ffffff", bumpInvert: false, normalPath: "", normalFlipY: false },
       fullCard,
       { width: 1000, height: 1000 },
       1,

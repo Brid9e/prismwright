@@ -45,7 +45,8 @@ const manifest: BundleManifest = {
   card: { id: "c1", name: "星辰", list: "cards" },
 }
 
-const sourceCard = { ...createCard(1, "图层 1"), name: "星辰", front: "assets/a.png" }
+const sourceCard = { ...createCard(1, "图层 1"), name: "星辰" }
+sourceCard.layers[0].effects = [{ id: "img", enabled: true, kind: "image", params: { path: "assets/a.png", x: 0, y: 0, rotation: 0, scale: 1, fit: "contain", bumpStrength: 0, bumpDetail: 0.01, bumpFlow: 0.5, bumpLight: 1, bumpLightAngle: 127, bumpLightColor: "#ffffff", bumpInvert: false, normalPath: "", normalFlipY: false } }]
 
 describe("remapAssetPaths", () => {
   it("递归替换字符串，未命中的保持原样", () => {
@@ -82,11 +83,13 @@ describe("importCardBundle", () => {
 
     const cards = usePackStore.getState().pack!.cards
     const copy = cards[cards.length - 1]
-    expect(copy.front).toMatch(/^assets\/imported\/[0-9a-f-]{36}-a\.png$/)
+    const image = copy.layers[0].effects.find((e) => e.kind === "image")
+    const path = image?.kind === "image" ? image.params.path : ""
+    expect(path).toMatch(/^assets\/imported\/[0-9a-f-]{36}-a\.png$/)
     expect(vi.mocked(packFs.copyAsset)).toHaveBeenCalledWith(
       "/tmp/bundle-1/assets/a.png",
       "/tmp/p",
-      copy.front,
+      path,
     )
     expect(vi.mocked(bundleFs.cleanup)).toHaveBeenCalledWith("/tmp/bundle-1")
   })
@@ -99,7 +102,7 @@ describe("importCardBundle", () => {
       entries: [],
     })
     vi.mocked(packFs.readText).mockResolvedValue(
-      JSON.stringify({ ...sourceCard, front: "../secret.png" }),
+      JSON.stringify({ ...sourceCard, layers: [{ ...sourceCard.layers[0], effects: [{ ...sourceCard.layers[0].effects[0], params: { ...sourceCard.layers[0].effects[0].params, path: "../secret.png" } }] }] }),
     )
 
     await expect(importCardBundle("/f.card", manifest)).rejects.toThrow()
@@ -132,10 +135,7 @@ describe("importCardBundle", () => {
     vi.mocked(packFs.readText).mockResolvedValue(
       JSON.stringify({
         ...sourceCard,
-        front: "assets/a.png",
-        effects: [
-          { id: "e1", kind: "imageMask", params: { path: "assets/m.png" } },
-        ],
+        layers: [{ ...sourceCard.layers[0], effects: [...sourceCard.layers[0].effects, { id: "e1", kind: "imageMask", params: { path: "assets/m.png" } }] as any }],
       }),
     )
     // 工程里的源文件都在，目标系列里都没有。
@@ -145,6 +145,6 @@ describe("importCardBundle", () => {
       .mockRejectedValueOnce(new Error("disk full"))
 
     await expect(importCardBundle("/f.card", manifest)).rejects.toThrow()
-    expect(vi.mocked(packFs.moveToTrash)).toHaveBeenCalledWith("/tmp/p", "assets/a.png")
+    expect(vi.mocked(packFs.moveToTrash)).toHaveBeenCalledWith("/tmp/p", "assets/m.png")
   })
 })

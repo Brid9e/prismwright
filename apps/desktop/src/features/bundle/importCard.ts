@@ -9,7 +9,7 @@
  * 字节相同就直接复用，不同才另存到 `assets/imported/<uuid>-<basename>`。这样反复导入
  * 同一个工程不会产生一堆内容相同的副本。
  */
-import { CardSchema, collectCardAssets, type Card } from "@prismwright/schema"
+import { CardSchema, collectCardAssets, migrateCardFace, type Card } from "@prismwright/schema"
 import { basename, join, toPackDirName } from "../../app/path"
 import { usePackStore } from "../../store/packStore"
 import { useUiStore } from "../../store/uiStore"
@@ -86,8 +86,9 @@ function sameBytes(a: ArrayBuffer, b: ArrayBuffer): boolean {
 export async function importCardBundle(path: string, manifest: BundleManifest): Promise<void> {
   const extracted = await bundleFs.extract(path)
   try {
+    // 旧 .card 包没有走 parsePack；这里补 v8→v9 的 face 迁移，否则老卡的前景图会丢。
     const card = CardSchema.parse(
-      JSON.parse(await packFs.readText(join(extracted.dir, "card.json"))),
+      migrateCardFace(JSON.parse(await packFs.readText(join(extracted.dir, "card.json")))),
     ) as Card
 
     const rootDir = await ensurePack(manifest)

@@ -118,11 +118,6 @@ describe("EFFECT_REGISTRY", () => {
 
   // 字段级 scope 的契约：moire 的卡面浮雕只作用于卡面片元，标 `face` 让图层面板隐去它。
   // 若哪天误删了这个标注，图层面板会重新冒出一个拖了没反应的滑块。
-  it("moire.faceStrength 字段级 scope 为 face（图层上不显示）", () => {
-    const field = EFFECT_REGISTRY.moire.fields.find((f) => f.key === "faceStrength")
-    expect(field?.scope).toBe("face")
-  })
-
   it("gradient 的字段含斜坡 4 项与相位全局 7 项（相位项从图层搬入后仍可在面板编辑）", () => {
     // twistSeed 紧随 twist：种子不是单独一档效果参数，而是 twist 的伴生量（换种子 = 换转法）。
     expect(EFFECT_REGISTRY.gradient.fields.map((f) => f.key)).toEqual([
@@ -173,12 +168,11 @@ describe("EFFECT_REGISTRY", () => {
     expect([byKey.offsetY.min, byKey.offsetY.max, byKey.offsetY.step]).toEqual([-1, 1, 0.01])
   })
 
-  it("image 字段为 path + 跟随卡面 + 填充方式 + 四个变换滑块 + 法线贴图与四个法线控件，范围与 schema 一致", () => {
+  it("image 字段为 path + 填充方式 + 四个变换滑块 + 法线贴图与四个法线控件，范围与 schema 一致", () => {
     type SliderField = FieldDescriptor & { min: number; max: number; step: number }
     const fields = EFFECT_REGISTRY.image.fields as readonly FieldDescriptor[]
     expect(fields.map((f) => f.key)).toEqual([
       "path",
-      "followFront",
       "fit",
       "x",
       "y",
@@ -194,13 +188,8 @@ describe("EFFECT_REGISTRY", () => {
       "bumpLightColor",
       "bumpInvert",
     ])
-    // 跟随卡面时下面几项不显示：写了也会被卡面值覆盖。
-    const byVisible = Object.fromEntries(fields.map((f) => [f.key, f]))
-    for (const key of ["fit", "x", "y", "rotation", "scale"]) {
-      expect(byVisible[key].visibleWhen?.({ followFront: false })).toBe(true)
-      expect(byVisible[key].visibleWhen?.({ followFront: true })).toBe(false)
-    }
     const byKey = Object.fromEntries(fields.map((f) => [f.key, f as SliderField]))
+    const byVisible = Object.fromEntries(fields.map((f) => [f.key, f]))
     expect([byKey.x.min, byKey.x.max, byKey.x.step]).toEqual([-1, 1, 0.01])
     expect([byKey.y.min, byKey.y.max, byKey.y.step]).toEqual([-1, 1, 0.01])
     expect([byKey.rotation.min, byKey.rotation.max, byKey.rotation.step]).toEqual([-180, 180, 1])
@@ -256,7 +245,7 @@ describe("EFFECT_REGISTRY", () => {
     // 消费方真正依赖的 uniform 键集合，改动它会静默改坏画面，故逐个写死。
     const EXPECTED: Record<string, readonly string[]> = {
       gradient: ["mode", "density", "angle", "twist", "twistSeed", "straight"],
-      moire: ["mode", "angle", "density", "depth", "twist", "twistSeed", "faceStrength"],
+      moire: ["mode", "angle", "density", "depth", "twist", "twistSeed", "contentRelief"],
       gloss: [
         "mode",
         "bands",

@@ -196,13 +196,15 @@ export interface MoireParams {
   /** 「扭曲」的随机种子；0 = 绕卡心匀速。语义见 {@link GradientParams.twistSeed}。默认 0。 */
   twistSeed: number
   /**
-   * 卡面浮雕强度，0–1。默认 0。
+   * 内容浮雕强度，0–1。默认 1（保持图层内容浮雕的现有行为）。
    *
    * 与 {@link depth} 的分工：`depth` 决定纹样本身的深度（既供光泽切带、也供本项浮雕），
-   * `faceStrength` 只决定「有多少纹样被渲染成卡面浮雕」。0 = 卡面无浮雕（纹样只能经光泽切带
-   * 被看到）；调大则把纹样当作高度场渲染成明暗，卡面呈现出凸起 / 凹陷的磨砂质感。
+   * `contentRelief` 只决定「有多少纹样被渲染成内容浮雕」。0 = 只有光泽切带，不把纹样压成
+   * 图层内容的明暗；调大则把纹样当作高度场渲染成凸起 / 凹陷。
+   *
+   * 旧面级 moire 的 `faceStrength` 在 v9 迁移时映射到本字段。
    */
-  faceStrength: number
+  contentRelief: number
 }
 
 /**
@@ -384,14 +386,6 @@ export interface MaskImageParams {
   /** 蒙版图顺时针旋转角度（度，绕蒙版中心）。默认 0。 */
   rotation: number
   /**
-   * 是否跟随卡面的填充方式 / 位移 / 缩放 / 旋转。默认 `false`。
-   *
-   * 只是编辑期的联动标记：打开后编辑器在写卡面变换时把值抄进本条目，落盘的参数始终是
-   * 具体数值——渲染器（含旧版小程序）不读这个标志，看到的永远是对齐好的画面。
-   * 注意两张图宽高比不同时，同参数的画面也未必逐像素重合——这是参数级对齐的固有边界。
-   */
-  followFront: boolean
-  /**
    * 蒙版图填充方式（见 {@link FrontFit}）。默认 `"cover"`，与底图一致。
    *
    * 加该字段之前蒙版图是被拉伸到铺满卡面的，故对「蒙版图比例 ≠ 卡面比例」的存量卡，
@@ -419,22 +413,17 @@ export interface ImageParams {
   /** 缩放倍数，1 = 自适应尺寸。默认 1。 */
   scale: number
   /**
-   * 填充方式，与卡面底图的 `frontFit` 同名同义。默认 `contain`。
+   * 填充方式（见 {@link FrontFit}）。默认 `contain`。
    *
-   * 缺省是 `contain` 而非卡面的 `cover`：加该字段之前图片按「完整可见」铺，默认值必须
-   * 复现旧画面（additive default 的意义），否则存量图层图片会被裁掉一圈。
+   * 缺省 `contain`：加该字段之前图片按「完整可见」铺，默认值必须复现旧画面
+   * （additive default 的意义），否则存量图层图片会被裁掉一圈。
    */
   fit: FrontFit
-  /**
-   * 跟随卡面：编辑器在卡面变换改变时把填充方式 / 位移 / 缩放 / 旋转抄进本条目。
-   * 默认 `false`。渲染器不认这个标志——落盘参数始终是具体数值。
-   */
-  followFront: boolean
   /**
    * 法线强度（0–10）。由图片自身的亮度差生成伪法线，扰动光泽 / 摩尔纹的走势；
    * 选了法线贴图时缩放贴图的坡向（1 = 原样）。
    *
-   * 默认 `0` = 本条目不开法线，图层改用卡面底图的法线（继承规则见渲染器 `bump.ts`）。
+   * 默认 `0` = 本条目不开法线，图层改用整卡背景图层的法线（继承规则见渲染器 `bump.ts`）。
    * 其余各项只在强度 > 0 时起作用。
    */
   bumpStrength: number
@@ -694,58 +683,8 @@ export interface Layer {
 export type CardFinish = "standard" | "glass"
 
 export interface CardFace {
-  /** 卡面图相对系列根的路径；空串表示未设置。默认 `""`。 */
-  front: string
-  /** 卡面底色（hex）：底图没覆盖到的位置 / 没有底图时垫的颜色。默认 `#282830`。 */
+  /** 卡面底色（hex）：没有图层覆盖时，整张卡垫的颜色。默认 `#282830`。 */
   baseColor: string
-  /** 底图填充方式（见 {@link FrontFit}）。默认 `"cover"`。 */
-  frontFit: FrontFit
-  /**
-   * 底图水平偏移，单位是卡高（正 = 图片向右移）。默认 0。
-   *
-   * 与 {@link ImageParams}.x 同口径、同方向；超出图片范围的部分显示卡面默认底色。
-   */
-  frontOffsetX: number
-  /** 底图垂直偏移，单位是卡高（正 = 图片向上移）。语义见 {@link frontOffsetX}。默认 0。 */
-  frontOffsetY: number
-  /**
-   * 底图缩放倍率（等比，1 = 不缩放）。默认 1。
-   *
-   * 叠在填充方式算出的图幅之上：> 1 放大图片（采样跨度变小），< 1 缩小（四周露出卡面
-   * 默认底色）。
-   */
-  frontScale: number
-  /**
-   * 底图旋转角度（度，正 = 顺时针，绕图片中心）。默认 0，范围约定 ±180。
-   *
-   * 旋转在**卡面坐标**里做（宽按卡面宽高比换算），否则宽高比不是 1 时图片会被拉斜。
-   */
-  frontRotation: number
-  /**
-   * 卡面底图的法线强度（0–10）。由底图亮度差生成伪法线，扰动光泽 / 摩尔纹的走势，
-   * 并向下继承给没有自带法线的图层。默认 0 = 关（存量画面不变）。
-   */
-  frontBumpStrength: number
-  /** 卡面法线的取样步长（卡高单位，0.001–0.05）。默认 0.01。 */
-  frontBumpDetail: number
-  /** 卡面法线对图案走势的推动比例（0–1）。默认 0.5。 */
-  frontBumpFlow: number
-  /** 卡面法线的斜光明暗强度（0–1）。默认 1；0 = 只影响走势、不出明暗。 */
-  frontBumpLight: number
-  /** 卡面法线的斜光方向（度，-180–180）。默认 127（与摩尔纹浮雕同向）。 */
-  frontBumpLightAngle: number
-  /** 卡面法线的斜光颜色（hex）。默认 `#ffffff`（中性）。 */
-  frontBumpLightColor: string
-  /** 反转卡面法线的明暗方向。默认 false。 */
-  frontBumpInvert: boolean
-  /**
-   * 卡面法线贴图相对路径（切线空间，RGB 编码 XYZ）；空串 = 不选（默认）。
-   *
-   * 非空时**整体接替**卡面底图的亮度伪法线，并作为继承源给没有自带法线的图层。
-   */
-  frontNormalPath: string
-  /** 翻转卡面法线贴图的绿通道（DirectX ↔ OpenGL 约定相反时打开）。默认 false。 */
-  frontNormalFlipY: boolean
   /** 卡面表面材质（见 {@link CardFinish}）。默认 `"standard"`。 */
   finish: CardFinish
   /** 玻璃强度（反射覆盖，0–1）。默认 0.6；仅 `finish = "glass"` 时生效。 */
@@ -759,12 +698,9 @@ export interface CardFace {
    * 窄卡的可用上限还受卡宽一半限制，渲染器会按 min(值, 宽/2, 0.5) 夹取。
    */
   cornerRadius: number
-  /** 效果列表。角色分组、组内顺序即作用序（见渲染层固定类型序）。默认 `[]`。 */
-  effects: Effect[]
-  /** 图层列表，顺序即渲染层级（索引 0 在最底）。默认 `[]`。 */
+  /** 图层列表（唯一的内容与效果来源），顺序即渲染层级（索引 0 在最底）。默认 `[]`。 */
   layers: Layer[]
 }
-
 /**
  * 一张卡片：在 {@link CardFace} 的基础上补充身份与元数据。
  */
@@ -852,7 +788,7 @@ export interface PackArtStyle {
  */
 export interface Pack {
   /** 数据格式版本，当前恒为字面量 `8`。 */
-  schemaVersion: 8
+  schemaVersion: 9
   /**
    * 创建该系列时所用的编辑器版本（编辑器 + 渲染器成套，如 `"v1"`）。
    *

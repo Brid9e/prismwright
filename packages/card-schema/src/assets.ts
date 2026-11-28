@@ -15,19 +15,13 @@ import type { Card, CardFace, Pack } from "./types.js"
 /**
  * 收集单个卡面（卡片正面或系列背面）引用的资源相对路径。
  *
- * 顺序为「卡面自身（front 图、图蒙版、整卡擦除图）在前，各图层按深度优先顺序在后」。
+ * 顺序为图层树的深度优先顺序（图面、图片、蒙版、擦除图）。卡面已没有独立的前景图字段。
  *
  * @param face - 卡面对象（卡片或系列背面，二者结构相同）。
  * @returns 该卡面引用的相对路径数组（可能含重复，交给调用方去重）。
  */
 export function collectFaceAssets(face: CardFace): string[] {
   const rels: string[] = []
-  if (face.front) rels.push(face.front)
-  if (face.frontNormalPath) rels.push(face.frontNormalPath)
-  const faceMask = resolveImageMask(face.effects)
-  if (faceMask?.path) rels.push(faceMask.path)
-  const erase = resolveEraseMask(face.effects)
-  if (erase?.path) rels.push(erase.path)
   // 摊平后逐层收集：老数据无子层，等价于扁平遍历；有子层时子树里的资源也被收全。
   for (const { layer } of flattenLayers(face.layers)) {
     const mask = resolveImageMask(layer.effects)

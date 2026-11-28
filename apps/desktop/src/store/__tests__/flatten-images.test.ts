@@ -142,7 +142,7 @@ describe("packStore.flattenImages", () => {
     const otherId = usePackStore.getState().addCard(false)!
     usePackStore.getState().commit((d) => {
       const other = d.cards.find((c) => c.id === otherId)
-      if (other) other.front = "assets/b.png"
+      if (other) other.layers[0].effects = [{ id: "img", enabled: true, kind: "image", params: { path: "assets/b.png", x: 0, y: 0, rotation: 0, scale: 1, fit: "contain", bumpStrength: 0, bumpDetail: 0.01, bumpFlow: 0.5, bumpLight: 1, bumpLightAngle: 127, bumpLightColor: "#ffffff", bumpInvert: false, normalPath: "", normalFlipY: false } }]
     })
     setLayers(cardId, [imageLayer("assets/a.png"), imageLayer("assets/b.png")])
 

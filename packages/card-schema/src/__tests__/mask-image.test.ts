@@ -17,7 +17,6 @@ describe("MaskImageParamsSchema", () => {
       // 填充方式缺省与底图一致：覆盖。
       fit: "cover",
       // 跟随卡面缺省关闭：旧系列解析后按各自参数渲染，画面不变。
-      followFront: false,
       // 颜色源：缺省仍按图片蒙版，旧系列逐像素不变。
       source: "image",
       color: "#808080",
@@ -30,12 +29,6 @@ describe("MaskImageParamsSchema", () => {
     expect(p.y).toBeCloseTo(0.4)
     expect(p.scale).toBeCloseTo(2.5)
     expect(p.rotation).toBe(-90)
-  })
-
-  it("跟随卡面：缺省 false，显式 true 原样保留", () => {
-    expect(MaskImageParamsSchema.parse({}).followFront).toBe(false)
-    expect(MaskImageParamsSchema.parse({ followFront: true }).followFront).toBe(true)
-    expect(() => MaskImageParamsSchema.parse({ followFront: "yes" })).toThrow()
   })
 
   it("原样保留显式给定的填充方式", () => {

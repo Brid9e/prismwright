@@ -12,7 +12,6 @@ import { describe, it, expect } from "vitest"
 import { Color, DataTexture, NormalBlending, RGBAFormat, Vector2, Vector4, type Texture } from "three"
 import {
   EffectSchema,
-  CardFaceSchema,
   ImageParamsSchema,
   LayerSchema,
   MAX_NEST_DEPTH,
@@ -629,24 +628,9 @@ describe("createLayerMaterial 颜色源蒙版", () => {
 })
 
 describe("createLayerMaterial 蒙版擦除", () => {
-  // 擦除图来自卡面（整卡一张），图层材质只能从参数拿——漏传的表现是「擦除只擦掉底图，
-  // 全息层原样留着」。
-  it("传入擦除纹理时 uHasErase = 1，并绑定到 uEraseMap", () => {
-    const m = build({ erase: imageTexture })
-    expect(m.uniforms.uHasErase.value).toBe(1)
-    expect(m.uniforms.uEraseMap.value).toBe(imageTexture)
-  })
-
-  it("没传擦除纹理时 uHasErase = 0", () => {
-    expect(build().uniforms.uHasErase.value).toBe(0)
-  })
-
-  // 图层自己的擦除图与整卡那张是两张独立的图、两个门：混用会让「图层擦除」静默变成整卡擦除。
-  it("layerErase 绑到 uLayerEraseMap，且不覆盖整卡那张", () => {
+  it("layerErase 绑到 uLayerEraseMap", () => {
     const own = new DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1, RGBAFormat)
-    const m = build({ erase: imageTexture, layerErase: own })
-    expect(m.uniforms.uHasErase.value).toBe(1)
-    expect(m.uniforms.uEraseMap.value).toBe(imageTexture)
+    const m = build({ layerErase: own })
     expect(m.uniforms.uHasLayerErase.value).toBe(1)
     expect(m.uniforms.uLayerEraseMap.value).toBe(own)
   })
@@ -713,16 +697,17 @@ describe("文字纹理与祖先文字蒙版", () => {
 })
 
 describe("createLayerMaterial 的法线（bump）绑定", () => {
-  const bumpFace = CardFaceSchema.parse({
-    frontBumpStrength: 0.8,
-    frontBumpDetail: 0.03,
-    frontBumpFlow: 0.2,
-    frontBumpLight: 0.5,
-    frontBumpLightAngle: -15,
-    frontBumpLightColor: "#88ccff",
-    frontBumpInvert: true,
-    frontScale: 2,
-    frontRotation: 90,
+  const bumpFace = ImageParamsSchema.parse({
+    bumpStrength: 0.8,
+    bumpDetail: 0.03,
+    bumpFlow: 0.2,
+    bumpLight: 0.5,
+    bumpLightAngle: -15,
+    bumpLightColor: "#88ccff",
+    bumpInvert: true,
+    fit: "cover",
+    scale: 2,
+    rotation: 90,
   })
 
   it("默认 uBumpSource = 0（关）", () => {
@@ -822,9 +807,9 @@ describe("createLayerMaterial 的法线（bump）绑定", () => {
   })
 
   it("继承卡面的法线贴图时绑卡面贴图，来源 2", () => {
-    const face = CardFaceSchema.parse({
-      frontBumpStrength: 0.8,
-      frontNormalPath: "assets/face-n.png",
+    const face = ImageParamsSchema.parse({
+      bumpStrength: 0.8,
+      normalPath: "assets/face-n.png",
     })
     const m = build({ front: placeholder, face, faceNormal: normalTexture })
     expect(m.uniforms.uBumpSource.value).toBe(2)
@@ -834,9 +819,9 @@ describe("createLayerMaterial 的法线（bump）绑定", () => {
 
   // 本层选了贴图、卡面也选了：本层胜出，采样器绝不能绑到卡面的那张上。
   it("本层与卡面都有法线贴图时绑本层的那张", () => {
-    const face = CardFaceSchema.parse({
-      frontBumpStrength: 0.8,
-      frontNormalPath: "assets/face-n.png",
+    const face = ImageParamsSchema.parse({
+      bumpStrength: 0.8,
+      normalPath: "assets/face-n.png",
     })
     const params = ImageParamsSchema.parse({ bumpStrength: 0.5, normalPath: "assets/layer-n.png" })
     const other = new DataTexture(new Uint8Array([255, 128, 128, 255]), 1, 1, RGBAFormat)

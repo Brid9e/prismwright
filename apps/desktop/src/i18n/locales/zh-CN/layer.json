@@ -7,6 +7,7 @@
     "add": "添加图层",
     "addText": "添加文字",
     "addImage": "添加图片",
+    "addBackground": "添加底图",
     "duplicate": "复制图层",
     "delete": "删除图层",
     "toggle": "启用/禁用"

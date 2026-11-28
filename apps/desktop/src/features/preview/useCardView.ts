@@ -68,7 +68,7 @@ export interface CardViewControls {
    * `layerId` 为 `null` / 省略时是卡面那张（整卡擦除），否则是该图层自己的那张。
    * 与 `CardView.setEraseTexture` 同义，经 ref 转发。
    */
-  setEraseTexture: (texture: Texture | null, layerId?: string | null) => void
+  setEraseTexture: (texture: Texture | null, layerId: string) => void
   /** 擦除画布内容变化后调用（让 three 重新上传纹理并渲染一帧）。 */
   refreshErase: () => void
   /** 开 / 关「擦除区域底色」（绘画辅助显示，只影响这一块预览）。 */
@@ -158,7 +158,7 @@ export function useCardView({
     [],
   )
   const setEraseTexture = useCallback(
-    (texture: Texture | null, layerId: string | null = null) =>
+    (texture: Texture | null, layerId: string) =>
       viewRef.current?.setEraseTexture(texture, layerId),
     [],
   )

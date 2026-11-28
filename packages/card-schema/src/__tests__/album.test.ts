@@ -3,7 +3,7 @@ import { ALBUM_PAGE_SIZE, PackSchema } from "../schema"
 import { createEmptyPack } from "../defaults"
 
 const minimal = {
-  schemaVersion: 8 as const,
+  schemaVersion: 9 as const,
   id: "p1",
   name: "水豚大明星",
   createdAt: "2026-11-08T00:00:00.000Z",
@@ -22,7 +22,7 @@ const page = (...ids: string[]): (string | null)[] => {
 describe("PackSchema.album", () => {
   it("缺省时为空卡册（不升 schemaVersion）", () => {
     const pack = PackSchema.parse(minimal)
-    expect(pack.schemaVersion).toBe(8)
+    expect(pack.schemaVersion).toBe(9)
     expect(pack.album).toEqual({ pages: [] })
   })
 

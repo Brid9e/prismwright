@@ -7,7 +7,7 @@
  */
 import { useState, type MouseEvent } from "react"
 import { useTranslation } from "react-i18next"
-import { Copy, Eye, EyeOff, ImagePlus, Plus, Trash2, Type } from "lucide-react"
+import { Copy, Eye, EyeOff, Image, ImagePlus, Plus, Trash2, Type } from "lucide-react"
 import {
   MAX_NEST_DEPTH,
   ancestorChain,
@@ -60,12 +60,12 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
    * 先选文件再建数据：用户取消对话框时不该留下任何空图层。选图之后的导入失败
    * （扩展名 / 拷贝失败等）保留空图片层，用户可在效果面板里重选。
    */
-  async function addImage() {
+  async function addImage(atBottom = false) {
     const src = await packFs.pickFile([
       { name: tEffect("image.path"), extensions: [...IMAGE_EXTENSIONS] },
     ])
     if (!src) return
-    const created = addImageLayer(faceRef)
+    const created = addImageLayer(faceRef, atBottom)
     if (!created) return
     const result = await importAsset(
       faceRef,
@@ -197,6 +197,16 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
             className="flex h-5 w-5 items-center justify-center rounded-sm text-muted hover:bg-elevated hover:text-foreground"
           >
             <ImagePlus size={13} />
+          </button>
+        </Tooltip>
+        <Tooltip label={t("action.addBackground")}>
+          <button
+            type="button"
+            aria-label={t("action.addBackground")}
+            onClick={() => void addImage(true)}
+            className="flex h-5 w-5 items-center justify-center rounded-sm text-muted hover:bg-elevated hover:text-foreground"
+          >
+            <Image size={13} />
           </button>
         </Tooltip>
         <Tooltip label={t("action.add")}>

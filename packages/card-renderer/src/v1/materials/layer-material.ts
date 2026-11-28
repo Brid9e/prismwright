@@ -7,7 +7,6 @@ import {
   MAX_NEST_DEPTH,
   resolveImageMask,
   resolvePalette,
-  type CardFace,
   type Effect,
   type GlossParams,
   type ImageParams,
@@ -57,17 +56,12 @@ export interface LayerMaterialParams {
   /** 蒙版 sampler 的占位纹理：填满未使用的祖先槽位，避免 sampler 为 null 触发告警。 */
   maskPlaceholder: Texture
   /**
-   * 卡面原图纹理；没有卡面图时为 `null`。颜色源蒙版（本层与祖先）按它采样，
-   * 与卡面材质看到的原图是同一张。
+   * 整卡背景图纹理（最底层可见 image 图层）；没有时为 `null`。颜色源蒙版 / shadow /
+   * tint 按它采样。
    */
   front?: Texture | null
-  /**
-   * 蒙版擦除图（挂在卡面上、整卡一张）；没有时为 `null`。
-   *
-   * 不从 `effects` 里解析：擦除条目住在**卡面**的效果列表里，而本参数是本层的列表。
-   * 由 card-view 统一解析后传给每个图层材质，保证整卡用的是同一张。
-   */
-  erase?: Texture | null
+  /** 整卡背景色：没有背景图时，颜色源蒙版 / shadow 用它代替图片像素。 */
+  backgroundColor?: string
   /**
    * 本层**自己**的擦除图（maskErase 挂在 `p.effects` 里）；没有时为 `null`。
    *
@@ -95,16 +89,14 @@ export interface LayerMaterialParams {
    */
   normal?: Texture | null
   /**
-   * 本层所属卡面的法线贴图纹理（`frontNormalPath` 的载入结果）；继承卡面法线时用。
-   * 未选 / 未载入时为 `null`。
+   * 背景图层的法线贴图纹理；本层没有自己的图片法线时继承它。未选 / 未载入时为 `null`。
    */
   faceNormal?: Texture | null
   /**
-   * 本层所属的卡面数据（正面 / 背面）。只用于**法线继承**：本层没自己的图片法线时沿用
-   * {@link CardFace.frontBumpStrength} 那一组，并按这里的底图变换采样卡面原图（见 bump.ts）。
-   * 不传 = 不继承。
+   * 背景图层的 image 参数（最底层可见 image 图层）。只用于**法线继承**：本层没有自己的
+   * 图片法线时沿用它的 bump 字段；不传 = 不继承。
    */
-  face?: CardFace | null
+  face?: ImageParams | null
   /**
    * 本层文字纹理；不是文字层、内容为空或纹理创建失败时为 `null`（着色器里 `uHasText = 0`）。
    * 纹理由调用方用 `TextTextureCache` 准备好后同步传入——材质是同步构造的。
@@ -155,11 +147,11 @@ export function createLayerMaterial(p: LayerMaterialParams): ShaderMaterial {
   // 暗部颜色：片元拿卡面原图算亮度，把色相铺进暗部；没有原图时退化为正常叠加。
   const shadow = u.blend === "shadow"
 
-  // 本层效果 + 卡面 moire 继承一并打包成定长数组（键即着色器 uniform 名）。
+  // 本层效果 + 背景图层 moire 继承一并打包成定长数组（键即着色器 uniform 名）。
   const fx = toEffectUniforms(p.effects, p.inheritedMoire)
   // 本层图蒙版从效果列表解析（不再是图层专属字段）。
   const imageMask = resolveImageMask(p.effects)
-  // 卡面原图：颜色源蒙版采样它。没图时颜色源整体关掉（见 maskIsActive）。
+  // 整卡背景图：颜色源蒙版采样它。没图时用 backgroundColor。
   const frontTexture = p.front ?? null
   const frontValid = frontTexture !== null
   // 颜色源蒙版采样的是卡面原图，其「蒙版图」比例就是原图比例；图片源才看蒙版纹理。
@@ -179,15 +171,14 @@ export function createLayerMaterial(p: LayerMaterialParams): ShaderMaterial {
   const [fitWidth, fitHeight] = fitSpan(imageAspect, p.aspect, imageParams?.fit ?? "contain")
   const imageScale = imageParams?.scale ?? 1
 
-  // 法线（bump）：本层图片自带就用自己的（来源 1），否则继承卡面底图的（来源 2）。
-  // 卡面那份要按底图的填充 / 偏移 / 缩放 / 旋转换算采样点，故这里算一份与卡面材质同源的变换。
+  // 法线（bump）：本层图片自带就用自己的（来源 1），否则继承背景图层的（来源 2）。
   const bump = resolveLayerBump({
     image: imageParams,
     hasImage: imageTexture !== null,
     hasNormal: p.normal !== null && p.normal !== undefined,
-    face: p.face ?? null,
-    hasFaceImage: frontTexture !== null,
-    hasFaceNormal: p.faceNormal !== null && p.faceNormal !== undefined,
+    background: p.face ?? null,
+    hasBackgroundImage: frontTexture !== null,
+    hasBackgroundNormal: p.faceNormal !== null && p.faceNormal !== undefined,
   })
   // 法线采样器只有一根：在构造期就按解析结果选定纹理（本层 / 卡面），片元按 uBumpSource 只换算
   // 采样点、不再选纹理——图层片元的纹理单元只剩 15/16（上限 16）。
@@ -198,11 +189,11 @@ export function createLayerMaterial(p: LayerMaterialParams): ShaderMaterial {
   const faceUv = frontUvTransform({
     imageAspect: textureAspect(frontTexture, p.aspect),
     cardAspect: p.aspect,
-    fit: p.face?.frontFit ?? "cover",
-    offsetX: p.face?.frontOffsetX ?? 0,
-    offsetY: p.face?.frontOffsetY ?? 0,
-    scale: p.face?.frontScale ?? 1,
-    rotation: p.face?.frontRotation ?? 0,
+    fit: p.face?.fit ?? "cover",
+    offsetX: p.face?.x ?? 0,
+    offsetY: p.face?.y ?? 0,
+    scale: p.face?.scale ?? 1,
+    rotation: p.face?.rotation ?? 0,
   })
 
   // 祖先蒙版打包成定长（MAX_NEST_DEPTH）并行数组：GLSL 数组长度须在编译期固定，故未使用的
@@ -286,9 +277,6 @@ export function createLayerMaterial(p: LayerMaterialParams): ShaderMaterial {
       // 颜色源：蒙版改为采样卡面原图（与卡面材质同一张），按颜色距离取权重。
       // 没图时 sampler 绑占位纹理、hasMask 归零（见下面的 maskIsActive）。
       uFrontMap: { value: frontTexture ?? p.maskPlaceholder },
-      // 蒙版擦除：整卡一张。没有时补占位纹理（uHasErase=0 时片元不采样）。
-      uEraseMap: { value: p.erase ?? p.maskPlaceholder },
-      uHasErase: { value: p.erase ? 1 : 0 },
       // 本层自己的擦除图：与整卡那张相乘（见 shaders/layer.ts）。
       uLayerEraseMap: { value: p.layerErase ?? p.maskPlaceholder },
       uHasLayerErase: { value: p.layerErase ? 1 : 0 },
@@ -398,6 +386,7 @@ export function createLayerMaterial(p: LayerMaterialParams): ShaderMaterial {
       // 暗部颜色（blend = shadow）：片元按卡面原图亮度把色相铺进暗部；无原图时整段跳过。
       uShadowMode: { value: shadow ? 1 : 0 },
       uHasFront: { value: frontValid ? 1 : 0 },
+      uBackgroundColor: { value: new Color(p.backgroundColor ?? "#282830") },
     },
     vertexShader: GLSL_VERTEX,
     fragmentShader: LAYER_FRAGMENT,

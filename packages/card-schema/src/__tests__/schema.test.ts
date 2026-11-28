@@ -139,7 +139,7 @@ describe("PaletteParamsSchema 的色标解析与归一化", () => {
       effects: [{ kind: "palette" as const, id: "e1", params: { colors: ["#ff00ff", "#00ffff"] } }],
     }
     const pack = PackSchema.parse({
-      schemaVersion: 8,
+      schemaVersion: 9,
       id: "p1",
       name: "旧包",
       createdAt: "2026-10-10T00:00:00.000Z",
@@ -235,14 +235,13 @@ describe("GlossParamsSchema / MoireParamsSchema / GradientParamsSchema", () => {
     expect(() => MoireParamsSchema.parse({ density: 65 })).toThrow()
   })
 
-  // faceStrength 默认 0 是「存量系列卡面逐像素不变」的保证：缺省时必须补 0（而非某个非零值），
-  // 否则老系列一解析，卡面就凭空空多出一道浮雕纹理。
-  it("moire.faceStrength 缺省补 0、接受端点、拒绝越界", () => {
-    expect(MoireParamsSchema.parse({}).faceStrength).toBe(0)
-    expect(MoireParamsSchema.parse({ faceStrength: 0 }).faceStrength).toBe(0)
-    expect(MoireParamsSchema.parse({ faceStrength: 1 }).faceStrength).toBe(1)
-    expect(() => MoireParamsSchema.parse({ faceStrength: -0.01 })).toThrow()
-    expect(() => MoireParamsSchema.parse({ faceStrength: 1.01 })).toThrow()
+  // contentRelief 默认 1：保持图层内容浮雕的现有行为；旧面级 faceStrength 由 v9 迁移显式写入。
+  it("moire.contentRelief 缺省补 1、接受端点、拒绝越界", () => {
+    expect(MoireParamsSchema.parse({}).contentRelief).toBe(1)
+    expect(MoireParamsSchema.parse({ contentRelief: 0 }).contentRelief).toBe(0)
+    expect(MoireParamsSchema.parse({ contentRelief: 1 }).contentRelief).toBe(1)
+    expect(() => MoireParamsSchema.parse({ contentRelief: -0.01 })).toThrow()
+    expect(() => MoireParamsSchema.parse({ contentRelief: 1.01 })).toThrow()
   })
 
   it("PatternMode 非法值被拒、合法值被接受", () => {
@@ -289,8 +288,6 @@ describe("CardSchema", () => {
     const card = CardSchema.parse({ id: "c1", num: 1, name: "卡名", layers: [validLayer] })
     expect(card.notes).toBe("")
     expect(card.rarity).toBe("common")
-    expect(card.effects).toEqual([])
-    expect(card.front).toBe("")
     expect(card.layers).toHaveLength(1)
   })
 
@@ -309,7 +306,7 @@ describe("CardSchema", () => {
 
 describe("PackSchema", () => {
   const minimal = {
-    schemaVersion: 8 as const,
+    schemaVersion: 9 as const,
     id: "p1",
     name: "星辰之约",
     createdAt: "2026-10-10T00:00:00.000Z",
@@ -336,8 +333,8 @@ describe("PackSchema", () => {
     expect(() => PackSchema.parse({ ...minimal, name: "" })).toThrow()
   })
 
-  it("要求 schemaVersion 恰为 8", () => {
-    expect(PackSchema.parse(minimal).schemaVersion).toBe(8)
+  it("要求 schemaVersion 恰为 9", () => {
+    expect(PackSchema.parse(minimal).schemaVersion).toBe(9)
     expect(() => PackSchema.parse({ ...minimal, schemaVersion: 3 })).toThrow()
     expect(() => PackSchema.parse({ ...minimal, schemaVersion: 6 })).toThrow()
   })
@@ -559,7 +556,7 @@ describe("MaskPresetParamsSchema", () => {
 
 describe("卡面形状", () => {
   const minimalPack = {
-    schemaVersion: 8 as const,
+    schemaVersion: 9 as const,
     id: "p1",
     name: "星辰之约",
     createdAt: "2026-10-10T00:00:00.000Z",
@@ -594,7 +591,7 @@ describe("卡面形状", () => {
 describe("系列封面", () => {
   it("缺 coverLarge / coverSmall 的老包解析后补空串", () => {
     const pack = PackSchema.parse({
-      schemaVersion: 8,
+      schemaVersion: 9,
       id: "p1",
       name: "老系列",
       createdAt: "2026-01-01T00:00:00.000Z",
@@ -615,7 +612,7 @@ describe("系列封面", () => {
 
 describe("卡包图样式", () => {
   const minimalPack = {
-    schemaVersion: 8 as const,
+    schemaVersion: 9 as const,
     id: "p1",
     name: "星辰之约",
     createdAt: "2026-10-10T00:00:00.000Z",

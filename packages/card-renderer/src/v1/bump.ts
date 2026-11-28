@@ -19,7 +19,6 @@
 import {
   DEFAULT_BUMP_LIGHT_ANGLE,
   DEFAULT_BUMP_LIGHT_COLOR,
-  type CardFace,
   type ImageParams,
 } from "@prismwright/schema"
 
@@ -115,37 +114,6 @@ export function resolveBump(
   return { ...base, mode: "luma", flipY: false }
 }
 
-/** 卡面字段 → {@link BumpFields}（卡面用 `front` 前缀）。 */
-function faceBumpFields(face: CardFace): BumpFields {
-  return {
-    bumpStrength: face.frontBumpStrength,
-    bumpDetail: face.frontBumpDetail,
-    bumpFlow: face.frontBumpFlow,
-    bumpLight: face.frontBumpLight,
-    bumpLightAngle: face.frontBumpLightAngle,
-    bumpLightColor: face.frontBumpLightColor,
-    bumpInvert: face.frontBumpInvert,
-    normalPath: face.frontNormalPath,
-    normalFlipY: face.frontNormalFlipY,
-  }
-}
-
-/**
- * 卡面自身用的法线：来源恒为 1（卡面底图），没有卡面图 / 没开时为关。
- *
- * @param face - 卡面数据；没有时传 `null`（解析为关）。
- * @param hasFaceImage - 卡面底图是否真的在场。
- * @param hasFaceNormal - 卡面法线贴图是否真的载入。
- */
-export function resolveFaceBump(
-  face: CardFace | null,
-  hasFaceImage: boolean,
-  hasFaceNormal: boolean,
-): ResolvedBump {
-  if (!face) return BUMP_OFF
-  return resolveBump(faceBumpFields(face), hasFaceImage, 1, hasFaceNormal)
-}
-
 /** {@link resolveLayerBump} 的输入：四张纹理各问一次「在场吗」。 */
 export interface LayerBumpInput {
   /** 本层图片效果参数；没有图时为 `null`。 */
@@ -154,12 +122,12 @@ export interface LayerBumpInput {
   hasImage: boolean
   /** 本层自己的法线贴图纹理是否真的载入。 */
   hasNormal: boolean
-  /** 本面（正面 / 背面）的卡面数据，即继承源；没有时传 `null`。 */
-  face: CardFace | null
-  /** 卡面底图是否真的在场。 */
-  hasFaceImage: boolean
-  /** 卡面的法线贴图纹理是否真的载入。 */
-  hasFaceNormal: boolean
+  /** 背景图层的 image 参数（最底层可见 image 图层）；没有时传 `null`。 */
+  background: ImageParams | null
+  /** 背景图纹理是否真的在场。 */
+  hasBackgroundImage: boolean
+  /** 背景图层的法线贴图纹理是否真的载入。 */
+  hasBackgroundNormal: boolean
 }
 
 /**
@@ -172,7 +140,9 @@ export function resolveLayerBump(input: LayerBumpInput): ResolvedBump {
     ? resolveBump(input.image, input.hasImage, 1, input.hasNormal)
     : BUMP_OFF
   if (own.source !== 0) return own
-  const inherited = resolveFaceBump(input.face, input.hasFaceImage, input.hasFaceNormal)
-  // 卡面那份在着色器里要用「卡面底图」采样函数，故来源改写成 2（通路保持卡面的解析结果）。
+  const inherited = input.background
+    ? resolveBump(input.background, input.hasBackgroundImage, 1, input.hasBackgroundNormal)
+    : BUMP_OFF
+  // 背景图在着色器里用 uFrontMap / uFaceMapMatrix 采样，故来源改写成 2。
   return inherited.source === 0 ? BUMP_OFF : { ...inherited, source: 2 }
 }

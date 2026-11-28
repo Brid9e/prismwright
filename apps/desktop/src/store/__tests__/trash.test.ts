@@ -42,8 +42,29 @@ function giveRels(cardId: string, front: string, mask: string) {
   usePackStore.getState().commit((d) => {
     const card = d.cards.find((c) => c.id === cardId)
     if (!card) return
-    card.front = front
-    // 图蒙版作为一条 imageMask 效果挂在首个图层上（其 path 即待回收的资源）。
+    // 图片作为一条 image 效果挂在首个图层上；图蒙版作为一条 imageMask 效果，其 path 即待回收资源。
+    card.layers[0].effects.push({
+      kind: "image",
+      id: "img",
+      enabled: true,
+      params: {
+        path: front,
+        x: 0,
+        y: 0,
+        rotation: 0,
+        scale: 1,
+        fit: "contain",
+        bumpStrength: 0,
+        bumpDetail: 0.01,
+        bumpFlow: 0.5,
+        bumpLight: 1,
+        bumpLightAngle: 127,
+        bumpLightColor: "#ffffff",
+        bumpInvert: false,
+        normalPath: "",
+        normalFlipY: false,
+      },
+    })
     card.layers[0].effects.push({
       kind: "imageMask",
       id: "im",
@@ -60,7 +81,6 @@ function giveRels(cardId: string, front: string, mask: string) {
         y: 0,
         scale: 1,
         rotation: 0,
-        followFront: false,
         fit: "stretch",
       },
     })

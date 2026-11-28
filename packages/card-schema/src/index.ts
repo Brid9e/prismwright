@@ -113,7 +113,7 @@ export {
   createCardFace,
   createEmptyPack,
 } from "./defaults.js"
-export { CURRENT_SCHEMA_VERSION, migrate, parsePack } from "./migrate.js"
+export { CURRENT_SCHEMA_VERSION, migrate, migrateCardFace, parsePack } from "./migrate.js"
 export type { FlatLayer } from "./tree.js"
 export {
   flattenLayers,

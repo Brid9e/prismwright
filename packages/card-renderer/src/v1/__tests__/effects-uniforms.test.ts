@@ -89,14 +89,14 @@ describe("toEffectUniforms", () => {
     expect(u.uMoireMode[0]).toBe(0)
   })
 
-  // faceStrength（卡面浮雕）走同一条数组接缝。缺省必须打 0——否则老系列一解析就让卡面多出浮雕。
-  it("moire.faceStrength 逐条打进 uMoireFaceStrength，缺省补 0", () => {
-    const u = toEffectUniforms([effect("moire", { faceStrength: 0.7 })], [])
-    expect(u.uMoireFaceStrength).toHaveLength(MOIRE_MAX)
-    expect(u.uMoireFaceStrength[0]).toBe(0.7)
-    expect(u.uMoireFaceStrength[1]).toBe(0) // 未用槽位补 0
+  // contentRelief 走同一条数组接缝。缺省 1 = 保持图层内容浮雕的现有行为。
+  it("moire.contentRelief 逐条打进 uMoireContentRelief，缺省补 1", () => {
+    const u = toEffectUniforms([effect("moire", { contentRelief: 0.7 })], [])
+    expect(u.uMoireContentRelief).toHaveLength(MOIRE_MAX)
+    expect(u.uMoireContentRelief[0]).toBe(0.7)
+    expect(u.uMoireContentRelief[1]).toBe(0) // 未用槽位补 0
 
-    expect(toEffectUniforms([effect("moire", {})], []).uMoireFaceStrength[0]).toBe(0)
+    expect(toEffectUniforms([effect("moire", {})], []).uMoireContentRelief[0]).toBe(1)
   })
 
   // asMask 走同一条数组接缝：着色器靠它把「当蒙版用」的光泽从颜色通路里跳过。

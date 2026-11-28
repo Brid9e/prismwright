@@ -249,9 +249,9 @@ export const MoireParamsSchema = z.object({
   depth: z.number().min(0).max(1).default(0.25),
   twist: z.number().min(-1).max(1).default(0),
   twistSeed: TwistSeedSchema,
-  // 卡面浮雕强度：把摩尔纹当作卡面的一层高度场渲染成明暗（≈磨砂 / 蚀刻质感），与「切光带」那条
-  // 通路并列。默认 0 = 卡面无浮雕，存量系列解析后画面逐像素不变；调大才让纹样浮现在卡面上。
-  faceStrength: z.number().min(0).max(1).default(0),
+  // 内容浮雕强度：把摩尔纹当作图层内容的一层高度场渲染成明暗。默认 1 = 保持图层内容浮雕的
+  // 现有行为；旧面级 moire 的 faceStrength 在 v9 迁移时映射到这里。
+  contentRelief: z.number().min(0).max(1).default(1),
 })
 
 /** 光泽光带参数 schema（无 enabled）。 */
@@ -358,7 +358,6 @@ export const MaskImageParamsSchema = z.object({
   // 跟随卡面：打开后编辑器在写卡面变换时同步填充方式 / 位移 / 缩放 / 旋转，
   // 落盘的仍是具体数值——渲染器不认这个标志，旧版本读到的也是对齐好的画面。
   // 新增字段带默认值（additive default），故不必升 schemaVersion。
-  followFront: z.boolean().default(false),
   // 填充方式与底图同名同义、缺省也一致（覆盖）。注意：加该字段之前蒙版图是被拉伸到铺满
   // 卡面的，故对「蒙版图比例 ≠ 卡面比例」的存量卡，缺省值从拉伸变覆盖会改变孔洞画面。
   fit: FrontFitSchema.default("cover"),
@@ -393,7 +392,6 @@ export const ImageParamsSchema = z.object({
   // 跟随卡面：打开后编辑器在写卡面变换时同步填充方式 / 位移 / 缩放 / 旋转，
   // 落盘的仍是具体数值——渲染器不认这个标志，旧版本读到的也是对齐好的画面。
   // 新增字段带默认值（additive default），故不必升 schemaVersion。
-  followFront: z.boolean().default(false),
   // 法线（bump）：由图片自身的亮度差生成，扰动光泽 / 摩尔纹的走势。
   // 强度 0（默认）= 本条目不开，图层沿用卡面底图的法线（见渲染器 bump.ts 的继承规则）；
   // 上限 10：法线贴图的坡向量级比亮度差大，需要更大的强度才够「凸」。
@@ -672,46 +670,16 @@ export const LayerSchema: z.ZodType<Layer, z.ZodTypeDef, unknown> = z.object({
 export const CardFinishSchema = z.enum(["standard", "glass"])
 
 export const CardFaceSchema = z.object({
-  front: z.string().default(""),
-  // 卡面底色：底图没覆盖到的位置（适应模式留白、缩小 / 旋转露出的角）或没有底图时垫的颜色。
-  // 新增字段带默认值，旧系列解析后与原深灰画面一致。
+  // 卡片画布底色：没有图层覆盖时垫的颜色。默认深灰，旧系列解析后画面不变。
   baseColor: z.string().regex(HEX_COLOR).default(DEFAULT_CARD_BASE_COLOR),
-  // 底图调整字段：新增字段带默认值（additive default），故不必升 schemaVersion；
-  // 旧系列缺这些字段时按「覆盖 / 零偏移 / 1 倍 / 0 度」解析，渲染结果与显式设置一致。
-  frontFit: FrontFitSchema.default("cover"),
-  frontOffsetX: z.number().default(0),
-  frontOffsetY: z.number().default(0),
-  frontScale: z.number().default(1),
-  frontRotation: z.number().default(0),
-  // 法线（bump）：卡面底图自身亮度差生成的伪法线，扰动光泽 / 摩尔纹的走势，并向下继承给
-  // 没有自带法线的图层。强度 0（默认）= 关，存量画面逐像素不变；其余各项只在强度 > 0 时起作用。
-  // 上限 10：法线贴图的坡向量级比亮度差大，需要更大的强度才够「凸」。
-  // 光照 = 高度场上那束斜光的明暗强度（0 = 只影响走势、不出明暗，画法与加光照之前一致）、
-  // 方向（缺省 127° = 与摩尔纹浮雕的固定斜光同向）与颜色（缺省白光 = 不带色偏）。
-  // 新增字段带默认值（additive default），故不必升 schemaVersion。
-  frontBumpStrength: z.number().min(0).max(10).default(0),
-  frontBumpDetail: z.number().min(0.001).max(0.05).default(0.01),
-  frontBumpFlow: z.number().min(0).max(1).default(0.5),
-  frontBumpLight: z.number().min(0).max(1).default(1),
-  frontBumpLightAngle: z.number().min(-180).max(180).default(DEFAULT_BUMP_LIGHT_ANGLE),
-  frontBumpLightColor: z.string().regex(HEX_COLOR).default(DEFAULT_BUMP_LIGHT_COLOR),
-  frontBumpInvert: z.boolean().default(false),
-  // 卡面法线贴图：与底图配套的切线空间法线图（RGB 编码 XYZ）；非空时整体接替亮度伪法线，
-  // 并向下继承给没有自带法线贴图 / 亮度法线的图层。空串（默认）= 不选。
-  // 新增字段带默认值（additive default），故不必升 schemaVersion。
-  frontNormalPath: z.string().default(""),
-  // 绿通道翻转（DirectX ↔ OpenGL 约定）。默认关。
-  frontNormalFlipY: z.boolean().default(false),
   // 表面材质：玻璃会叠一层环境反射（见渲染器的玻璃 overlay）。默认标准，旧数据逐像素不变。
   finish: CardFinishSchema.default("standard"),
   glassStrength: z.number().min(0).max(1).default(0.6),
   glassRoughness: z.number().min(0).max(1).default(0.15),
   glassTint: z.string().regex(HEX_COLOR).default("#ffffff"),
-  // 卡面形状：只剩圆角（卡高单位，0.5 = 完全圆头）。每张卡各自持有，同一系列里的卡片
-  // 因此可以圆角不同——卡背不单独做形状，它跟着正面的几何走，不受圆角影响。
-  // 宽高比不在这里：它由系列统一持有，见 `PackSchema.aspect`（v8 起）。
+  // 卡面形状：只剩圆角（卡高单位，0.5 = 完全圆头）。
   cornerRadius: z.number().min(0).max(0.5).default(DEFAULT_CORNER_RADIUS),
-  effects: EffectsSchema,
+  // 唯一的内容与效果来源：图层树。旧的 front / 面级 effects 由 v9 迁移进图层。
   layers: z.array(LayerSchema).default([]),
 })
 
@@ -736,7 +704,7 @@ export const AlbumLayoutSchema = z.object({
 
 /** 系列校验 schema，即 `pack.json` 的顶层结构。 */
 export const PackSchema = z.object({
-  schemaVersion: z.literal(8),
+  schemaVersion: z.literal(9),
   // 创建该系列时所用的编辑器版本（编辑器 + 渲染器成套，如 "v1"）。与 `schemaVersion`
   // 是两回事：后者是**数据结构**版本，前者是**工具**版本。旧系列缺此字段时按 "v1" 解析
   // （additive default，故不必升 schemaVersion）。

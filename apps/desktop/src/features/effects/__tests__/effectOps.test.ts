@@ -98,10 +98,8 @@ describe("hasEnabledKind", () => {
 })
 
 describe("fieldsForScope", () => {
-  it("字段级 scope：moire 的卡面浮雕只对卡面显示，图层面板里隐去", () => {
-    const keysFor = (scope: "layer" | "face") => fieldsForScope("moire", scope).map((f) => f.key)
-    expect(keysFor("face")).toContain("faceStrength")
-    expect(keysFor("layer")).not.toContain("faceStrength")
+  it("moire 的内容浮雕在图层上可调", () => {
+    expect(fieldsForScope("moire", "layer").map((f) => f.key)).toContain("contentRelief")
   })
 
   it("未标注 scope 的字段两端都显示（默认不筛）", () => {

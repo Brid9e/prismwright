@@ -64,28 +64,8 @@ export function cardRenderHash(card: Card, aspect: number): string {
   const canonical = JSON.stringify({
     v: RENDER_SPEC_VERSION,
     video: GENERATE_VIDEO_PREVIEW,
-    front: card.front,
-    // 卡面底色直接决定留白 / 无底图时的画面，漏掉会让预览停在旧颜色。
+    // 卡片底色直接决定没有图层覆盖时的画面。
     baseColor: card.baseColor,
-    // 填充方式、偏移、缩放与旋转直接决定底图取样，却不在 `front` 里——漏掉它们的后果是
-    // 「换了填充方式 / 转了个角度，预览 / 展柜缩略图仍是旧画面」，且要等别的字段变化才被顺带重渲。
-    frontFit: card.frontFit,
-    frontOffsetX: card.frontOffsetX,
-    frontOffsetY: card.frontOffsetY,
-    frontScale: card.frontScale,
-    frontRotation: card.frontRotation,
-    // 法线（bump）也直接改画面（光泽 / 摩尔纹的走势），漏掉它的后果同样是「拖了滑块，
-    // 预览与缩略图还是旧画面」。
-    frontBumpStrength: card.frontBumpStrength,
-    frontBumpDetail: card.frontBumpDetail,
-    frontBumpFlow: card.frontBumpFlow,
-    frontBumpLight: card.frontBumpLight,
-    frontBumpLightAngle: card.frontBumpLightAngle,
-    frontBumpLightColor: card.frontBumpLightColor,
-    frontBumpInvert: card.frontBumpInvert,
-    // 法线贴图与其绿通道方向同样直接改画面（贴图接管亮度法线，见 bump.ts）。
-    frontNormalPath: card.frontNormalPath,
-    frontNormalFlipY: card.frontNormalFlipY,
     // 表面材质与玻璃参数直接改画面（反射叠加），漏掉会让预览停在哑光画面。
     finish: card.finish,
     glassStrength: card.glassStrength,
@@ -94,7 +74,6 @@ export function cardRenderHash(card: Card, aspect: number): string {
     // 卡面形状直接决定输出画幅与圆角，漏掉它换比例后预览 / 缩略图会停在旧画面。
     aspect,
     cornerRadius: card.cornerRadius,
-    effects: card.effects,
     layers: card.layers,
   })
   return hash53(canonical)

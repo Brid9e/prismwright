@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { EffectSchema, LayerSchema, CardFaceSchema } from "../schema.js"
+import { EffectSchema, LayerSchema } from "../schema.js"
 import type { Effect } from "../types.js"
 
 describe("EffectSchema", () => {
@@ -42,19 +42,16 @@ describe("EffectSchema", () => {
     expect("enabled" in e.params).toBe(false)
   })
 
-  it("Layer / CardFace 的 effects 默认空数组", () => {
+  it("Layer 的 effects 默认空数组", () => {
     expect(LayerSchema.parse({ id: "l1" }).effects).toEqual([])
-    expect(CardFaceSchema.parse({}).effects).toEqual([])
   })
 
-  it("Layer / CardFace 能解析非空 effects 列表（防 mis-wire）", () => {
+  it("Layer 能解析非空 effects 列表（防 mis-wire）", () => {
     const layer = LayerSchema.parse({
       id: "l1",
       effects: [{ kind: "gloss", id: "e1", params: {} }],
     })
     expect(layer.effects).toHaveLength(1)
     expect(layer.effects[0].kind).toBe("gloss")
-    const face = CardFaceSchema.parse({ effects: [{ kind: "moire", id: "e2", params: {} }] })
-    expect(face.effects[0].kind).toBe("moire")
   })
 })

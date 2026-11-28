@@ -8,7 +8,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Eye, EyeOff, Paintbrush, Redo2, RotateCcw, SquareDashed, Undo2, Waves } from "lucide-react"
 import { CanvasTexture, NoColorSpace } from "three"
-import { findLayerById, type CardFace } from "@prismwright/schema"
+import { findLayerById, flattenLayers, resolveImage, type CardFace } from "@prismwright/schema"
 import { CARD_ASPECT, MAX_ZOOM, MIN_ZOOM } from "@prismwright/renderer/v1"
 import { useDefaultBackStore } from "../../store/defaultBackStore"
 import { isDefaultBackPack } from "../default-back/default-back"
@@ -149,7 +149,16 @@ export function PreviewPanel() {
 
   // 拾色期间把底图解码一次（每次请求一张），点击时在 CPU 上取像素。
   const [frontImage, setFrontImage] = useState<HTMLImageElement | null>(null)
-  const frontRel = face?.front ?? ""
+  // 整卡背景图 = 最靠下的可见 image 图层；吸管取它的像素。
+  const backgroundImage = useMemo(() => {
+    if (!face) return null
+    for (const { layer } of flattenLayers(face.layers)) {
+      const image = resolveImage(layer.effects)
+      if (image?.path) return image
+    }
+    return null
+  }, [face])
+  const frontRel = backgroundImage?.path ?? ""
   useEffect(() => {
     if (!pickActive || !frontRel || !faceRoot) {
       setFrontImage(null)
@@ -195,11 +204,11 @@ export function PreviewPanel() {
         uv.v,
         size,
         {
-          fit: face.frontFit,
-          offsetX: face.frontOffsetX,
-          offsetY: face.frontOffsetY,
-          scale: face.frontScale,
-          rotation: face.frontRotation,
+          fit: backgroundImage?.fit ?? "cover",
+          offsetX: backgroundImage?.x ?? 0,
+          offsetY: backgroundImage?.y ?? 0,
+          scale: backgroundImage?.scale ?? 1,
+          rotation: backgroundImage?.rotation ?? 0,
         },
         aspect,
       )
@@ -236,10 +245,7 @@ export function PreviewPanel() {
    */
   function paletteColors(effectId: string) {
     if (!face || !colorPick) return null
-    const effects =
-      colorPick.target.scope === "face"
-        ? face.effects
-        : findLayerById(face.layers, colorPick.target.layerId)?.effects
+    const effects = findLayerById(face.layers, colorPick.target.layerId)?.effects
     const effect = effects?.find((e) => e.id === effectId)
     return effect?.kind === "palette" ? effect.params.colors : null
   }
@@ -347,11 +353,8 @@ export function PreviewPanel() {
     if (!paintActive || !erasePaint) return
     const current = faceLatest.current
     // 擦除挂在卡面还是某一层：目标决定去哪个效果列表里找那条 maskErase。
-    const targetLayerId = erasePaint.target.scope === "layer" ? erasePaint.target.layerId : null
-    const effects =
-      targetLayerId === null
-        ? current?.effects
-        : findLayerById(current?.layers ?? [], targetLayerId)?.effects
+    const targetLayerId = erasePaint.target.layerId
+    const effects = findLayerById(current?.layers ?? [], targetLayerId)?.effects
     const effect = effects?.find((e) => e.id === erasePaint.effectId)
     // 已有擦除图就在它上面继续画；没有则从一张全白的画布开始（全白 = 什么都不擦）。
     const path = effect?.kind === "maskErase" ? effect.params.path : ""

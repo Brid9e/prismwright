@@ -156,7 +156,7 @@ describe("packStore commitEraseImage", () => {
   it("未打开系列时返回 no-pack", async () => {
     const result = await usePackStore
       .getState()
-      .commitEraseImage({ kind: "back" }, { scope: "face" }, "e", bytes())
+      .commitEraseImage({ kind: "back" }, { scope: "layer", layerId: "l" }, "e", bytes())
     expect(result).toEqual({ ok: false, reason: "no-pack" })
   })
 

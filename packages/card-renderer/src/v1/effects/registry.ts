@@ -420,16 +420,13 @@ export const EFFECT_REGISTRY = {
         precision: 0,
       },
       {
-        key: "faceStrength",
-        labelKey: "moire.faceStrength",
+        key: "contentRelief",
+        labelKey: "moire.contentRelief",
         type: "slider",
         min: 0,
         max: 1,
         step: 0.01,
         precision: 2,
-        // 只作用于卡面片元（浮雕建在卡面底图上）；图层片元不跑那条通路，挂到图层上是死参数。
-        // 标 `face` 让图层面板隐去它，免得用户拖了没反应。
-        scope: "face",
       },
     ],
     packUniforms: (p: MoireParams): PackedUniforms => ({
@@ -439,7 +436,7 @@ export const EFFECT_REGISTRY = {
       depth: p.depth,
       twist: p.twist,
       twistSeed: p.twistSeed,
-      faceStrength: p.faceStrength,
+      contentRelief: p.contentRelief,
     }),
   },
   gloss: {
@@ -947,14 +944,12 @@ export const EFFECT_REGISTRY = {
       // 跟随卡面（一键对齐）：打开后编辑器在写卡面变换时把填充方式 / 位移 / 缩放 / 旋转
       // 抄进本条目（见 packStore 的 applyFrontTransformToMask），参数里落的是具体数值。
       // 跟随时下面五项不显示——写了也会被卡面值覆盖。
-      { key: "followFront", labelKey: "imageMask.followFront", type: "switch" },
       // 蒙版图的填充方式 / 位移 / 缩放 / 旋转（与 image 效果同一套量纲与范围，默认覆盖 + 零位移 + 1 倍 + 0 度）。
       {
         key: "fit",
         labelKey: "imageMask.fit",
         type: "select",
         options: MASK_FIT_OPTIONS,
-        visibleWhen: (p) => !p.followFront,
       },
       {
         key: "x",
@@ -964,7 +959,6 @@ export const EFFECT_REGISTRY = {
         max: 1,
         step: 0.01,
         precision: 2,
-        visibleWhen: (p) => !p.followFront,
       },
       {
         key: "y",
@@ -974,7 +968,6 @@ export const EFFECT_REGISTRY = {
         max: 1,
         step: 0.01,
         precision: 2,
-        visibleWhen: (p) => !p.followFront,
       },
       {
         key: "scale",
@@ -984,7 +977,6 @@ export const EFFECT_REGISTRY = {
         max: 4,
         step: 0.01,
         precision: 2,
-        visibleWhen: (p) => !p.followFront,
       },
       {
         key: "rotation",
@@ -994,7 +986,6 @@ export const EFFECT_REGISTRY = {
         max: 180,
         step: 1,
         precision: 0,
-        visibleWhen: (p) => !p.followFront,
       },
     ],
     // 图蒙版是「资源 + 门控」型效果：上限 1、且带一个 sampler（纹理名没法打包成 number），
@@ -1029,13 +1020,11 @@ export const EFFECT_REGISTRY = {
       // 跟随卡面（一键对齐）：打开后编辑器在写卡面变换时把填充方式 / 位移 / 缩放 / 旋转
       // 抄进本条目（见 packStore 的 applyFrontTransformToImage），参数里落的是具体数值。
       // 跟随时下面的填充方式与四个滑块不显示——写了也会被卡面值覆盖。
-      { key: "followFront", labelKey: "image.followFront", type: "switch" },
       {
         key: "fit",
         labelKey: "image.fit",
         type: "select",
         options: IMAGE_FIT_OPTIONS,
-        visibleWhen: (p) => !p.followFront,
       },
       {
         key: "x",
@@ -1045,7 +1034,6 @@ export const EFFECT_REGISTRY = {
         max: 1,
         step: 0.01,
         precision: 2,
-        visibleWhen: (p) => !p.followFront,
       },
       {
         key: "y",
@@ -1055,7 +1043,6 @@ export const EFFECT_REGISTRY = {
         max: 1,
         step: 0.01,
         precision: 2,
-        visibleWhen: (p) => !p.followFront,
       },
       {
         key: "rotation",
@@ -1065,7 +1052,6 @@ export const EFFECT_REGISTRY = {
         max: 180,
         step: 1,
         precision: 0,
-        visibleWhen: (p) => !p.followFront,
       },
       {
         key: "scale",
@@ -1075,7 +1061,6 @@ export const EFFECT_REGISTRY = {
         max: 4,
         step: 0.01,
         precision: 2,
-        visibleWhen: (p) => !p.followFront,
       },
       // 法线（bump）有两个来源，二选一：上传的法线贴图优先，没有贴图时由图片自身亮度差
       // 当场生成（解码与接管规则见 bump.ts / GLSL 的 normalMapSlope）。

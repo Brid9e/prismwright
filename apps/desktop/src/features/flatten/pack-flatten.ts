@@ -107,7 +107,6 @@ export async function planFlatten(
             rotation: 0,
             scale: 1,
             fit: "stretch",
-            followFront: false,
             // 平铺出来的图是逐像素快照，不再生成法线：卡面法线仍会从卡面图继承到它上面。
             bumpStrength: 0,
             bumpDetail: 0.01,

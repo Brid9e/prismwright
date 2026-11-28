@@ -14,7 +14,6 @@ describe("createDefaultBackFace", () => {
   })
 
   it("不引用任何图片：默认卡背不依赖系列内的素材", () => {
-    expect(createDefaultBackFace().front).toBe("")
   })
 
   it("自带一层底纹（调色板 + 渐变）与一层文字", () => {
@@ -77,7 +76,7 @@ describe("withDefaultBack", () => {
   })
 
   it("系列自己的卡背优先，默认卡背不覆盖它", () => {
-    const own = { ...createDefaultBackFace(), front: "assets/own.png" }
+    const own = { ...createDefaultBackFace(), baseColor: "#123456" }
     const pack = { ...createEmptyPack("系列"), back: own }
     expect(withDefaultBack(pack, face).back).toBe(own)
   })

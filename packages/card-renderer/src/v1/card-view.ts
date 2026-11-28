@@ -136,17 +136,9 @@ export function createCardView(opts: CardViewOptions): CardView {
 
   let card: CardFace = opts.card
   /**
-   * 绘画中的擦除图覆盖：非 null 时整卡用它，不再读效果里的 `path`。
-   *
-   * 画一笔就要看得到效果，等落盘 + `update` 再接回来太慢，故允许外部把一张
-   * `CanvasTexture` 直接挂上来；画完提交后传 `null` 回到按效果解析。
-   *
-   * 只作用于主卡面——绘画会话只发生在正面上。
-   */
-  let liveErase: Texture | null = null
-  /**
-   * 绘画中的**图层**擦除图覆盖（按图层 id）。与 {@link liveErase} 同义，只是作用在某一层
-   * 自己的擦除图上——卡面那张仍归 `liveErase`。同样只作用于主卡面。
+   * 绘画中的**图层**擦除图覆盖（按图层 id）。画一笔就要看得到效果，等落盘 + `update`
+   * 再接回来太慢，故允许外部把一张 `CanvasTexture` 直接挂上来；画完提交后删掉，回到按
+   * 效果解析。只作用于主卡面。
    */
   const liveLayerErase = new Map<string, Texture>()
   /**
@@ -308,58 +300,40 @@ export function createCardView(opts: CardViewOptions): CardView {
     gen: number,
     scope: string,
   ): Promise<FaceParts | null> {
-    // 卡面图蒙版改从效果列表解析（不再是卡面专属字段）。
-    const faceMaskPath = resolveImageMask(face.effects)?.path ?? ""
-    // 蒙版擦除也挂在卡面上（整卡一张），绘画期间优先用内存里的那一张。
-    const erasePath = resolveEraseMask(face.effects)?.path ?? ""
-    // 底图与卡面蒙版一并解析：二者独立，放同一个批次里省一次 await 往返。
-    // 法线贴图走 "data"：它是方向数据，不能被 sRGB 解码。
-    const [faceTexture, faceMask, erase, faceNormal] = await Promise.all([
-      cache.get(face.front, "color"),
-      cache.get(faceMaskPath, "data"),
-      cache.get(erasePath, "data"),
-      cache.get(face.frontNormalPath, "data"),
-    ])
-    if (gen !== rebuildGen || disposed) return null
-    // 绘画中的覆盖优先：它比磁盘上的那份新（刚画的还没落盘）。但只属于主卡面。
-    const eraseTexture = scope === "" ? liveErase ?? erase : erase
-
-    // 底图 / 圆角 / 效果列表均在重建时一次性写入材质，参数级变化也走重建（见 update）。
+    // 卡面只有底色：图片、蒙版、效果全部在图层上。
     const nextBaseMat = createBaseMaterial({
-      map: faceTexture ?? placeholderTexture,
       aspect,
       cornerRadius,
-      effects: face.effects,
-      mask: faceMask,
-      erase: eraseTexture,
-      // 绘画辅助底色：只影响交互视图；导出走另一条路径，不经过这个视图。
-      erasePreview: erasePreviewEnabled,
-      // 没有底图时占位纹理只有 1×1：填充方式无意义，按拉伸处理，免得「适应」把整张卡裁成空白。
-      frontFit: faceTexture ? face.frontFit : "stretch",
-      frontOffsetX: face.frontOffsetX,
-      frontOffsetY: face.frontOffsetY,
-      frontScale: face.frontScale,
-      frontRotation: face.frontRotation,
-      // 法线（bump）：卡面底图自身亮度差生成的伪法线；没有真底图时材质侧会整体关掉。
-      frontBumpStrength: face.frontBumpStrength,
-      frontBumpDetail: face.frontBumpDetail,
-      frontBumpFlow: face.frontBumpFlow,
-      frontBumpLight: face.frontBumpLight,
-      frontBumpLightAngle: face.frontBumpLightAngle,
-      frontBumpLightColor: face.frontBumpLightColor,
-      frontBumpInvert: face.frontBumpInvert,
-      // 法线贴图：选了就整体接替底图的亮度伪法线；路径写了但没载入时材质退回亮度通路。
-      frontNormalPath: face.frontNormalPath,
-      frontNormalFlipY: face.frontNormalFlipY,
-      normal: faceNormal,
-      // 颜色源蒙版要采样真原图：没有卡面图时它必须整体关掉（否则会去采 1×1 占位纹理）。
-      frontValid: faceTexture !== null,
       baseColor: face.baseColor,
     })
 
+    const entries = flattenLayers(face.layers).filter(isLayerVisible)
+    // 最靠下的可见 image 图层作为整卡背景：颜色源蒙版 / shadow / tint / bump / moire 继承都读它。
+    const backgroundEntry = entries.find(({ layer }) => {
+      const image = resolveImage(layer.effects)
+      return Boolean(image?.path)
+    })
+    const backgroundImage = backgroundEntry
+      ? resolveImage(backgroundEntry.layer.effects)
+      : null
+    const [backgroundTexture, backgroundNormal] = backgroundEntry && backgroundImage
+      ? await Promise.all([
+          cache.get(backgroundImage.path, "color"),
+          cache.get(backgroundImage.normalPath ?? "", "data"),
+        ])
+      : [null, null]
+    if (gen !== rebuildGen || disposed) {
+      nextBaseMat.dispose()
+      return null
+    }
+    const background =
+      backgroundTexture && backgroundImage
+        ? { texture: backgroundTexture, params: backgroundImage, normal: backgroundNormal }
+        : null
+    const inheritedMoire = backgroundEntry?.layer.effects ?? []
+
     // 树 → 线性绘制序列：深度优先、父在前子随后；被禁用的层连同整棵子树一起跳过。
     // 索引 i 驱动 z 与 renderOrder，故过滤后的序列必须连续编号（用 entries 的下标，而非原数组下标）。
-    const entries = flattenLayers(face.layers).filter(isLayerVisible)
     const nextMeshes: Mesh[] = []
     const nextMats: ShaderMaterial[] = []
     let z = LAYER_Z_STEP
@@ -406,27 +380,25 @@ export function createCardView(opts: CardViewOptions): CardView {
         ancestors: ancestorMasks,
         // 未使用的祖先槽位复用同一份占位纹理（hasMask=0，采样值不被采用）。
         maskPlaceholder: placeholderTexture,
-        // 卡面原图：颜色源蒙版（本层与祖先）按它采样。
-        front: faceTexture,
-        // 整卡擦除：与卡面材质同一张（见 shaders/common.ts 的 eraseWeight）。
-        erase: eraseTexture,
-        // 本层自己的擦除图：绘画中的覆盖优先，与整卡那张相乘（见 shaders/layer.ts）。
+        // 整卡背景图：颜色源蒙版 / shadow / tint 采样它；没有时材质用 backgroundColor。
+        front: background?.texture ?? null,
+        // 本层自己的擦除图：绘画中的覆盖优先。整卡擦除现在是祖先 group 的擦除。
         layerErase: scope === "" ? liveLayerErase.get(layer.id) ?? ownErase : ownErase,
-        // 绘画辅助底色只在本层自己的擦除图上起作用（整卡的由卡面材质负责）。
+        // 绘画辅助底色只作用于本层自己的擦除图。
         erasePreview: erasePreviewEnabled,
-        // 本层效果 + 卡面的 moire 集合。后者作为**继承源**：本层无 moire 时整体取它，
-        // 于是「卡面统一调摩尔纹」仍能透传到未自定的图层（见 toEffectUniforms）。
+        // 本层效果 + 背景图层的 moire 集合（作为继承源：本层无 moire 时整体取它）。
         effects: layer.effects,
-        inheritedMoire: face.effects,
+        inheritedMoire,
         // 图片只在纹理与参数都在场时启用；缺图时材质置 uHasImage = 0。
         image: imageTexture && image ? { texture: imageTexture, params: image } : null,
         // 本层文字纹理（非文字层 / 空内容时为 null，材质置 uHasText = 0）。
         text: textCache.get(layer, scope),
-        // 本层自己的法线贴图 / 本面的（继承用）。材质按解析结果只绑其中一张。
+        // 本层自己的法线贴图 / 背景图层的（继承用）。材质按解析结果只绑其中一张。
         normal: layerNormal,
-        faceNormal,
-        // 本面数据：法线继承源（本层没自己的图片法线时沿用卡面底图那份）。
-        face,
+        faceNormal: background?.normal ?? null,
+        // 背景图层的 image 参数：法线继承源。
+        face: background?.params ?? null,
+        backgroundColor: face.baseColor,
         aspect,
         cornerRadius,
       })
@@ -524,9 +496,6 @@ export function createCardView(opts: CardViewOptions): CardView {
     frontGlassMat.uniforms.uCameraPosition.value.copy(camera.position)
     backGlassMat.uniforms.uCameraPosition.value.copy(camera.position)
     for (const stack of [frontStack, backStack]) {
-      if (stack.baseMat) {
-        stack.baseMat.uniforms.uCameraPosition.value.copy(camera.position)
-      }
       for (const mat of stack.layerMats) {
         mat.uniforms.uCameraPosition.value.copy(camera.position)
       }
@@ -843,16 +812,14 @@ export function createCardView(opts: CardViewOptions): CardView {
         flipSubs.delete(cb)
       }
     },
-    setEraseTexture(next: Texture | null, layerId: string | null = null) {
-      if (layerId === null) liveErase = next
-      else if (next) liveLayerErase.set(layerId, next)
+    setEraseTexture(next: Texture | null, layerId: string) {
+      if (next) liveLayerErase.set(layerId, next)
       else liveLayerErase.delete(layerId)
       // 重建材质以换绑 sampler（纹理对象本身不重建，故开销只在材质构造与一次渲染）。
       void rebuild().catch((err) => console.error("[card-renderer] 擦除图切换失败", err))
     },
     refreshErase() {
       // 画布内容变了：让 three 重新上传这张纹理，并请求一帧。绘画期间调用方逐笔调用。
-      if (liveErase) liveErase.needsUpdate = true
       for (const tex of liveLayerErase.values()) tex.needsUpdate = true
       dirty = true
     },
