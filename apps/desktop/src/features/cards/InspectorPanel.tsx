@@ -16,6 +16,7 @@ import { findCard, usePackStore, type FaceRef } from "../../store/packStore"
 import { useUiStore } from "../../store/uiStore"
 import { Button } from "../../ui/Button"
 import { ConfirmDialog } from "../../ui/ConfirmDialog"
+import { ScrollArea } from "../../ui/ScrollArea"
 import { SectionCard } from "../../ui/Section"
 import { Segmented } from "../../ui/Segmented"
 import { Tag } from "../../ui/Tag"
@@ -212,7 +213,7 @@ export function InspectorPanel() {
           className="min-h-0 flex-1"
         >
           <ResizePanel id="inspector" order={1} defaultSize={66} minSize={30} className="min-h-0">
-            <div className="h-full overflow-y-auto overflow-x-hidden">{body}</div>
+            <ScrollArea className="h-full">{body}</ScrollArea>
           </ResizePanel>
           <PanelResizeHandle className="group relative h-2 transition-colors">
             <span className="absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 rounded-full bg-transparent transition-colors group-data-[resize-handle-state=hover]:bg-accent/50 group-data-[resize-handle-state=drag]:bg-accent" />
@@ -229,7 +230,7 @@ export function InspectorPanel() {
           </ResizePanel>
         </PanelGroup>
       ) : (
-        <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">{body}</div>
+        <ScrollArea className="min-h-0 flex-1">{body}</ScrollArea>
       )}
 
       <ConfirmDialog

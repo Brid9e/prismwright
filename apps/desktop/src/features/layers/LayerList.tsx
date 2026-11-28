@@ -20,6 +20,7 @@ import { useUiStore } from "../../store/uiStore"
 import { packFs } from "../../tauri/pack-fs"
 import { layerContextItems } from "../../ui/contextMenuModel"
 import { Button } from "../../ui/Button"
+import { ScrollArea } from "../../ui/ScrollArea"
 import { Tooltip } from "../../ui/Tooltip"
 import { importErrorMessage } from "../assets/import-error"
 import { displayLayerName } from "../cards/display"
@@ -204,8 +205,8 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
         </Button>
       </div>
       {/* 纵向滚动的树列表同样不该出现横向滚动条（行内文本已 `truncate`）：只放开 y、裁掉 x，
-          避免极窄栏 + 深层嵌套时挤出一条横向滚动条。 */}
-      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+          避免极窄栏 + 深层嵌套时挤出一条横向滚动条。滚动条走覆盖式。 */}
+      <ScrollArea className="min-h-0 flex-1">
         <LayerTree
           rows={rows}
           onSelect={selectLayer}
@@ -218,7 +219,7 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
             return layer ? trailingFor(row.id, layer.enabled) : null
           }}
         />
-      </div>
+      </ScrollArea>
     </div>
   )
 }

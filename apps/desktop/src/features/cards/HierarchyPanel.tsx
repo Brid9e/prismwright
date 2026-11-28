@@ -11,6 +11,7 @@ import { findCard, usePackStore } from "../../store/packStore"
 import { useUiStore } from "../../store/uiStore"
 import { Button } from "../../ui/Button"
 import { ConfirmDialog } from "../../ui/ConfirmDialog"
+import { ScrollArea } from "../../ui/ScrollArea"
 import { Segmented } from "../../ui/Segmented"
 import { CardTree, Thumbnail } from "./CardTree"
 import { type CardSection } from "./cardFilter"
@@ -102,9 +103,9 @@ export function HierarchyPanel({ compact = false }: HierarchyPanelProps) {
         />
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-1">
+      <ScrollArea className="min-h-0 flex-1" viewportClassName="px-1">
         <CardTree section={section} query={query} />
-      </div>
+      </ScrollArea>
 
       <div className="shrink-0 border-t border-line p-2">
         {/* 卡背页签没有「卡片」可建，落回普通卡并切到「全部」，否则新卡落在看不见的分组/

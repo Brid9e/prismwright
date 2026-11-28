@@ -17,6 +17,7 @@ import { editDefaultBackFlow } from "../../app/defaultBack"
 import { chooseNewPackDir } from "../../app/packActions"
 import { isLanguage, SUPPORTED_LANGUAGES } from "../../i18n/init"
 import { useUiStore, type SettingsCategory } from "../../store/uiStore"
+import { ScrollArea } from "../../ui/ScrollArea"
 import { Select } from "../../ui/Select"
 import { AppearancePanel } from "./AppearancePanel"
 
@@ -61,8 +62,9 @@ export function SettingsView() {
       </header>
 
       {/* 正文居中、最宽 1100px；内层撑满高度，好让左侧栏的分割线通体到底。 */}
-      <div className="flex min-h-0 flex-1 justify-center overflow-y-auto px-4 pb-4">
-        <div className="flex w-full max-w-6xl">
+      <ScrollArea className="min-h-0 flex-1" viewportClassName="px-4 pb-4">
+        <div className="flex justify-center">
+          <div className="flex w-full max-w-6xl">
           <nav className="w-32 shrink-0 border-r border-line pr-2" aria-label={t("title")}>
             {CATEGORIES.map(({ id, labelKey }) => (
               <button
@@ -156,6 +158,7 @@ export function SettingsView() {
           </div>
         </div>
       </div>
+      </ScrollArea>
     </div>
   )
 }
