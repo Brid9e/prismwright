@@ -6,7 +6,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Eye, EyeOff, Paintbrush, Redo2, RotateCcw, SquareDashed, Undo2, Waves } from "lucide-react"
+import { Eye, EyeOff, Paintbrush, Redo2, RotateCcw, Grid3x3, Undo2, Waves } from "lucide-react"
 import { CanvasTexture, NoColorSpace } from "three"
 import { findLayerById, type CardFace } from "@prismwright/schema"
 import { CARD_ASPECT, MAX_ZOOM, MIN_ZOOM } from "@prismwright/renderer/v1"
@@ -626,7 +626,7 @@ export function PreviewPanel() {
               onClick={() => setIdleSway(!idleSway)}
             />
             <ToolbarButton
-              icon={SquareDashed}
+              icon={Grid3x3}
               label={t("preview.toggleChecker")}
               active={showChecker}
               size="sm"
