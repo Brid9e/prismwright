@@ -7,7 +7,7 @@
 import { describe, it, expect } from "vitest"
 import { LayerSchema } from "@prismwright/schema"
 import { toDisplayOrder } from "../order"
-import { resolveDrop } from "../drop"
+import { dropZoneAt, resolveDrop } from "../drop"
 
 /** 造树：P ── [A ── G, B]，另有顶层 S。展示顺序（倒序）= [S, B, G, A, P]。 */
 function rows() {
@@ -18,6 +18,18 @@ function rows() {
   const s = LayerSchema.parse({ id: "s" })
   return toDisplayOrder([p, s])
 }
+
+describe("dropZoneAt", () => {
+  it("上 25% 为之前、下 25% 为之后，中段一半为放进里面", () => {
+    expect(dropZoneAt(0)).toBe("top")
+    expect(dropZoneAt(0.249)).toBe("top")
+    expect(dropZoneAt(0.25)).toBe("middle")
+    expect(dropZoneAt(0.5)).toBe("middle")
+    expect(dropZoneAt(0.749)).toBe("middle")
+    expect(dropZoneAt(0.75)).toBe("bottom")
+    expect(dropZoneAt(1)).toBe("bottom")
+  })
+})
 
 describe("resolveDrop", () => {
   it("中段落位 = 成为目标行的子层，追加到其子列表末尾", () => {

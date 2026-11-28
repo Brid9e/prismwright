@@ -17,6 +17,17 @@ import type { LayerRow } from "./order"
 /** 落点相对目标行的纵向位置。 */
 export type DropZone = "top" | "middle" | "bottom"
 
+/**
+ * 指针在目标行内的相对位置（0 = 顶边，1 = 底边）→ 三段落点。
+ *
+ * 上 25% / 中 50% / 下 25%：中段是「放进里面」，判定区最宽；上下缘留给同级插入。
+ */
+export function dropZoneAt(relativeY: number): DropZone {
+  if (relativeY < 0.25) return "top"
+  if (relativeY >= 0.75) return "bottom"
+  return "middle"
+}
+
 /** 解析出的落位目标。 */
 export interface DropTarget {
   /** 落位后的父层 id；顶层为 `null`。 */

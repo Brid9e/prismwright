@@ -5,33 +5,30 @@
  * 而 `TreeList` 只服务卡片树（扁平）。刻意不共用，避免把嵌套语义渗进卡片树。
  *
  * 拖拽期间不重排数组（沿用全局约定）：落点在松手时由 `./drop` 的 `resolveDrop` 解析。
+ *
+ * 命中用 `DragOverlay` + 指针真实位置：被拖行不再跟着指针遮住目标；每行的矩形在拖拽中
+ * 不位移（没有 SortableContext 的排序变换），三段判定因此稳定。键盘拖拽仍交给 dnd-kit。
  */
-import { useState, type MouseEvent, type ReactNode } from "react"
+import { useCallback, useRef, useState, type MouseEvent, type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import {
   DndContext,
+  DragOverlay,
   KeyboardSensor,
   PointerSensor,
-  closestCenter,
-  pointerWithin,
+  useDraggable,
+  useDroppable,
   useSensor,
   useSensors,
-  type CollisionDetection,
   type DragEndEvent,
   type DragMoveEvent,
-  type UniqueIdentifier,
+  type DragStartEvent,
 } from "@dnd-kit/core"
-import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable"
-import { CSS } from "@dnd-kit/utilities"
+import { sortableKeyboardCoordinates } from "@dnd-kit/sortable"
 import { AlertTriangle, ChevronDown, ChevronRight, GripVertical } from "lucide-react"
 import { restrictToVerticalAxis } from "../../ui/dnd-modifiers"
 import type { LayerRow } from "./order"
-import { resolveDrop, type DropZone } from "./drop"
+import { dropZoneAt, resolveDrop, type DropZone } from "./drop"
 
 /** 界面上的一个图层行：结构信息 + 展示信息。 */
 export interface LayerTreeRow extends LayerRow {
@@ -52,6 +49,7 @@ function Row({
   onToggleExpand,
   onContextMenu,
   trailing,
+  registerRow,
 }: {
   row: LayerTreeRow
   zone: DropZone | null
@@ -59,16 +57,26 @@ function Row({
   onToggleExpand: (id: string) => void
   onContextMenu?: (id: string, event: MouseEvent<HTMLDivElement>) => void
   trailing: ReactNode
+  registerRow: (id: string, el: HTMLDivElement | null) => void
 }) {
   const { t } = useTranslation("common")
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  // 拖拽节点是整行（overlay 才有正确宽度）；监听器只挂在把手上，点行其它位置仍是选中。
+  const { attributes, listeners, setNodeRef: setDragRef, isDragging } = useDraggable({
     id: row.id,
   })
+  const { setNodeRef: setDropRef } = useDroppable({ id: row.id })
+  const setRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      setDragRef(el)
+      setDropRef(el)
+      registerRow(row.id, el)
+    },
+    [registerRow, row.id, setDragRef, setDropRef],
+  )
 
   return (
     <div
-      ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition }}
+      ref={setRef}
       onClick={() => onSelect(row.id)}
       onContextMenu={(event) => {
         if (!onContextMenu) return
@@ -137,32 +145,6 @@ function Row({
   )
 }
 
-/**
- * 落点行优先取「指针所在行」，指针移出列表时退回离指针最近的行。
- *
- * 默认的 `closestCenter` 按**被拖行**的中心找最近行；而拖行只是跟着指针走，与指针隔着一个
- * 「抓着这一行哪一处」的固定偏移，于是高亮行常与指针下的行差半行、显得滞后。改用
- * `pointerWithin` 让高亮严格跟住指针；指针到列表外（如贴边自动滚动）时再用 `closestCenter`
- * 兜底，避免高亮突然消失。
- */
-const detectCollision: CollisionDetection = (args) => {
-  const within = pointerWithin(args)
-  return within.length > 0 ? within : closestCenter(args)
-}
-
-/**
- * 落点判定的纵向锚点：拖拽中指针的 y。
- *
- * `activatorEvent` 是按下那一下的事件，`delta` 是被拖行自按下以来的位移（水平分量已被竖直轴
- * 修饰器归零），两者相加即当前指针位置。键盘拖拽没有指针坐标，退回被拖行中心。
- */
-function dropAnchorY(event: DragMoveEvent): number | null {
-  const activator = event.activatorEvent
-  if (activator instanceof PointerEvent) return activator.clientY + event.delta.y
-  const translated = event.active.rect.current.translated
-  return translated ? translated.top + translated.height / 2 : null
-}
-
 export interface LayerTreeProps {
   rows: LayerTreeRow[]
   onSelect: (id: string) => void
@@ -188,32 +170,63 @@ export function LayerTree({
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
+  // 行元素的真实矩形：指针命中按它计算，不使用 dnd-kit 的碰撞 / 排序变换结果。
+  const rowEls = useRef(new Map<string, HTMLDivElement>())
+  const registerRow = useCallback((id: string, el: HTMLDivElement | null) => {
+    if (el) rowEls.current.set(id, el)
+    else rowEls.current.delete(id)
+  }, [])
+  const [activeId, setActiveId] = useState<string | null>(null)
   // 当前悬停在哪个行、落在其上缘 / 中段 / 下缘的哪一段——驱动落位高亮。
-  const [over, setOver] = useState<{ id: UniqueIdentifier; zone: DropZone } | null>(null)
+  const [over, setOver] = useState<{ id: string; zone: DropZone } | null>(null)
+
+  function handleDragStart(event: DragStartEvent) {
+    setActiveId(String(event.active.id))
+    setOver(null)
+  }
 
   function handleDragMove(event: DragMoveEvent) {
-    const overRect = event.over?.rect
-    const anchorY = dropAnchorY(event)
-    if (!overRect || !event.over || anchorY === null) {
+    const active = String(event.active.id)
+    const anchorY = pointerY(event)
+    if (anchorY === null) return
+
+    // 找指针下的行；落在行间空隙时保留上一次有效目标，不跳到 closestCenter 的最近行。
+    let hit: { id: string; relativeY: number } | null = null
+    for (const row of rows) {
+      const el = rowEls.current.get(row.id)
+      if (!el) continue
+      const rect = el.getBoundingClientRect()
+      if (anchorY >= rect.top && anchorY <= rect.bottom) {
+        hit = {
+          id: row.id,
+          relativeY: rect.height > 0 ? (anchorY - rect.top) / rect.height : 0.5,
+        }
+        break
+      }
+    }
+    if (!hit) return
+
+    const zone = dropZoneAt(hit.relativeY)
+    // 拖进自身 / 自己的子树、或会形成环的组合：不显示落点，松手也不会改结构。
+    if (!resolveDrop(rows, active, hit.id, zone)) {
       setOver(null)
       return
     }
-    // 用**指针**在目标行内的纵向位置判定三段：上 1/4 = 之前、下 1/4 = 之后、中段 = 之内。
-    // 中段占到一半行高——「放进里面」是这一操作里最需要对准的动作，判定区给宽才不至于要精准
-    // 停住；上下缘各留 1/4，插到行与行之间仍够命中。
-    const rel = (anchorY - overRect.top) / overRect.height
-    const zone: DropZone = rel < 0.25 ? "top" : rel > 0.75 ? "bottom" : "middle"
-    setOver({ id: event.over.id, zone })
+    setOver({ id: hit.id, zone })
   }
 
   function handleDragEnd(event: DragEndEvent) {
-    const zone: DropZone = over && event.over && over.id === event.over.id ? over.zone : "middle"
+    const active = String(event.active.id)
+    const target = over
     setOver(null)
-    if (!event.over) return
-    const target = resolveDrop(rows, String(event.active.id), String(event.over.id), zone)
+    setActiveId(null)
     if (!target) return
-    onMove(String(event.active.id), target.parentId, target.index)
+    const resolved = resolveDrop(rows, active, target.id, target.zone)
+    if (!resolved) return
+    onMove(active, resolved.parentId, resolved.index)
   }
+
+  const activeRow = activeId ? rows.find((r) => r.id === activeId) : undefined
 
   if (rows.length === 0) {
     return <div className="px-3 py-2 text-body text-disabled">{emptyText}</div>
@@ -222,25 +235,49 @@ export function LayerTree({
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={detectCollision}
       modifiers={[restrictToVerticalAxis]}
+      onDragStart={handleDragStart}
       onDragMove={handleDragMove}
       onDragEnd={handleDragEnd}
-      onDragCancel={() => setOver(null)}
+      onDragCancel={() => {
+        setOver(null)
+        setActiveId(null)
+      }}
     >
-      <SortableContext items={rows.map((r) => r.id)} strategy={verticalListSortingStrategy}>
-        {rows.map((row) => (
-          <Row
-            key={row.id}
-            row={row}
-            zone={over && over.id === row.id ? over.zone : null}
-            onSelect={onSelect}
-            onToggleExpand={onToggleExpand}
-            onContextMenu={onContextMenu}
-            trailing={trailing(row)}
-          />
-        ))}
-      </SortableContext>
+      {rows.map((row) => (
+        <Row
+          key={row.id}
+          row={row}
+          zone={over && over.id === row.id ? over.zone : null}
+          onSelect={onSelect}
+          onToggleExpand={onToggleExpand}
+          onContextMenu={onContextMenu}
+          trailing={trailing(row)}
+          registerRow={registerRow}
+        />
+      ))}
+      {/* 跟手的是覆盖层，不是原行；原行留在原位半透明，指针因此不会被它遮住。 */}
+      <DragOverlay dropAnimation={null}>
+        {activeRow ? (
+          <div className="flex h-row items-center gap-2 rounded-control border border-line-soft bg-panel px-2 text-body text-foreground popover-shadow">
+            <GripVertical size={12} className="shrink-0 text-disabled" />
+            <span className="min-w-0 flex-1 truncate">{activeRow.label}</span>
+          </div>
+        ) : null}
+      </DragOverlay>
     </DndContext>
   )
+}
+
+/**
+ * 拖拽中指针的纵向锚点。
+ *
+ * `activatorEvent` 是按下那一下的事件，`delta` 是被拖行自按下以来的位移；键盘拖拽没有
+ * 指针坐标，退回被拖行中心。坐标是视口坐标，与 `getBoundingClientRect()` 同域。
+ */
+function pointerY(event: DragMoveEvent): number | null {
+  const activator = event.activatorEvent
+  if (activator instanceof PointerEvent) return activator.clientY + event.delta.y
+  const translated = event.active.rect.current.translated
+  return translated ? translated.top + translated.height / 2 : null
 }
