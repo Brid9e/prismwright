@@ -122,7 +122,7 @@
   },
   "inspector": {
     "design": "设计",
-    "layers": "图层",
+    "layers": "属性",
     "effects": "效果",
     "export": "导出",
     "noLayer": "先在图层页选中一个图层",

@@ -122,7 +122,7 @@
   },
   "inspector": {
     "design": "Design",
-    "layers": "Layers",
+    "layers": "Properties",
     "effects": "Effects",
     "export": "Export",
     "noLayer": "Select a layer on the Layers tab first",

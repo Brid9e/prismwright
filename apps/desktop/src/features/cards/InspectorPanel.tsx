@@ -1,13 +1,14 @@
 /**
- * 右栏：卡片头 + 四个页签（设计 / 图层 / 效果 / 导出）。
+ * 右栏：卡片头 + 页签（设计 / 属性 / 效果 / 导出）+ 右下角常驻图层面板。
  *
  * 编辑目标由 `previewSide` 决定——正面编当前选中的卡片，背面编系列级 `pack.back`。
  * 因此这里产出一个 `FaceRef` 交给所有子组件，使背面复用同一套 UI。
  *
- * 页签化的目的：旧版把「身份字段 + 图层树 + 图层详情」叠在一条长滚动里，参数一多就要
- * 来回滚。现在按「这张卡是什么 / 由什么组成 / 有什么效果 / 怎么导出」切开，每页只铺一类内容。
+ * 图层面板像 Photoshop 一样常驻在右栏底部，可拖高度；上方页签只显示当前选中层的属性 /
+ * 效果，不再把图层树塞进页签里。
  */
 import { useTranslation } from "react-i18next"
+import { Panel as ResizePanel, PanelGroup, PanelResizeHandle } from "react-resizable-panels"
 import { createCardFace, findLayerById, flattenLayers, type CardFace } from "@prismwright/schema"
 import { isDefaultBackPack } from "../default-back/default-back"
 import { useDefaultBackStore } from "../../store/defaultBackStore"
@@ -104,6 +105,78 @@ export function InspectorPanel() {
       ? `e${String(card.num).padStart(2, "0")} · ${pack?.name ?? ""}`
       : ""
 
+  const body = usingDefaultBack ? (
+    <div className="flex flex-col gap-2 p-3">
+      <p className="text-body text-muted">{t("preview.usingDefaultBack")}</p>
+      <Button variant="secondary" onClick={() => void editDefaultBackFlow(ts("defaultBack.name"))}>
+        {t("preview.editDefaultBack")}
+      </Button>
+      <Button variant="secondary" onClick={() => void customizeBackFlow()}>
+        {t("preview.customizeBack")}
+      </Button>
+    </div>
+  ) : !hasFace || !face ? (
+    <div className="p-3 text-body text-disabled">{t("preview.noCard")}</div>
+  ) : activeTab === "design" ? (
+    <div className="flex flex-col gap-2 p-3">
+      <SectionCard title={t("inspector.design")} collapsible={false}>
+        <CardFaceFields
+          face={face}
+          faceRef={faceRef}
+          card={side === "back" ? null : card}
+          showSeriesAspect={!editingDefaultBack}
+        />
+      </SectionCard>
+      {canDeleteBack && (
+        <Button variant="danger" onClick={() => requestConfirm({ kind: "delete-back" })}>
+          {t("preview.deleteBack")}
+        </Button>
+      )}
+    </div>
+  ) : activeTab === "layers" ? (
+    <div className="flex flex-col gap-2 p-3">
+      {selectedLayer ? (
+        <LayerDetail
+          face={face}
+          faceRef={faceRef}
+          layerId={selectedLayer.id}
+          section="properties"
+        />
+      ) : (
+        <div className="text-body text-disabled">{tl("empty")}</div>
+      )}
+    </div>
+  ) : activeTab === "effects" ? (
+    selectedLayer ? (
+      <LayerDetail face={face} faceRef={faceRef} layerId={selectedLayer.id} section="effects" />
+    ) : (
+      <div className="p-3 text-body text-disabled">{t("inspector.noLayer")}</div>
+    )
+  ) : (
+    <div className="flex flex-col gap-2 p-3">
+      <SectionCard title={t("inspector.exportCard")} collapsible={false}>
+        <div className="flex flex-col gap-2">
+          <Button variant="secondary" onClick={() => openExportDialog("png")}>
+            {tm("menu.exportPng")}
+          </Button>
+          <Button variant="secondary" onClick={() => openExportDialog("gif")}>
+            {tm("menu.exportGif")}
+          </Button>
+          <Button variant="secondary" onClick={() => openExportDialog("webm")}>
+            {tm("menu.exportWebm")}
+          </Button>
+        </div>
+      </SectionCard>
+      <SectionCard title={t("inspector.exportSeries")} collapsible={false}>
+        <Button className="w-full" onClick={() => openBundleExport(null)}>
+          {t("inspector.exportSeries")}
+        </Button>
+      </SectionCard>
+    </div>
+  )
+
+  const showDock = hasFace && !usingDefaultBack && Boolean(face)
+
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex shrink-0 flex-col gap-1 border-b border-line px-3 py-2">
@@ -132,73 +205,32 @@ export function InspectorPanel() {
         </div>
       )}
 
-      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
-        {usingDefaultBack ? (
-          <div className="flex flex-col gap-2 p-3">
-            <p className="text-body text-muted">{t("preview.usingDefaultBack")}</p>
-            <Button variant="secondary" onClick={() => void editDefaultBackFlow(ts("defaultBack.name"))}>
-              {t("preview.editDefaultBack")}
-            </Button>
-            <Button variant="secondary" onClick={() => void customizeBackFlow()}>
-              {t("preview.customizeBack")}
-            </Button>
-          </div>
-        ) : !hasFace || !face ? (
-          <div className="p-3 text-body text-disabled">{t("preview.noCard")}</div>
-        ) : activeTab === "design" ? (
-          <div className="flex flex-col gap-2 p-3">
-            <SectionCard title={t("inspector.design")} collapsible={false}>
-              <CardFaceFields
-                face={face}
-                faceRef={faceRef}
-                card={side === "back" ? null : card}
-                showSeriesAspect={!editingDefaultBack}
-              />
-            </SectionCard>
-            {canDeleteBack && (
-              <Button variant="danger" onClick={() => requestConfirm({ kind: "delete-back" })}>
-                {t("preview.deleteBack")}
-              </Button>
-            )}
-          </div>
-        ) : activeTab === "layers" ? (
-          <div className="flex flex-col gap-2 p-3">
+      {showDock && face ? (
+        <PanelGroup
+          direction="vertical"
+          autoSaveId="prismwright-right-dock"
+          className="min-h-0 flex-1"
+        >
+          <ResizePanel id="inspector" order={1} defaultSize={66} minSize={30} className="min-h-0">
+            <div className="h-full overflow-y-auto overflow-x-hidden">{body}</div>
+          </ResizePanel>
+          <PanelResizeHandle className="group relative h-2 transition-colors">
+            <span className="absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 rounded-full bg-transparent transition-colors group-data-[resize-handle-state=hover]:bg-accent/50 group-data-[resize-handle-state=drag]:bg-accent" />
+          </PanelResizeHandle>
+          <ResizePanel
+            id="layers"
+            order={2}
+            defaultSize={34}
+            minSize={20}
+            maxSize={60}
+            className="min-h-0"
+          >
             <LayerList face={face} faceRef={faceRef} />
-            {selectedLayer ? (
-              <LayerDetail face={face} faceRef={faceRef} layerId={selectedLayer.id} section="properties" />
-            ) : (
-              <div className="p-3 text-body text-disabled">{tl("empty")}</div>
-            )}
-          </div>
-        ) : activeTab === "effects" ? (
-          selectedLayer ? (
-            <LayerDetail face={face} faceRef={faceRef} layerId={selectedLayer.id} section="effects" />
-          ) : (
-            <div className="p-3 text-body text-disabled">{t("inspector.noLayer")}</div>
-          )
-        ) : (
-          <div className="flex flex-col gap-2 p-3">
-            <SectionCard title={t("inspector.exportCard")} collapsible={false}>
-              <div className="flex flex-col gap-2">
-                <Button variant="secondary" onClick={() => openExportDialog("png")}>
-                  {tm("menu.exportPng")}
-                </Button>
-                <Button variant="secondary" onClick={() => openExportDialog("gif")}>
-                  {tm("menu.exportGif")}
-                </Button>
-                <Button variant="secondary" onClick={() => openExportDialog("webm")}>
-                  {tm("menu.exportWebm")}
-                </Button>
-              </div>
-            </SectionCard>
-            <SectionCard title={t("inspector.exportSeries")} collapsible={false}>
-              <Button className="w-full" onClick={() => openBundleExport(null)}>
-                {t("inspector.exportSeries")}
-              </Button>
-            </SectionCard>
-          </div>
-        )}
-      </div>
+          </ResizePanel>
+        </PanelGroup>
+      ) : (
+        <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">{body}</div>
+      )}
 
       <ConfirmDialog
         open={pendingConfirm?.kind === "delete-layer"}

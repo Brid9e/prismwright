@@ -174,7 +174,7 @@ export function LayerList({ face, faceRef }: { face: CardFace; faceRef: FaceRef 
   }
 
   return (
-    <div className="flex min-h-0 flex-col">
+    <div className="flex h-full min-h-0 flex-col">
       <div className="flex shrink-0 items-center px-3 pb-1 pt-2">
         <span className="select-none text-body font-semibold text-muted">
           {t("section.layers")}
