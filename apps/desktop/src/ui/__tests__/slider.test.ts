@@ -22,6 +22,18 @@ function renderSlider(props: Partial<Parameters<typeof Slider>[0]>) {
   )
 }
 
+describe("Slider 轨道", () => {
+  it("厚轨道、已滑过填充与竖直手柄都用了语义刻度类", () => {
+    const html = renderSlider({})
+    // 轨道与数字框同用 control 圆角；填充用 track-fill 与未滑过部分区分。
+    expect(html).toContain("rounded-control")
+    expect(html).toContain("bg-track")
+    expect(html).toContain("bg-track-fill")
+    // 手柄是 8×16 的竖向圆角矩形（h-4 = 16px，w-2 = 8px），不是圆点。
+    expect(html).toMatch(/class="[^"]*\bh-4\b[^"]*\bw-2\b[^"]*"/)
+  })
+})
+
 describe("Slider 复位按钮", () => {
   it("提供 defaultValue 时渲染带 resetLabel 的复位按钮", () => {
     const html = renderSlider({ defaultValue: 0.9, resetLabel: "重置为默认值" })

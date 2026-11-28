@@ -30,7 +30,7 @@ export function Select({ value, options, onChange, disabled, grow }: SelectProps
     <DropdownMenu.Root>
       <DropdownMenu.Trigger
         disabled={disabled}
-        className={`flex h-6 items-center gap-1 rounded-sm border border-border bg-sunken px-1.5 text-[12px] text-foreground outline-none hover:border-border-subtle focus:border-accent disabled:text-disabled ${
+        className={`flex h-button items-center gap-1 rounded-control border border-line-soft bg-sunken px-2 text-body text-foreground outline-none hover:border-line focus:border-accent disabled:text-disabled ${
           grow ? "min-w-0 flex-1" : ""
         }`}
       >
@@ -40,13 +40,13 @@ export function Select({ value, options, onChange, disabled, grow }: SelectProps
       <DropdownMenu.Portal>
         <DropdownMenu.Content
           sideOffset={4}
-          className="z-50 min-w-[var(--radix-dropdown-menu-trigger-width)] rounded-sm border border-border-subtle bg-elevated py-1 shadow-lg"
+          className="popover-shadow z-50 min-w-[var(--radix-dropdown-menu-trigger-width)] rounded-card border border-line-soft bg-panel py-1"
         >
           {options.map((option) => (
             <DropdownMenu.Item
               key={option.value}
               onSelect={() => onChange(option.value)}
-              className="flex cursor-default items-center gap-2 px-2 py-1 text-[12px] text-foreground outline-none data-[highlighted]:bg-accent/25"
+              className="mx-1 flex h-control cursor-default items-center gap-2 rounded-control px-2 text-body text-foreground outline-none data-[highlighted]:bg-elevated"
             >
               <Check size={13} className={option.value === value ? "opacity-100" : "opacity-0"} />
               {option.label}

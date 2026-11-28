@@ -22,9 +22,9 @@ export function IconButton({ icon: Icon, label, onClick, disabled }: IconButtonP
         onClick={onClick}
         disabled={disabled}
         aria-label={label}
-        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-sm text-muted hover:bg-elevated hover:text-foreground disabled:text-disabled"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-control text-muted outline-none hover:bg-elevated hover:text-foreground focus-visible:ring-2 focus-visible:ring-accent/50 disabled:text-disabled disabled:opacity-40"
       >
-        <Icon size={13} />
+        <Icon size={14} />
       </button>
     </Tooltip>
   )

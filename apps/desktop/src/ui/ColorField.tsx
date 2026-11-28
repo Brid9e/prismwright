@@ -9,6 +9,7 @@
  * 会把缺省从「暖白常量」变成白纸黑字的一个值，等于静默改了存量卡的颜色。
  */
 import { useTranslation } from "react-i18next"
+import * as RadixSlider from "@radix-ui/react-slider"
 import { alphaOf, withAlpha } from "@prismwright/schema"
 import { toSixDigitHex } from "../features/layers/colors"
 
@@ -25,28 +26,34 @@ export interface ColorFieldProps {
 export function ColorField({ value, onChange, ariaLabel, size = "sm" }: ColorFieldProps) {
   const { t } = useTranslation("common")
   const alpha = alphaOf(value)
-  const swatch = size === "md" ? "h-6 w-10" : "h-5 w-8"
+  const swatch = size === "md" ? "h-5 w-8" : "h-4 w-6"
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex h-button items-center gap-1.5 rounded-control border border-line-soft bg-sunken px-1.5">
       <input
         type="color"
         value={toSixDigitHex(value)}
         aria-label={ariaLabel}
         onChange={(e) => onChange(withAlpha(e.target.value, alpha))}
-        className={`${swatch} cursor-pointer rounded-sm border border-border bg-sunken p-0`}
+        className={`${swatch} shrink-0 cursor-pointer rounded-chip border border-line-soft bg-transparent p-0`}
       />
-      <input
-        type="range"
+      {/* 透明度用与滑杆同款的细轨 Radix 滑杆：原生 range 的 accent-color 在各平台
+          粗细与手柄形状都不一致，会破坏控件系统的一致性。 */}
+      <RadixSlider.Root
+        value={[alpha]}
         min={0}
         max={1}
         step={0.01}
-        value={alpha}
         disabled={value === ""}
         aria-label={t("colorAlpha", { label: ariaLabel })}
-        onChange={(e) => onChange(withAlpha(value, Number(e.target.value)))}
-        className="w-16 accent-accent disabled:opacity-40"
-      />
-      <span className="w-7 shrink-0 text-right text-[10px] tabular-nums text-muted">
+        onValueChange={([a]) => onChange(withAlpha(value, a))}
+        className="relative flex h-4 min-w-0 flex-1 touch-none select-none items-center disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        <RadixSlider.Track className="relative h-1 w-full grow overflow-hidden rounded-full bg-track">
+          <RadixSlider.Range className="absolute h-full bg-track-fill" />
+        </RadixSlider.Track>
+        <RadixSlider.Thumb className="block h-3 w-1.5 rounded-chip bg-foreground outline-none focus-visible:ring-2 focus-visible:ring-accent/50" />
+      </RadixSlider.Root>
+      <span className="w-7 shrink-0 text-right text-num tabular-nums text-muted">
         {Math.round(alpha * 100)}%
       </span>
     </div>

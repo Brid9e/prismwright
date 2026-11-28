@@ -72,6 +72,10 @@ export default {
         row: "32px",
         panelhead: "40px",
         topbar: "46px",
+        switch: "17px",
+      },
+      width: {
+        switch: "30px",
       },
       fontSize: {
         num: ["10px", { lineHeight: "12px" }],

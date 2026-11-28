@@ -67,7 +67,7 @@ export function NumberField({
       onKeyDown={(e) => {
         if (e.key === "Enter") e.currentTarget.blur()
       }}
-      className="h-6 w-16 shrink-0 rounded-sm border border-border bg-sunken px-1.5 text-right font-mono text-[12px] text-foreground outline-none focus:border-accent disabled:cursor-not-allowed disabled:text-disabled"
+      className="h-control w-11 shrink-0 rounded-control border border-line-soft bg-sunken px-1.5 text-right font-mono text-num text-foreground outline-none hover:border-line focus:border-accent disabled:cursor-not-allowed disabled:text-disabled"
     />
   )
 }

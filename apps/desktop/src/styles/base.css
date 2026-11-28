@@ -43,6 +43,34 @@
   }
 }
 
+/* 组件的通用投影与内阴影。
+ *
+ * 这些是多层 rgba 组合，写成 Tailwind 任意值会绕过度量约束（且读起来噪声大），
+ * 故集中在样式表里按语义命名；组件只消费类名。 */
+@layer components {
+  /* 输入框、滑轨这类「凹槽」的轻内阴影。 */
+  .inset-control {
+    box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.35);
+  }
+
+  /* 滑杆手柄：抬起来一点，压在填充上仍看得清。 */
+  .thumb-shadow {
+    box-shadow:
+      0 1px 4px rgb(0 0 0 / 0.45),
+      0 0 0 1px rgb(0 0 0 / 0.25);
+  }
+
+  /* 悬浮面板（左右栏、顶栏）。 */
+  .panel-shadow {
+    box-shadow: 0 12px 32px rgb(0 0 0 / 0.2);
+  }
+
+  /* 下拉、菜单、浮层。 */
+  .popover-shadow {
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.3);
+  }
+}
+
 /* 预览画布的棋盘底：透明区域用棋盘格表示「这里是空的」。
  * 写在样式表而非内联样式，因为色值守卫禁止 TSX 里出现 rgb(...) 字面量。 */
 .checkerboard {

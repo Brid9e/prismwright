@@ -80,14 +80,17 @@ export function Slider({
         // 禁用态靠整条 Root 降透明度 + 禁止光标体现。Radix 把 Track / Range / Thumb 都渲染成
         // `<span>`，`:disabled` 伪类对它们无效（`disabled:` 变体会失配、形同虚设），故这两样都提到
         // Root 一层统一处理。
-        className={`relative flex h-4 min-w-0 flex-1 touch-none select-none items-center ${
-          disabled ? "cursor-not-allowed opacity-50" : ""
+        className={`relative flex h-control min-w-0 flex-1 touch-none select-none items-center ${
+          disabled ? "cursor-not-allowed opacity-40" : ""
         }`}
       >
-        <RadixSlider.Track className="relative h-1 w-full grow rounded-sm bg-sunken">
-          <RadixSlider.Range className="absolute h-full rounded-sm bg-accent" />
+        {/* 厚圆角矩形轨道：与数字框同高（24）同圆角（7）；已滑过部分用实心 track-fill，
+            与未滑过的中性灰底形成明确区分。overflow-hidden 让填充在左端随轨道圆角收口。 */}
+        <RadixSlider.Track className="inset-control relative h-control w-full grow overflow-hidden rounded-control border border-line-soft bg-track">
+          <RadixSlider.Range className="absolute h-full rounded-control bg-track-fill" />
         </RadixSlider.Track>
-        <RadixSlider.Thumb className="block h-3 w-3 rounded-sm border border-border-strong bg-foreground outline-none focus:ring-1 focus:ring-ring" />
+        {/* 竖向圆角矩形手柄（8×16），不是圆点。 */}
+        <RadixSlider.Thumb className="thumb-shadow block h-4 w-2 rounded-chip bg-foreground outline-none focus-visible:ring-2 focus-visible:ring-accent/50" />
       </RadixSlider.Root>
       <NumberField
         value={value}
