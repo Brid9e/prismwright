@@ -20,7 +20,6 @@ import {
   ChevronUp,
   ImagePlus,
   Paintbrush,
-  Pipette,
   Plus,
   Trash2,
 } from "lucide-react"
@@ -64,11 +63,6 @@ export interface EffectStackProps {
   onUpdate: (id: string, patch: Partial<EffectParams>) => void
   /** 图片字段（imageMask / image 共用）的「上传 / 替换」动作；父组件负责拉原生文件框并落盘。 */
   onPickImage: (id: string, fieldKey: string) => void
-  /**
-   * 颜色字段（imageMask 的颜色源）的吸管动作：父组件把「进入拾色态」记进 uiStore，
-   * 由预览面板接管下一次点击。
-   */
-  onPickColor: (id: string, colorIndex?: number) => void
   /**
    * 绘画字段（maskErase 的 path）的画笔动作：父组件把「进入绘画态」记进 uiStore，
    * 由预览面板接管指针、画完再落盘写回 path。
@@ -121,7 +115,6 @@ export function EffectFields({
   scope,
   onUpdate,
   onPickImage,
-  onPickColor,
   onPaintErase,
 }: {
   effect: Effect
@@ -129,7 +122,6 @@ export function EffectFields({
   scope: "layer" | "face"
   onUpdate: (id: string, patch: Partial<EffectParams>) => void
   onPickImage: (id: string, fieldKey: string) => void
-  onPickColor: (id: string, colorIndex?: number) => void
   onPaintErase: (id: string) => void
 }) {
   const { t } = useTranslation("effect")
@@ -236,9 +228,7 @@ export function EffectFields({
             )
           }
           case "color": {
-            // 单色字段（imageMask / 光泽的颜色）：色块 + 透明度滑杆（见 ColorField）。
-            // 吸管只在字段名就叫 `color` 时出现——预览拾色固定写回 `color` 这个键
-            // （见 features/preview 的拾色流程），其它色字段（如法线光照色）写了也不生效。
+            // 单色字段（imageMask / 光泽的颜色）：色块 + hex，点开面板内取色器（见 ColorField）。
             // 缺参时的回退取自注册表默认值——不在此另写 hex 字面量（硬编码色值由 lint 兜住）。
             const current = String(params[field.key] ?? defaults[field.key] ?? "")
             return (
@@ -248,13 +238,6 @@ export function EffectFields({
                   onChange={(hex) => onUpdate(effect.id, fieldPatch(field.key, hex))}
                   ariaLabel={label}
                 />
-                {field.key === "color" && (
-                  <IconButton
-                    icon={Pipette}
-                    label={t("imageMask.pickColor")}
-                    onClick={() => onPickColor(effect.id)}
-                  />
-                )}
               </PropertyRow>
             )
           }
@@ -291,7 +274,6 @@ export function EffectFields({
                     key={effect.id}
                     colors={params[field.key] as ColorStop[]}
                     onChange={(colors) => onUpdate(effect.id, fieldPatch(field.key, colors))}
-                    onPick={(index) => onPickColor(effect.id, index)}
                   />
                 </div>
               </PropertyRow>
@@ -391,7 +373,6 @@ function EffectRow({
   onUpdate,
   onMove,
   onPickImage,
-  onPickColor,
   onPaintErase,
   moveUpIndex,
   moveDownIndex,
@@ -410,7 +391,6 @@ function EffectRow({
   onUpdate: (id: string, patch: Partial<EffectParams>) => void
   onMove: (id: string, toIndex: number) => void
   onPickImage: (id: string, fieldKey: string) => void
-  onPickColor: (id: string, colorIndex?: number) => void
   onPaintErase: (id: string) => void
   /** 上移目标（全列表下标）；null = 组内已是首条，按钮置灰。 */
   moveUpIndex: number | null
@@ -474,7 +454,6 @@ function EffectRow({
           scope={scope}
           onUpdate={onUpdate}
           onPickImage={onPickImage}
-          onPickColor={onPickColor}
           onPaintErase={onPaintErase}
         />
       )}
@@ -491,7 +470,6 @@ export function EffectStack({
   onMove,
   onUpdate,
   onPickImage,
-  onPickColor,
   onPaintErase,
 }: EffectStackProps) {
   const { t } = useTranslation("effect")
@@ -540,7 +518,6 @@ export function EffectStack({
                 onUpdate={onUpdate}
                 onMove={onMove}
                 onPickImage={onPickImage}
-                onPickColor={onPickColor}
                 onPaintErase={onPaintErase}
                 moveUpIndex={role === "phase" ? siblingTargetIndex(effects, effect.id, -1) : null}
                 moveDownIndex={role === "phase" ? siblingTargetIndex(effects, effect.id, 1) : null}

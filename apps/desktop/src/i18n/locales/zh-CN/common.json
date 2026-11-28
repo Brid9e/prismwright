@@ -59,7 +59,6 @@
     "restore": "向下还原",
     "close": "关闭"
   },
-  "colorAlpha": "{{label}}透明度",
   "colorPicker": {
     "saturationValue": "饱和度与明度",
     "hue": "色相",

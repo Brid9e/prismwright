@@ -26,8 +26,6 @@
     "preview": "Palette preview",
     "drag": "Drag color {{index}} to reorder",
     "color": "Color {{index}}",
-    "pick": "Pick color {{index}} from the preview",
-    "alpha": "Opacity of color {{index}}",
     "percent": "Position of color {{index}} (percent)"
   },
   "field": {

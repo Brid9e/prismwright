@@ -29,7 +29,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { GripVertical, Pipette, Plus, X } from "lucide-react"
+import { GripVertical, Plus, X } from "lucide-react"
 import type { ColorStop } from "@prismwright/schema"
 import {
   DEFAULT_NEW_STOP,
@@ -43,15 +43,12 @@ import {
   setStopPosition,
 } from "../features/layers/colors"
 import { ColorPicker } from "./ColorPicker"
-import { IconButton } from "./IconButton"
 import { NumberField } from "./NumberField"
 import { Tooltip } from "./Tooltip"
 
 export interface ColorStopsProps {
   colors: ColorStop[]
   onChange: (colors: ColorStop[]) => void
-  /** 某行的吸管：进入「从画面拾色」，写回这一行的色值。 */
-  onPick: (index: number) => void
 }
 
 /** 一行色标：把手 + 取色块 + 透明度 + 位置百分比 + 删除。 */
@@ -61,7 +58,6 @@ function StopRow({
   canRemove,
   onColor,
   onPosition,
-  onPick,
   onRemove,
 }: {
   index: number
@@ -69,7 +65,6 @@ function StopRow({
   canRemove: boolean
   onColor: (hex: string) => void
   onPosition: (at: number) => void
-  onPick: () => void
   onRemove: () => void
 }) {
   const { t } = useTranslation("layer")
@@ -103,13 +98,6 @@ function StopRow({
         ariaLabel={t("colors.color", { index: index + 1 })}
       />
 
-      {/* 吸管：与其它颜色字段一样，拾色按钮放在控件外面、点一下从画面取色。 */}
-      <IconButton
-        icon={Pipette}
-        label={t("colors.pick", { index: index + 1 })}
-        onClick={onPick}
-      />
-
       {/* 位置百分比：这个颜色停在色带的百分之几处；只影响这一行。 */}
       <NumberField
         value={Math.round(stop.at * 1000) / 10}
@@ -134,7 +122,7 @@ function StopRow({
   )
 }
 
-export function ColorStops({ colors, onChange, onPick }: ColorStopsProps) {
+export function ColorStops({ colors, onChange }: ColorStopsProps) {
   const { t } = useTranslation("layer")
   const full = !canAddStop(colors)
   const sensors = useSensors(
@@ -170,7 +158,6 @@ export function ColorStops({ colors, onChange, onPick }: ColorStopsProps) {
                 canRemove={canRemoveStop(colors)}
                 onColor={(hex) => onChange(replaceStop(colors, index, hex))}
                 onPosition={(at) => onChange(setStopPosition(colors, index, at))}
-                onPick={() => onPick(index)}
                 onRemove={() => onChange(removeStop(colors, index))}
               />
             ))}

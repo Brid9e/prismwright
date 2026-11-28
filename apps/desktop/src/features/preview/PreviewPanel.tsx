@@ -8,7 +8,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Eye, EyeOff, Paintbrush, Redo2, RotateCcw, SquareDashed, Undo2, Waves } from "lucide-react"
 import { CanvasTexture, NoColorSpace } from "three"
-import { findLayerById, flattenLayers, resolveImage, type CardFace } from "@prismwright/schema"
+import { findLayerById, type CardFace } from "@prismwright/schema"
 import { CARD_ASPECT, MAX_ZOOM, MIN_ZOOM } from "@prismwright/renderer/v1"
 import { useDefaultBackStore } from "../../store/defaultBackStore"
 import { isDefaultBackPack } from "../default-back/default-back"
@@ -17,13 +17,7 @@ import { useUiStore } from "../../store/uiStore"
 import { Segmented } from "../../ui/Segmented"
 import { Slider } from "../../ui/Slider"
 import { ToolbarButton } from "../../ui/Toolbar"
-import {
-  applyPickedStopColor,
-  faceRefMatches,
-  frontPixelCoord,
-  pickClickAction,
-  sampleImageColor,
-} from "../effects/pickColor"
+import { faceRefMatches } from "./faceRefMatches"
 import {
   eraseCanvasSize,
   brushColor,
@@ -87,15 +81,12 @@ export function PreviewPanel() {
   const showChecker = useUiStore((s) => s.showChecker)
   const setShowChecker = useUiStore((s) => s.setShowChecker)
   const markMissing = useUiStore((s) => s.markMissing)
-  const colorPick = useUiStore((s) => s.colorPick)
-  const resolveColorPick = useUiStore((s) => s.resolveColorPick)
   const erasePaint = useUiStore((s) => s.erasePaint)
   const resolveErasePaint = useUiStore((s) => s.resolveErasePaint)
   const eraseBrushWidth = useUiStore((s) => s.eraseBrushWidth)
   const setEraseBrushWidth = useUiStore((s) => s.setEraseBrushWidth)
   const erasePreview = useUiStore((s) => s.erasePreview)
   const setErasePreview = useUiStore((s) => s.setErasePreview)
-  const updateEffect = usePackStore((s) => s.updateEffect)
   const commitEraseImage = usePackStore((s) => s.commitEraseImage)
   const setErasePaintHistory = useUiStore((s) => s.setErasePaintHistory)
 
@@ -138,121 +129,9 @@ export function PreviewPanel() {
     onMissing: markMissing,
   })
 
-  // 拾色只在「请求的卡面 == 正在显示的那一面」时有效；对不上就没有可落点的画面。
-  const pickActive = colorPick !== null && faceRefMatches(colorPick.ref, side, selectedCardId)
-
-  // 请求与画面脱节（切了正/背面、换了卡、卡面被清空）时直接作废，别留一个没有落点的
-  // 十字光标——那种状态下用户点哪儿都不会有反应。
-  useEffect(() => {
-    if (colorPick && !pickActive) resolveColorPick()
-  }, [colorPick, pickActive, resolveColorPick])
-
-  // 拾色期间把底图解码一次（每次请求一张），点击时在 CPU 上取像素。
-  const [frontImage, setFrontImage] = useState<HTMLImageElement | null>(null)
-  // 整卡背景图 = 最靠下的可见 image 图层；吸管取它的像素。
-  const backgroundImage = useMemo(() => {
-    if (!face) return null
-    for (const { layer } of flattenLayers(face.layers)) {
-      const image = resolveImage(layer.effects)
-      if (image?.path) return image
-    }
-    return null
-  }, [face])
-  const frontRel = backgroundImage?.path ?? ""
-  useEffect(() => {
-    if (!pickActive || !frontRel || !faceRoot) {
-      setFrontImage(null)
-      return
-    }
-    let alive = true
-    setFrontImage(null)
-    void loadAssetImage(faceRoot, frontRel).then((img) => {
-      if (alive) setFrontImage(img)
-    })
-    return () => {
-      alive = false
-    }
-  }, [pickActive, frontRel, faceRoot])
-
-  useEffect(() => {
-    if (!colorPick) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") resolveColorPick()
-    }
-    window.addEventListener("keydown", onKey)
-    return () => window.removeEventListener("keydown", onKey)
-  }, [colorPick, resolveColorPick])
-
-  /**
-   * 预览上点一下：把卡面 UV 换算成底图像素、取色、写回效果参数。
-   *
-   * 处置规则在 `pickClickAction` 里（有测试）：取到色就写回；点卡外或卡面没有底图时
-   * **取消拾色**——拾色层盖住整个预览，不退出就等于把卡片锁死；只有「底图还在解码 /
-   * 点在图片被裁掉的区域」才允许再点一次。写回走 `updateEffect`，于是这次取色进撤销栈，
-   * 与手改色值同路。
-   */
-  function handlePickPointerDown(e: React.PointerEvent) {
-    if (!colorPick || !face) return
-    e.preventDefault()
-    e.stopPropagation()
-    const uv = pickUv(e.clientX, e.clientY)
-    let color: string | null = null
-    if (uv && frontImage) {
-      const size = { width: frontImage.naturalWidth, height: frontImage.naturalHeight }
-      const coord = frontPixelCoord(
-        uv.u,
-        uv.v,
-        size,
-        {
-          fit: backgroundImage?.fit ?? "cover",
-          offsetX: backgroundImage?.x ?? 0,
-          offsetY: backgroundImage?.y ?? 0,
-          scale: backgroundImage?.scale ?? 1,
-          rotation: backgroundImage?.rotation ?? 0,
-        },
-        aspect,
-      )
-      if (coord) color = sampleImageColor(frontImage, size, coord)
-    }
-
-    const action = pickClickAction({ insideCard: uv !== null, hasFrontImage: frontRel !== "", color })
-    if (action === "cancel") {
-      resolveColorPick()
-      return
-    }
-    if (action === "sample" && color) {
-      if (colorPick.colorIndex !== undefined) {
-        // 调色板色标：写回 colors[index] 并保留该色标的透明度。拾色期间效果被删掉
-        // （colors 取不到）时只退出拾色，不写一个没有落点的补丁。
-        const colors = paletteColors(colorPick.effectId)
-        if (colors) {
-          updateEffect(colorPick.ref, colorPick.target, colorPick.effectId, {
-            colors: applyPickedStopColor(colors, colorPick.colorIndex, color),
-          })
-        }
-      } else {
-        updateEffect(colorPick.ref, colorPick.target, colorPick.effectId, { color })
-      }
-      resolveColorPick()
-    }
-  }
-
-  /**
-   * 取拾色目标那条 palette 效果当前的色标数组（只读快照）。
-   *
-   * 吸管写回的是**整组** `colors`，所以必须先拿到当前值再替换其中一项。请求里的
-   * `ref` 已由 `pickActive` 保证就是预览正在显示的卡面，故直接用本地的 `face`。
-   */
-  function paletteColors(effectId: string) {
-    if (!face || !colorPick) return null
-    const effects = findLayerById(face.layers, colorPick.target.layerId)?.effects
-    const effect = effects?.find((e) => e.id === effectId)
-    return effect?.kind === "palette" ? effect.params.colors : null
-  }
-
   // —— 蒙版擦除：在卡上涂抹，白 = 保留、黑 = 擦掉 ——
   //
-  // 只在「请求的卡面 == 正在显示的那一面」时有效（同拾色）。对话状态由预览面板本地持有，
+  // 只在「请求的卡面 == 正在显示的那一面」时有效。对话状态由预览面板本地持有，
   // 因为画布与纹理是纯粹的视图资源，进 store 只会让撤销栈与持久化多一堆无意义状态。
   const paintActive = erasePaint !== null && faceRefMatches(erasePaint.ref, side, selectedCardId)
   const [eraseSession, setEraseSession] = useState<EraseSession | null>(null)
@@ -638,33 +517,6 @@ export function PreviewPanel() {
           {!face && (
             <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-body text-disabled">
               {side === "back" ? t("preview.backNotSet") : t("preview.noCard")}
-            </div>
-          )}
-          {pickActive && (
-            <div
-              role="application"
-              aria-label={tEffect("imageMask.pickColor")}
-              title={tEffect("imageMask.pickColor")}
-              className="absolute inset-0 cursor-crosshair"
-              onPointerDown={handlePickPointerDown}
-            >
-              {/* 退出提示 + 取消按钮：拾色层盖住整块预览，必须让「怎么退出」一眼可见。
-                  浮条自己吞掉 pointerdown，否则点「取消」会先落成一次取色。 */}
-              <div
-                className="popover-shadow absolute left-1/2 top-2 flex w-[min(360px,calc(100%-1rem))] -translate-x-1/2 items-center gap-2 rounded-card border border-line-soft bg-panel/95 px-2 py-1 text-label text-muted"
-                onPointerDown={(e) => e.stopPropagation()}
-              >
-                <span className="min-w-0 flex-1 leading-tight">
-                  {tEffect("imageMask.pickHint")}
-                </span>
-                <button
-                  type="button"
-                  onClick={resolveColorPick}
-                  className="h-6 shrink-0 rounded-control px-2 text-label hover:bg-elevated hover:text-foreground"
-                >
-                  {tEffect("imageMask.cancel")}
-                </button>
-              </div>
             </div>
           )}
           {/* 擦除画笔层：整块盖住预览拦截指针（与拾色层同理，事件不会冒到渲染器的拖拽倾斜上）。

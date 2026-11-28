@@ -31,31 +31,9 @@ export type PendingConfirm =
   | { kind: "delete-back" }
 
 /**
- * 吸管拾色请求：等用户在预览里点一下，取卡面原图在该点的颜色。
- *
- * 只在这里记「要写回哪儿」；拾取本身由预览面板做（它才有视图与射线），写回走
- * `packStore.updateEffect`——于是取色与手改色值一样进撤销栈。
- */
-export interface ColorPickRequest {
-  /** 目标卡面。 */
-  ref: FaceRef
-  /** 目标效果列表（卡面或某图层）。 */
-  target: EffectTarget
-  /** 要写回 `color` 的 imageMask 条目。 */
-  effectId: string
-  /**
-   * 调色板色标的下标；省略表示写回效果的 `color` 字段。
-   *
-   * 存在时预览面板改写的是一条 `palette` 效果的 `colors[index].color`（并保留该色标
-   * 原有的透明度），而不是 `params.color`。
-   */
-  colorIndex?: number
-}
-
-/**
  * 蒙版擦除的绘画请求：等用户在预览里把擦除图画完。
  *
- * 与 {@link ColorPickRequest} 同一套路数——存「要写回哪儿」，绘画本身由预览面板做。
+ * 与其它预览交互同一套路数——存「要写回哪儿」，绘画本身由预览面板做。
  * 提交时把画好的 PNG 落盘、再经 `packStore.updateEffect` 写回 `path`，于是整次擦除
  * 是一步可撤销的历史。
  */
@@ -174,8 +152,6 @@ export interface UiStoreState {
   albumOpen: boolean
   /** 「系列封面」对话框是否打开；导入成功即写回 store，没有单独的确认步骤。 */
   coverOpen: boolean
-  /** 待完成的吸管拾色；`null` 表示没在拾取。 */
-  colorPick: ColorPickRequest | null
   /** 待完成的蒙版擦除绘画；`null` 表示没在画。 */
   erasePaint: ErasePaintRequest | null
   /**
@@ -246,10 +222,6 @@ export interface UiStoreState {
   setAlbumOpen: (open: boolean) => void
   /** 打开 / 关闭「系列封面」对话框（由文件菜单与编辑区右键菜单触发）。 */
   setCoverOpen: (open: boolean) => void
-  /** 进入吸管拾色：预览面板据此收起 / 挂上拾色层。 */
-  requestColorPick: (request: ColorPickRequest) => void
-  /** 结束拾色（取到色、按 Esc、或目标消失都走这里）。 */
-  resolveColorPick: () => void
   /** 进入蒙版擦除绘画：预览面板据此挂上画笔层。 */
   requestErasePaint: (request: ErasePaintRequest) => void
   /** 结束绘画（提交、按 Esc、或目标消失都走这里）。 */
@@ -286,7 +258,6 @@ export const useUiStore = create<UiStoreState>()((set) => ({
   pendingProbabilities: false,
   albumOpen: false,
   coverOpen: false,
-  colorPick: null,
   erasePaint: null,
   eraseBrushWidth: ERASE_BRUSH_WIDTH,
   erasePreview: true,
@@ -355,9 +326,6 @@ export const useUiStore = create<UiStoreState>()((set) => ({
   resolveProbabilities: () => set({ pendingProbabilities: false }),
   setAlbumOpen: (albumOpen) => set({ albumOpen }),
   setCoverOpen: (coverOpen) => set({ coverOpen }),
-
-  requestColorPick: (colorPick) => set({ colorPick }),
-  resolveColorPick: () => set({ colorPick: null }),
 
   requestErasePaint: (erasePaint) => set({ erasePaint }),
   // 一并摘掉步进历史：会话已结束，残留的回调若被 Ctrl+Z 命中，只会作用在一张

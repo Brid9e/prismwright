@@ -59,7 +59,6 @@
     "restore": "Restore",
     "close": "Close"
   },
-  "colorAlpha": "{{label}} opacity",
   "colorPicker": {
     "saturationValue": "Saturation and value",
     "hue": "Hue",

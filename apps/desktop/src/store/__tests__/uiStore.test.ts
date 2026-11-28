@@ -128,20 +128,13 @@ describe("uiStore", () => {
     expect(useUiStore.getState().pendingNewPack).toBeNull()
   })
 
-  it("requestColorPick / resolveColorPick 成对", () => {
-    const request = {
-      ref: { kind: "card", cardId: "c1" } as const,
-      target: { scope: "layer", layerId: "l" } as const,
-      effectId: "e1",
-    }
-    expect(useUiStore.getState().colorPick).toBeNull()
-    useUiStore.getState().requestColorPick(request)
-    expect(useUiStore.getState().colorPick).toEqual(request)
-    useUiStore.getState().resolveColorPick()
-    expect(useUiStore.getState().colorPick).toBeNull()
+  it("不再保留画布吸管状态", () => {
+    expect("colorPick" in useUiStore.getState()).toBe(false)
+    expect("requestColorPick" in useUiStore.getState()).toBe(false)
+    expect("resolveColorPick" in useUiStore.getState()).toBe(false)
   })
 
-  it("requestErasePaint / resolveErasePaint 成对，且与拾色互不干扰", () => {
+  it("requestErasePaint / resolveErasePaint 成对", () => {
     const ref = { kind: "back" } as const
     useUiStore.getState().requestErasePaint({ ref, target: { scope: "layer", layerId: "l" }, effectId: "e2" })
     expect(useUiStore.getState().erasePaint).toEqual({
@@ -149,8 +142,6 @@ describe("uiStore", () => {
       target: { scope: "layer", layerId: "l" },
       effectId: "e2",
     })
-    // 两种模式各自一个槽位：开绘画不应顺带清掉拾色请求（反之亦然）。
-    expect(useUiStore.getState().colorPick).toBeNull()
     useUiStore.getState().resolveErasePaint()
     expect(useUiStore.getState().erasePaint).toBeNull()
   })

@@ -41,7 +41,6 @@ function renderEmptyStack(scope: "layer" | "face") {
         onMove: noop,
         onUpdate: noop,
         onPickImage: noop,
-        onPickColor: noop,
         onPaintErase: noop,
       }),
     ),
@@ -59,7 +58,6 @@ function renderFields(effect: Effect, scope: "layer" | "face" = "layer") {
         scope,
         onUpdate: noop,
         onPickImage: noop,
-        onPickColor: noop,
         onPaintErase: noop,
       }),
     ),
@@ -110,6 +108,14 @@ describe("EffectFields 滑块复位", () => {
       EFFECT_REGISTRY.gradient.fields.filter((f) => f.type === "slider").length,
     )
     expect(enabled).toHaveLength(1)
+  })
+})
+
+describe("EffectFields 颜色字段", () => {
+  it("不再渲染画布吸管按钮", () => {
+    // gloss 有单色字段 `color`，之前这里会额外渲染一个 Pipette 按钮。
+    const html = renderFields(fx("gloss", "g"))
+    expect(html).not.toContain("从画面拾取")
   })
 })
 

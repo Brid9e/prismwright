@@ -26,8 +26,6 @@
     "preview": "色板预览",
     "drag": "拖动第 {{index}} 个颜色排序",
     "color": "第 {{index}} 个颜色",
-    "pick": "从画面拾取第 {{index}} 个颜色",
-    "alpha": "第 {{index}} 个颜色的透明度",
     "percent": "第 {{index}} 个颜色的位置百分比"
   },
   "field": {

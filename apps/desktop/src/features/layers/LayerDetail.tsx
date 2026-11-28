@@ -108,7 +108,6 @@ export function LayerDetail({
   const removeEffect = usePackStore((s) => s.removeEffect)
   const updateEffect = usePackStore((s) => s.updateEffect)
   const moveEffect = usePackStore((s) => s.moveEffect)
-  const requestColorPick = useUiStore((s) => s.requestColorPick)
   const requestErasePaint = useUiStore((s) => s.requestErasePaint)
 
   const layer = findLayerById(face.layers, layerId)
@@ -170,9 +169,6 @@ export function LayerDetail({
             onMove={(id, toIndex) => moveEffect(faceRef, effectTarget, id, toIndex)}
             onUpdate={(id, patch) => updateEffect(faceRef, effectTarget, id, patch)}
             onPickImage={(id, fieldKey) => void pickImage(id, fieldKey)}
-            onPickColor={(id, colorIndex) =>
-              requestColorPick({ ref: faceRef, target: effectTarget, effectId: id, colorIndex })
-            }
             onPaintErase={(id) =>
               requestErasePaint({ ref: faceRef, target: effectTarget, effectId: id })
             }
