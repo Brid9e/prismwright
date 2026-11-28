@@ -157,7 +157,7 @@ export function LayerDetail({
     }
     return (
       <div className="p-2">
-        <SectionCard title={t("section.layers")}>
+        <SectionCard title={displayLayerName(layer, t)}>
           <EffectStack
             scope="layer"
             effects={layer.effects}

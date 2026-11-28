@@ -77,8 +77,8 @@ function Row({
         event.stopPropagation()
         onContextMenu(row.id, event)
       }}
-      className={`group relative flex h-7 items-center gap-1 pr-1 text-body ${
-        row.selected ? "bg-accent-soft/60 text-foreground" : "text-muted hover:bg-elevated"
+      className={`group relative mx-1 flex h-row items-center gap-1 rounded-control pr-1 text-body ${
+        row.selected ? "bg-accent-soft text-foreground" : "text-muted hover:bg-elevated"
       } ${isDragging ? "opacity-50" : ""}`}
     >
       {zone === "top" && (
@@ -88,7 +88,7 @@ function Row({
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-0.5 bg-accent" />
       )}
       {/* 「放进里面」的落点用整行填充表示（不用描边细环：细环在深色底上太弱、也难与选中态区分）。 */}
-      {zone === "middle" && <div className="pointer-events-none absolute inset-0 bg-accent-soft" />}
+      {zone === "middle" && <div className="pointer-events-none absolute inset-0 rounded-control bg-accent-soft" />}
 
       {/* 拖拽把手：固定在最左一列（不随层级缩进移动），且常驻显示——任何一行都能随时抓取。 */}
       <button
