@@ -38,6 +38,7 @@ export function Segmented({ value, options, onChange, ariaLabel, disabled }: Seg
             role="tab"
             aria-selected={active}
             aria-label={option.ariaLabel}
+            title={option.ariaLabel ?? option.label}
             disabled={disabled}
             onClick={() => onChange(option.value)}
             className={`inline-flex h-control items-center gap-1.5 rounded-control px-2.5 text-body outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent/50 disabled:cursor-not-allowed disabled:opacity-40 ${

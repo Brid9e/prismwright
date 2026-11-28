@@ -114,6 +114,12 @@
   "topbar": {
     "export": "导出"
   },
+  "layout": {
+    "label": "布局",
+    "studio": "工作室",
+    "focus": "专注",
+    "compact": "紧凑"
+  },
   "inspector": {
     "design": "设计",
     "layers": "图层",

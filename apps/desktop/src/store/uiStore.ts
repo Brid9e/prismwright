@@ -9,6 +9,7 @@
  */
 import { create } from "zustand"
 import type { EditorVersion } from "../app/editorVersions"
+import type { LayoutMode } from "../app/layoutMode"
 import type { InspectorTab } from "../features/cards/inspectorTabs"
 import type { ExportFormat } from "../features/export/exportOptions"
 import { ERASE_BRUSH_WIDTH } from "../features/preview/eraseCanvas"
@@ -95,6 +96,8 @@ export interface UiStoreState {
   previewSide: "front" | "back"
   /** 检查器当前页签（设计 / 图层 / 效果 / 导出）；不持久化，换卡时保留。 */
   inspectorTab: InspectorTab
+  /** 工作区布局模式（工作室 / 专注 / 紧凑）。 */
+  layout: LayoutMode
   /** 预览是否在空闲时自动摆动（拖拽倾斜已常驻，无开关）。 */
   previewIdleSway: boolean
   /**
@@ -204,6 +207,7 @@ export interface UiStoreState {
   toggleFolded: (side: "left" | "right") => void
   setPreviewSide: (side: "front" | "back") => void
   setInspectorTab: (tab: InspectorTab) => void
+  setLayout: (layout: LayoutMode) => void
   setPreviewIdleSway: (value: boolean) => void
   setPreviewZoom: (value: number) => void
   setShowChecker: (value: boolean) => void
@@ -263,6 +267,7 @@ export const useUiStore = create<UiStoreState>()((set) => ({
   folded: { left: false, right: false },
   previewSide: "front",
   inspectorTab: "design",
+  layout: "studio",
   previewIdleSway: true,
   // 默认 2 倍：卡片在 1 倍下只占中间一小块，细节看不清；2 倍能直接看到印刷文字。
   previewZoom: 2,
@@ -297,6 +302,13 @@ export const useUiStore = create<UiStoreState>()((set) => ({
 
   setPreviewSide: (previewSide) => set({ previewSide }),
   setInspectorTab: (inspectorTab) => set({ inspectorTab }),
+  // 专注模式把左栏收掉；其余模式恢复两栏。可见性仍以 `collapsed` 为准（菜单的显隐与
+  // 布局模式因此共用同一条路径）。
+  setLayout: (layout) =>
+    set({
+      layout,
+      collapsed: { left: layout === "focus", right: false },
+    }),
   setPreviewIdleSway: (previewIdleSway) => set({ previewIdleSway }),
   setPreviewZoom: (previewZoom) => set({ previewZoom }),
   setShowChecker: (showChecker) => set({ showChecker }),

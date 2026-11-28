@@ -43,6 +43,7 @@ import { TitleBar } from "../features/titlebar/TitleBar"
 import { isDefaultBackPack } from "../features/default-back/default-back"
 import { leaveDefaultBackFlow } from "./defaultBack"
 import { saveLanguage } from "./language"
+import { saveLayoutMode } from "./layoutMode"
 import { saveEditorVersion } from "./editorVersion"
 import { dispatch } from "./menuActions"
 import { installNativeMenu } from "./nativeMenu"
@@ -53,6 +54,7 @@ export default function App() {
   const { t } = useTranslation("common")
   const openContextMenu = useUiStore((s) => s.openContextMenu)
   const collapse = useUiStore((s) => s.collapsed)
+  const layout = useUiStore((s) => s.layout)
   const language = useUiStore((s) => s.language)
   const editorVersion = useUiStore((s) => s.editorVersion)
   const settingsOpen = useUiStore((s) => s.settingsOpen)
@@ -97,6 +99,11 @@ export default function App() {
   useEffect(() => {
     void saveEditorVersion(editorVersion)
   }, [editorVersion])
+
+  // 布局模式变化 → 落盘，下次启动直接回到上次的工作区。
+  useEffect(() => {
+    void saveLayoutMode(layout)
+  }, [layout])
 
   // 最近列表：启动读入，随后由 RecentList / 菜单各自触发探测。
   useEffect(() => {
@@ -299,9 +306,10 @@ export default function App() {
               </div>
             )}
             <Splitter
+              layout={layout}
               leftCollapsed={collapse.left}
               rightCollapsed={collapse.right}
-              left={<HierarchyPanel />}
+              left={<HierarchyPanel compact={layout === "compact"} />}
               center={<PreviewPanel />}
               right={<InspectorPanel />}
             />

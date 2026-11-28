@@ -12,11 +12,16 @@ import { useUiStore } from "../../store/uiStore"
 import { Button } from "../../ui/Button"
 import { ConfirmDialog } from "../../ui/ConfirmDialog"
 import { Segmented } from "../../ui/Segmented"
-import { CardTree } from "./CardTree"
+import { CardTree, Thumbnail } from "./CardTree"
 import { type CardSection } from "./cardFilter"
 import { displayCardName } from "./display"
 
-export function HierarchyPanel() {
+export interface HierarchyPanelProps {
+  /** 紧凑布局：只渲染缩略图条，不含搜索、分组与新建。 */
+  compact?: boolean
+}
+
+export function HierarchyPanel({ compact = false }: HierarchyPanelProps) {
   const { t } = useTranslation("editor")
   const { t: tc } = useTranslation("card")
 
@@ -25,11 +30,41 @@ export function HierarchyPanel() {
   const pack = usePackStore((s) => s.pack)
   const addCard = usePackStore((s) => s.addCard)
   const deleteCard = usePackStore((s) => s.deleteCard)
+  const selectedCardId = usePackStore((s) => s.selectedCardId)
+  const selectCard = usePackStore((s) => s.selectCard)
+  const setPreviewSide = useUiStore((s) => s.setPreviewSide)
 
   const [query, setQuery] = useState("")
   const [section, setSection] = useState<CardSection>("all")
 
   const count = pack ? pack.cards.length + pack.hiddenCards.length : 0
+
+  if (compact) {
+    const all = pack ? [...pack.cards, ...pack.hiddenCards] : []
+    return (
+      <div className="flex h-full min-h-0 flex-col items-center gap-1 overflow-y-auto overflow-x-hidden p-1">
+        {all.map((card) => (
+          <button
+            key={card.id}
+            type="button"
+            aria-label={displayCardName(card, tc)}
+            aria-pressed={card.id === selectedCardId}
+            onClick={() => {
+              selectCard(card.id)
+              setPreviewSide("front")
+            }}
+            className={`shrink-0 rounded-chip p-0.5 outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${
+              card.id === selectedCardId
+                ? "bg-accent-soft ring-1 ring-accent"
+                : "hover:bg-elevated"
+            }`}
+          >
+            <Thumbnail card={card} />
+          </button>
+        ))}
+      </div>
+    )
+  }
 
   const pendingCard =
     pendingConfirm?.kind === "delete-card"

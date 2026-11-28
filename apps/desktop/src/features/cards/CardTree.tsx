@@ -32,7 +32,7 @@ export interface CardTreeProps {
  * 单独成组件是为了让 `useCardThumbnail` 的 Hook 只跟随**这一张卡**——放进循环里手写
  * Hook 会把所有卡的加载状态挤在同一个组件里，一张图变化就让整列重渲染。
  */
-function Thumbnail({ card }: { card: Card }) {
+export function Thumbnail({ card }: { card: Card }) {
   const url = useCardThumbnail(card)
   return (
     <span className="flex h-thumb w-thumb shrink-0 items-center justify-center overflow-hidden rounded-chip border border-line-soft bg-sunken">

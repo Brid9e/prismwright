@@ -26,6 +26,21 @@ describe("uiStore", () => {
     expect(s.pendingNewPack).toBeNull()
   })
 
+  it("布局模式默认为工作室，切到专注会收起左栏", () => {
+    expect(useUiStore.getState().layout).toBe("studio")
+    expect(useUiStore.getState().inspectorTab).toBe("design")
+
+    useUiStore.getState().setLayout("focus")
+    expect(useUiStore.getState().layout).toBe("focus")
+    expect(useUiStore.getState().collapsed).toEqual({ left: true, right: false })
+
+    useUiStore.getState().setLayout("compact")
+    expect(useUiStore.getState().collapsed).toEqual({ left: false, right: false })
+
+    useUiStore.getState().setInspectorTab("effects")
+    expect(useUiStore.getState().inspectorTab).toBe("effects")
+  })
+
   it("toggleCollapsed 只翻转指定一侧", () => {
     useUiStore.getState().toggleCollapsed("left")
     expect(useUiStore.getState().collapsed).toEqual({ left: true, right: false })

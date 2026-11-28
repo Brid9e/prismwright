@@ -9,6 +9,7 @@ import { useEffect, useRef } from "react"
 import type { ReactNode } from "react"
 import type { ImperativePanelHandle } from "react-resizable-panels"
 import { Panel as ResizePanel, PanelGroup, PanelResizeHandle } from "react-resizable-panels"
+import { layoutSizes, type LayoutMode } from "../app/layoutMode"
 
 /**
  * 可拖拽的分隔条：8px 留白（与面板间距一致），悬浮/拖拽时中部亮起一条绿线。
@@ -48,15 +49,50 @@ export interface SplitterProps {
   left: ReactNode
   center: ReactNode
   right: ReactNode
-  /** 左栏折叠状态。 */
+  /** 当前布局模式；切换时把两栏调到该模式的配比。 */
+  layout: LayoutMode
+  /** 左栏折叠状态（菜单显隐）。 */
   leftCollapsed: boolean
-  /** 右栏折叠状态。 */
+  /** 右栏折叠状态（菜单显隐）。 */
   rightCollapsed: boolean
 }
 
-export function Splitter({ left, center, right, leftCollapsed, rightCollapsed }: SplitterProps) {
+export function Splitter({
+  left,
+  center,
+  right,
+  layout,
+  leftCollapsed,
+  rightCollapsed,
+}: SplitterProps) {
   const leftRef = useCollapsedSync(leftCollapsed)
   const rightRef = useCollapsedSync(rightCollapsed)
+
+  /**
+   * 布局模式 → 列宽。
+   *
+   * 首次挂载且模式是「工作室」时跳过：此时 `autoSaveId` 恢复的是用户上次拖出来的宽度，
+   * 用 18% 覆盖会把这份记忆冲掉。其余情况（切模式、启动时就是专注/紧凑）一律套用配比。
+   */
+  const applied = useRef(false)
+  useEffect(() => {
+    const leftPanel = leftRef.current
+    const rightPanel = rightRef.current
+    if (!leftPanel || !rightPanel) return
+    if (!applied.current && layout === "studio") {
+      applied.current = true
+      return
+    }
+    applied.current = true
+    const sizes = layoutSizes(layout)
+    if (sizes.left === 0) {
+      if (!leftPanel.isCollapsed()) leftPanel.collapse()
+    } else {
+      if (leftPanel.isCollapsed()) leftPanel.expand()
+      leftPanel.resize(sizes.left)
+    }
+    if (!rightPanel.isCollapsed()) rightPanel.resize(sizes.right)
+  }, [layout, leftRef, rightRef])
 
   return (
     <PanelGroup direction="horizontal" autoSaveId="prismwright-layout" className="min-h-0 flex-1">
@@ -65,7 +101,8 @@ export function Splitter({ left, center, right, leftCollapsed, rightCollapsed }:
         id="left"
         order={1}
         defaultSize={18}
-        minSize={12}
+        // 紧凑模式左栏只有缩略图条，允许压到比常规更窄。
+        minSize={layout === "compact" ? 4 : 12}
         maxSize={32}
         collapsible
         collapsedSize={0}

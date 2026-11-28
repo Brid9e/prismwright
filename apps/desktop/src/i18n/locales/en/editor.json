@@ -114,6 +114,12 @@
   "topbar": {
     "export": "Export"
   },
+  "layout": {
+    "label": "Layout",
+    "studio": "Studio",
+    "focus": "Focus",
+    "compact": "Compact"
+  },
   "inspector": {
     "design": "Design",
     "layers": "Layers",

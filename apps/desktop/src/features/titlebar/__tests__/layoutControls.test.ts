@@ -19,11 +19,15 @@ import { LayoutControls } from "../LayoutControls"
 initI18n("zh-CN")
 
 describe("LayoutControls", () => {
-  it("渲染左 / 右两个按钮，栏可见时无障碍名为「隐藏…」", () => {
+  it("渲染工作室 / 专注 / 紧凑三个模式，当前项为工作室", () => {
     const html = renderToStaticMarkup(
       createElement(TooltipProvider, null, createElement(LayoutControls)),
     )
-    expect(html).toContain("隐藏系列栏")
-    expect(html).toContain("隐藏属性栏")
+    expect(html).toContain('aria-label="工作室"')
+    expect(html).toContain('aria-label="专注"')
+    expect(html).toContain('aria-label="紧凑"')
+
+    const selected = html.match(/<button[^>]*aria-selected="true"[^>]*>.*?<\/button>/s)?.[0] ?? ""
+    expect(selected).toContain('aria-label="工作室"')
   })
 })

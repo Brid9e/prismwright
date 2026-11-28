@@ -12,6 +12,7 @@ import App from "./App"
 import { initI18n } from "../i18n/init"
 import { loadLanguage } from "./language"
 import { loadEditorVersion } from "./editorVersion"
+import { loadLayoutMode } from "./layoutMode"
 import { resolveNewPackDir } from "./packDir"
 import { loadThemeId } from "./theme"
 import { useUiStore } from "../store/uiStore"
@@ -24,6 +25,7 @@ export async function bootstrap() {
   initI18n(language)
   useUiStore.getState().setLanguage(language)
   useUiStore.getState().setEditorVersion(await loadEditorVersion())
+  useUiStore.getState().setLayout(await loadLayoutMode())
   useUiStore.getState().setNewPackDir(await resolveNewPackDir())
 
   // 主题：读选中 id → 载入可用主题（内置同步 + 导入读盘，非 Tauri 时降级为空）→
