@@ -45,7 +45,7 @@ export function SettingsView() {
     <div className="flex min-h-0 flex-1 flex-col bg-app text-foreground">
       {/* 大字标题 + 返回按钮。内层与正文同宽同心，读起来标题落在正文左缘上；不加分割线。 */}
       <header className="flex h-10 shrink-0 items-center px-4">
-        <div className="mx-auto flex w-full max-w-[1100px] items-center gap-2">
+        <div className="mx-auto flex w-full max-w-6xl items-center gap-2">
           <button
             type="button"
             onClick={() => setSettingsOpen(false)}
@@ -56,13 +56,13 @@ export function SettingsView() {
           >
             <ArrowLeft size={16} />
           </button>
-          <span className="select-none text-[15px] font-medium text-foreground">{t("title")}</span>
+          <span className="select-none text-title font-medium text-foreground">{t("title")}</span>
         </div>
       </header>
 
       {/* 正文居中、最宽 1100px；内层撑满高度，好让左侧栏的分割线通体到底。 */}
       <div className="flex min-h-0 flex-1 justify-center overflow-y-auto px-4 pb-4">
-        <div className="flex w-full max-w-[1100px]">
+        <div className="flex w-full max-w-6xl">
           <nav className="w-32 shrink-0 border-r border-line pr-2" aria-label={t("title")}>
             {CATEGORIES.map(({ id, labelKey }) => (
               <button
@@ -121,7 +121,7 @@ export function SettingsView() {
                   <span className="shrink-0 text-title text-muted">{t("newPackDir.label")}</span>
                   <div className="flex min-w-0 items-center gap-1">
                     <span
-                      className="min-w-0 max-w-[420px] truncate text-title text-foreground"
+                      className="min-w-0 max-w-md truncate text-title text-foreground"
                       title={newPackDir}
                     >
                       {newPackDir || "—"}

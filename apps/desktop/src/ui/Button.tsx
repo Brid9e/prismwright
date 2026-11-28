@@ -7,13 +7,15 @@
  */
 import type { ButtonHTMLAttributes, ReactNode } from "react"
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger"
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "danger-solid"
 
 const VARIANT_CLASS: Record<ButtonVariant, string> = {
   primary: "bg-accent text-accent-foreground hover:bg-accent-hover active:bg-accent-active",
   secondary: "border border-line-soft text-muted hover:bg-elevated hover:text-foreground",
   ghost: "text-muted hover:bg-elevated hover:text-foreground",
   danger: "border border-danger/40 text-danger hover:bg-danger/10",
+  // 破坏性操作的确认键：实心红，与「取消」拉开距离。
+  "danger-solid": "bg-danger text-foreground hover:opacity-90",
 }
 
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className"> {

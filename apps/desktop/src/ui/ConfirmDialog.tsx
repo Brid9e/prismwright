@@ -3,6 +3,7 @@
  *
  * 外壳（遮罩 / 定位 / Esc）来自 `DialogShell`；本组件只负责标题、正文与两个按钮。
  */
+import { Button } from "./Button"
 import { DialogShell } from "./Dialog"
 
 export interface ConfirmDialogProps {
@@ -30,24 +31,16 @@ export function ConfirmDialog({
   return (
     <DialogShell open={open} title={title} description={body} onClose={onCancel}>
       <div className="flex justify-end gap-2">
-        <button
-          type="button"
-          autoFocus={destructive}
-          onClick={onCancel}
-          className="h-6 rounded-control border border-line-soft px-3 text-body text-foreground hover:bg-elevated"
-        >
+        <Button autoFocus={destructive} onClick={onCancel}>
           {cancelLabel}
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
           autoFocus={!destructive}
+          variant={destructive ? "danger-solid" : "primary"}
           onClick={onConfirm}
-          className={`h-6 rounded-control px-3 text-body text-accent-foreground ${
-            destructive ? "bg-danger hover:opacity-90" : "bg-accent hover:bg-accent-hover"
-          }`}
         >
           {confirmLabel}
-        </button>
+        </Button>
       </div>
     </DialogShell>
   )
