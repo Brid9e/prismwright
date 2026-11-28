@@ -30,11 +30,17 @@ export function clampZoom(zoom: number): number {
 /**
  * 缩放倍数 → 相机到卡面的距离（zoom 越大越近）。
  *
+ * `fitDistance` 抬高 `zoom = 1` 的基准：宽卡 / 窄画幅下整张卡刚好进画面的距离可能比
+ * {@link BASE_DISTANCE} 更远，取较大者保证 1 倍时完整可见。`zoom > 1` 后按同一基准
+ * 继续拉近并裁切边缘，不再被 fit 距离钉住——这是「放大到 400%」能真正生效的前提。
+ *
  * @param zoom - 缩放倍数；先经 {@link clampZoom} 夹取。
+ * @param fitDistance - 整卡贴合所需的最小距离；省略或 0 时退回 {@link BASE_DISTANCE}。
  * @returns 相机的 z 坐标（正数）。
  */
-export function zoomToCameraDistance(zoom: number): number {
-  return BASE_DISTANCE / clampZoom(zoom)
+export function zoomToCameraDistance(zoom: number, fitDistance = 0): number {
+  const base = Math.max(BASE_DISTANCE, fitDistance)
+  return base / clampZoom(zoom)
 }
 
 /**

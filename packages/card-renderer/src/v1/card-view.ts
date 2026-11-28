@@ -518,18 +518,18 @@ export function createCardView(opts: CardViewOptions): CardView {
   }
 
   /**
-   * 相机距离：缩放推拉与「整张卡都进画幅」的下限取大者。
+   * 相机距离：以「1 倍时整张卡可见」为基准，再按缩放倍数推拉。
    *
    * 宽高比可调的卡可以很宽，窄画幅（编辑器预览侧栏）下固定距离会把左右边缘裁掉；
-   * 下限只在大卡 / 窄画幅时才高于基准距离，5:7 的既有取景不受影响。
+   * fit 距离只抬高 1 倍的基准。`zoom > 1` 后不再套 fit 下限，放大到 400% 会裁切边缘，
+   * 这是用户要求的「允许放大并裁切」；重置视角回到 1 倍时仍完整可见。
    */
   function applyCameraDistance(): void {
     const { width, height } = host.size()
     const viewportAspect = (width || 1) / (height || 1)
-    const distance = Math.max(
-      zoomToCameraDistance(zoom),
-      fitCameraDistance(aspect, viewportAspect, CAMERA_FOV),
-    )
+    // fit 距离只抬高 1 倍的基准；放大后不再取 max，否则相机被钉住、画面停止变大。
+    const fit = fitCameraDistance(aspect, viewportAspect, CAMERA_FOV)
+    const distance = zoomToCameraDistance(zoom, fit)
     camera.position.set(0, 0, distance)
     // 高光/反射着色读的是 uCameraPosition，推拉后必须同步，否则高光停在旧视角。
     updateUniforms()

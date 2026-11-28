@@ -9,6 +9,16 @@ import {
 } from "../zoom"
 
 describe("zoom", () => {
+  it("fitDistance 抬高 zoom=1 的基准，同时允许继续放大", () => {
+    const fit = BASE_DISTANCE * 2
+    expect(zoomToCameraDistance(1, fit)).toBe(fit)
+    expect(zoomToCameraDistance(2, fit)).toBe(fit / 2)
+    expect(zoomToCameraDistance(4, fit)).toBe(fit / 4)
+    // fit 小于基准时不改旧行为。
+    expect(zoomToCameraDistance(1, 1)).toBe(BASE_DISTANCE)
+    expect(zoomToCameraDistance(4, 1)).toBe(BASE_DISTANCE / MAX_ZOOM)
+  })
+
   it("zoom = 1 时相机停在基准距离", () => {
     expect(zoomToCameraDistance(1)).toBe(BASE_DISTANCE)
   })
