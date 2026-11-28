@@ -86,13 +86,13 @@ export function createCard(num: number, layerName: string): Card {
  * @param name - 系列名（非空）。
  * @param editorVersion - 创建该系列的编辑器版本（如 `"v1"`）。由调用方传入当前值，
  *   缺省 `"v1"`——schema 包不持有版本清单，缺省只是给测试与旧调用点兜底。
- * @returns 字段完整的 {@link Pack}，数据格式版本为 8，`cards` / `hiddenCards` 为空数组，
+ * @returns 字段完整的 {@link Pack}，数据格式版本为 10，`cards` / `hiddenCards` 为空数组，
  *   `back` 为 `null`，`createdAt` 与 `updatedAt` 均取当前时刻（ISO 字符串，二者相等）。
  */
 export function createEmptyPack(name: string, editorVersion = "v1"): Pack {
   const now = new Date().toISOString()
   return PackSchema.parse({
-    schemaVersion: 9,
+    schemaVersion: 10,
     editorVersion,
     id: newId(),
     name,

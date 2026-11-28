@@ -1394,10 +1394,10 @@ export const usePackStore = create<PackStoreState>()((set, get) => ({
         const e = effectsArray(face, target)?.find((x) => x.id === effectId)
         if (!e) return
         if (enabled !== undefined) e.enabled = enabled
-        // `colors`（palette）是 `EffectParams` 里唯一的数组字段：逐项拷贝色标对象后再入 state，
+        // `colors`（渐变）是 `EffectParams` 里唯一的数组字段：逐项拷贝色标对象后再入 state，
         // 隔断与调用方所持数组及元素的共享引用（否则调用方原地改 `stop.at` 会绕过 commit 静默
         // 改写 state）。合并键仍为 `effect.<id>.<field>`，连续拖动色标合并成一步历史。
-        // `EffectPatch` 是判别式联合的部分补丁，须先用 `in` 收窄到 palette 分支才取得到 `colors`。
+        // `EffectPatch` 是判别式联合的部分补丁，须先用 `in` 收窄到 gradient 分支才取得到 `colors`。
         if ("colors" in paramsPatch && paramsPatch.colors)
           paramsPatch.colors = paramsPatch.colors.map((s) => ({ color: s.color, at: s.at }))
         // 参数补丁是按判别式联合收窄的部分字段，与具体 `params` 分支的对应关系 TS 证不出来，故收窄。

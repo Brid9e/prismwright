@@ -20,7 +20,6 @@ import type {
   ImageParams,
   MoireParams,
   GlossParams,
-  PaletteParams,
   HoloGridParams,
 } from "@prismwright/schema"
 import { patternModeCode } from "../mapping"
@@ -28,7 +27,7 @@ import { patternModeCode } from "../mapping"
 /**
  * 每种效果在单个目标上的槽位上限。
  *
- * 多数与着色器的定长数组长度一一对应；「资源 + 门控」型效果（`imageMask` / `palette`）不进任何
+ * 多数与着色器的定长数组长度一一对应；「资源 + 门控」型效果（`imageMask`）不进任何
  * 定长数组，上限恒为 1。
  */
 export const MOIRE_MAX = 2
@@ -40,8 +39,6 @@ export const MASK_PRESET_MAX = 2
 export const IMAGE_MASK_MAX = 1
 /** 蒙版擦除单目标上限：固定 1 张（一张画布就是一处擦除，要改就再画）。 */
 export const MASK_ERASE_MAX = 1
-/** 调色板（色标表）单目标上限：固定 1（一个目标一份调色板）。 */
-export const PALETTE_MAX = 1
 /** 独立网格单目标上限：固定 1（一个目标一份网格）。 */
 export const HOLO_GRID_MAX = 1
 /** 图片效果单目标上限：一个图层最多一张图片（要多张就多建图层）。 */
@@ -67,7 +64,7 @@ export type FieldType =
 /**
  * 效果可挂载的目标范围。
  *
- * `gradient` / `holoGrid` / `palette` 只对图层有意义（卡面片元不跑 `holoPhase` / `holoColor`，三者
+ * `gradient` / `holoGrid` 只对图层有意义（卡面片元不跑 `holoPhase` / `holoColor`，两者
  * 在卡面上空转）；`moire` / `gloss` / `maskPreset` / `imageMask` 卡面确实会渲染。UI 据此过滤
  * 「＋ 添加效果」菜单（只在新增加时过滤，已存在的条目仍照常渲染）。
  */
@@ -155,17 +152,15 @@ type EffectParamsOf<K extends EffectKind> = K extends "gradient"
       ? MoireParams
       : K extends "gloss"
         ? GlossParams
-        : K extends "palette"
-          ? PaletteParams
-          : K extends "maskPreset"
-            ? MaskPresetParams
-            : K extends "imageMask"
-              ? MaskImageParams
-              : K extends "maskErase"
-                ? MaskEraseParams
-                : K extends "image"
-                  ? ImageParams
-                  : never
+        : K extends "maskPreset"
+          ? MaskPresetParams
+          : K extends "imageMask"
+            ? MaskImageParams
+            : K extends "maskErase"
+              ? MaskEraseParams
+              : K extends "image"
+                ? ImageParams
+                : never
 
 /** 方向模式选择项（三种效果共用同一枚举）。 */
 const MODE_OPTIONS: readonly FieldOption[] = [
@@ -176,8 +171,8 @@ const MODE_OPTIONS: readonly FieldOption[] = [
 
 /** 调色板的合成方式：色带 / 叠色式暗部叠色。 */
 const PALETTE_COMPOSITE_OPTIONS: readonly FieldOption[] = [
-  { value: "palette", labelKey: "palette.compositePalette" },
-  { value: "tint", labelKey: "palette.compositeTint" },
+  { value: "palette", labelKey: "gradient.compositePalette" },
+  { value: "tint", labelKey: "gradient.compositeTint" },
 ]
 
 /** 图蒙版来源的选择项（与 `MaskSource` 一一对应）。 */
@@ -228,9 +223,97 @@ export const EFFECT_REGISTRY = {
     role: "phase",
     scope: "layer",
     maxPerTarget: GRADIENT_MAX,
-    defaultParams: () => parseParams("gradient", {}),
+    // 预置产品默认调色板（金→蓝→紫）：schema 的 `colors` 默认是 `[]`（不出全息），
+    // 新建时给一组可见初值，而非空。
+    defaultParams: () =>
+      parseParams("gradient", { colors: DEFAULT_STOPS.map((s) => ({ ...s })) }),
     labelKey: "gradient.label",
     fields: [
+      // 原 palette 效果（schema v10 并入）：色标 / 合成方式 / 叠色参数放在最前。
+      {
+        key: "composite",
+        labelKey: "gradient.composite",
+        type: "select",
+        options: PALETTE_COMPOSITE_OPTIONS,
+      },
+      // 叠色合成不读色标：隐藏色标，避免用户以为改色仍有反应。
+      {
+        key: "colors",
+        labelKey: "gradient.colors",
+        type: "colorStops",
+        visibleWhen: (p) => p.composite !== "tint",
+      },
+      // 叠色合成的可调项：默认值即 holo.fs 的常量，只在 叠色模式下显示。
+      {
+        key: "hue",
+        labelKey: "gradient.hue",
+        type: "slider",
+        min: 0,
+        max: 0.2,
+        step: 0.001,
+        precision: 3,
+        visibleWhen: (p) => p.composite === "tint",
+      },
+      {
+        key: "sat",
+        labelKey: "gradient.sat",
+        type: "slider",
+        min: 0,
+        max: 2,
+        step: 0.01,
+        precision: 2,
+        visibleWhen: (p) => p.composite === "tint",
+      },
+      {
+        key: "lift",
+        labelKey: "gradient.lift",
+        type: "slider",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        precision: 2,
+        visibleWhen: (p) => p.composite === "tint",
+      },
+      {
+        key: "tint",
+        labelKey: "gradient.tint",
+        type: "slider",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        precision: 2,
+        visibleWhen: (p) => p.composite === "tint",
+      },
+      {
+        key: "deltaBase",
+        labelKey: "gradient.deltaBase",
+        type: "slider",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        precision: 2,
+        visibleWhen: (p) => p.composite === "tint",
+      },
+      {
+        key: "deltaContrast",
+        labelKey: "gradient.deltaContrast",
+        type: "slider",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        precision: 2,
+        visibleWhen: (p) => p.composite === "tint",
+      },
+      {
+        key: "deltaBright",
+        labelKey: "gradient.deltaBright",
+        type: "slider",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        precision: 2,
+        visibleWhen: (p) => p.composite === "tint",
+      },
       { key: "mode", labelKey: "gradient.mode", type: "select", options: MODE_OPTIONS },
       {
         key: "count",
@@ -565,105 +648,6 @@ export const EFFECT_REGISTRY = {
       offsetY: p.offsetY,
       softness: p.softness,
     }),
-  },
-  palette: {
-    kind: "palette",
-    role: "color",
-    scope: "layer",
-    maxPerTarget: PALETTE_MAX,
-    // 预置产品默认调色板（金→蓝→紫）：schema 的 `colors` 默认是 `[]`（不出全息），
-    // 与 maskPreset 的 `id: "polygon"` 同理——新建时给一组可见初值，而非空。
-    defaultParams: () => parseParams("palette", { colors: DEFAULT_STOPS.map((s) => ({ ...s })) }),
-    labelKey: "palette.label",
-    fields: [
-      {
-        key: "composite",
-        labelKey: "palette.composite",
-        type: "select",
-        options: PALETTE_COMPOSITE_OPTIONS,
-      },
-      // 叠色合成不读色标：隐藏色标，避免用户以为改色仍有反应。
-      {
-        key: "colors",
-        labelKey: "palette.colors",
-        type: "colorStops",
-        visibleWhen: (p) => p.composite !== "tint",
-      },
-      // 叠色合成的可调项：默认值即 holo.fs 的常量，只在 叠色模式下显示。
-      {
-        key: "hue",
-        labelKey: "palette.hue",
-        type: "slider",
-        min: 0,
-        max: 0.2,
-        step: 0.001,
-        precision: 3,
-        visibleWhen: (p) => p.composite === "tint",
-      },
-      {
-        key: "sat",
-        labelKey: "palette.sat",
-        type: "slider",
-        min: 0,
-        max: 2,
-        step: 0.01,
-        precision: 2,
-        visibleWhen: (p) => p.composite === "tint",
-      },
-      {
-        key: "lift",
-        labelKey: "palette.lift",
-        type: "slider",
-        min: 0,
-        max: 1,
-        step: 0.01,
-        precision: 2,
-        visibleWhen: (p) => p.composite === "tint",
-      },
-      {
-        key: "tint",
-        labelKey: "palette.tint",
-        type: "slider",
-        min: 0,
-        max: 1,
-        step: 0.01,
-        precision: 2,
-        visibleWhen: (p) => p.composite === "tint",
-      },
-      {
-        key: "deltaBase",
-        labelKey: "palette.deltaBase",
-        type: "slider",
-        min: 0,
-        max: 1,
-        step: 0.01,
-        precision: 2,
-        visibleWhen: (p) => p.composite === "tint",
-      },
-      {
-        key: "deltaContrast",
-        labelKey: "palette.deltaContrast",
-        type: "slider",
-        min: 0,
-        max: 1,
-        step: 0.01,
-        precision: 2,
-        visibleWhen: (p) => p.composite === "tint",
-      },
-      {
-        key: "deltaBright",
-        labelKey: "palette.deltaBright",
-        type: "slider",
-        min: 0,
-        max: 1,
-        step: 0.01,
-        precision: 2,
-        visibleWhen: (p) => p.composite === "tint",
-      },
-    ],
-    // 调色板是「资源 + 门控」型：色标不进任何定长数组 uniform——材质侧经 resolvePalette 直接解析，
-    // 填进 `spectrum()` 的 `uColors` / `uStops`（见 materials/layer-material.ts）。
-    packUniforms: () => ({}),
   },
   holoGrid: {
     kind: "holoGrid",
@@ -1134,7 +1118,6 @@ export const EFFECT_KINDS: readonly EffectKind[] = [
   "gradient",
   "moire",
   "gloss",
-  "palette",
   "holoGrid",
   "maskPreset",
   "imageMask",

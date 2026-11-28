@@ -4,18 +4,20 @@
  * 架构位置：位于数据层最外层，负责把任意来源（磁盘 `pack.json`、导入文件）的未知数据校验为
  * 当前版本的 {@link Pack}。
  *
- * 当前保留两条升级：
+ * 当前保留三条升级：
  * - v7 → v8：宽高比从每张卡收到系列上；
  * - v8 → v9：卡面降级为纯图层——旧 `front` 图与面级效果迁进最底层的 image 图层，
- *   整卡擦除迁成带 `maskErase` 的父级 group。
+ *   整卡擦除迁成带 `maskErase` 的父级 group；
+ * - v9 → v10：调色板并入渐变——同一效果列表里的第一条 `gradient` 与第一条 `palette`
+ *   合成一条 `gradient`（色标 / 合成参数 + 斜坡 / 相位参数）。
  *
  * 对外暴露：`CURRENT_SCHEMA_VERSION` 常量、`migrate`、`migrateCardFace` 与 `parsePack`。
  */
 import type { Pack } from "./types.js"
-import { DEFAULT_CARD_ASPECT, PackSchema } from "./schema.js"
+import { DEFAULT_CARD_ASPECT, GradientParamsSchema, PackSchema } from "./schema.js"
 
 /** 当前数据格式版本。新增破坏性结构变更时递增。 */
-export const CURRENT_SCHEMA_VERSION = 9
+export const CURRENT_SCHEMA_VERSION = 10
 
 /** 从任意值里读一个可用的比例；不可用返回 `undefined`。 */
 function readAspect(value: unknown): number | undefined {
@@ -112,7 +114,7 @@ function legacyImageEffect(face: Record<string, unknown>): Record<string, unknow
  * - 旧面级 moire 的 `faceStrength` → 图层 moire 的 `contentRelief`；
  * - 删除 front* / 面级 effects。
  */
-export function migrateCardFace(raw: unknown): unknown {
+function migrateFaceV8toV9(raw: unknown): unknown {
   if (!isRecord(raw)) return raw
   const face = { ...raw }
   const hasFront = typeof face.front === "string" && face.front !== ""
@@ -165,6 +167,91 @@ export function migrateCardFace(raw: unknown): unknown {
   return face
 }
 
+/**
+ * v9 → v10：把一个效果列表里的调色板并入渐变。
+ *
+ * - 两条都有：params 合并，`id` 取渐变，位置取靠前者，`enabled` 取调色板（用户感知的是「有没有全息」）；
+ * - 仅调色板：补默认渐变参数（含 `straight: 1`）；
+ * - 仅渐变：补 `colors: []`，保持「不出全息」；
+ * - 同列表里多出的调色板 / 渐变：只保留合并后的第一条（渲染器本来就只读第一条）。
+ */
+function mergeEffectList(list: unknown): unknown {
+  if (!Array.isArray(list)) return list
+  let gradient: Record<string, unknown> | undefined
+  let palette: Record<string, unknown> | undefined
+  let gradientIndex = -1
+  let paletteIndex = -1
+  for (let i = 0; i < list.length; i++) {
+    const effect = list[i]
+    if (!isRecord(effect)) continue
+    if (effect.kind === "gradient" && !gradient) {
+      gradient = effect
+      gradientIndex = i
+    } else if (effect.kind === "palette" && !palette) {
+      palette = effect
+      paletteIndex = i
+    }
+  }
+  if (!gradient && !palette) return list
+
+  const defaults = GradientParamsSchema.parse({}) as Record<string, unknown>
+  const gradientParams = gradient && isRecord(gradient.params) ? gradient.params : {}
+  const paletteParams = palette && isRecord(palette.params) ? palette.params : {}
+  const seed: Record<string, unknown> = { ...defaults, ...gradientParams }
+  if (palette) Object.assign(seed, paletteParams)
+  // 没有调色板、且渐变本身也没有 colors（v9 的渐变从不带色标）时保持空色标：
+  // 迁移前这条渐变不出全息，迁移后也不该凭空出。已经是 v10 的渐变则保留已有 colors。
+  else if (!("colors" in gradientParams)) seed.colors = []
+  // 走一遍 schema：旧格式裸字符串色标在这里归一，缺省字段补齐，保证迁移产物可直接解析。
+  const params = GradientParamsSchema.parse(seed)
+  const merged = {
+    id: typeof gradient?.id === "string" ? gradient.id : palette?.id,
+    kind: "gradient",
+    enabled: palette ? palette.enabled !== false : gradient?.enabled !== false,
+    params,
+  }
+
+  const first = [gradientIndex, paletteIndex].filter((i) => i >= 0)
+  const insertAt = first.length > 0 ? Math.min(...first) : list.length
+  const out: unknown[] = []
+  for (let i = 0; i < list.length; i++) {
+    if (i === insertAt) out.push(merged)
+    const effect = list[i]
+    if (isRecord(effect) && (effect.kind === "gradient" || effect.kind === "palette")) continue
+    out.push(effect)
+  }
+  return out
+}
+
+/** 递归遍历一个图层的效果与子树。 */
+function mergeLayerPaletteGradient(raw: unknown): unknown {
+  if (!isRecord(raw)) return raw
+  const layer = { ...raw }
+  if (Array.isArray(layer.effects)) layer.effects = mergeEffectList(layer.effects)
+  if (Array.isArray(layer.children)) {
+    layer.children = layer.children.map(mergeLayerPaletteGradient)
+  }
+  return layer
+}
+
+/** v9 → v10：卡面自身与其所有图层的效果列表都做合并。 */
+function mergeFacePaletteGradient(raw: unknown): unknown {
+  if (!isRecord(raw)) return raw
+  const face = { ...raw }
+  if (Array.isArray(face.effects)) face.effects = mergeEffectList(face.effects)
+  if (Array.isArray(face.layers)) face.layers = face.layers.map(mergeLayerPaletteGradient)
+  return face
+}
+
+/**
+ * 单卡导入入口：同时走 v8→v9 与 v9→v10。
+ *
+ * `.card` 包里的 `card.json` 可能停留在任一新旧版本；两段迁移都是幂等的。
+ */
+export function migrateCardFace(raw: unknown): unknown {
+  return mergeFacePaletteGradient(migrateFaceV8toV9(raw))
+}
+
 /** v7 → v8：宽高比从每张卡收到系列上。 */
 function migrateV7toV8(obj: Record<string, unknown>): Record<string, unknown> {
   const cards = Array.isArray(obj.cards) ? obj.cards.map(withoutAspect) : undefined
@@ -186,13 +273,29 @@ function migrateV7toV8(obj: Record<string, unknown>): Record<string, unknown> {
 function migrateV8toV9(obj: Record<string, unknown>): Record<string, unknown> {
   return {
     ...obj,
-    ...(Array.isArray(obj.cards) ? { cards: obj.cards.map(migrateCardFace) } : {}),
+    ...(Array.isArray(obj.cards) ? { cards: obj.cards.map(migrateFaceV8toV9) } : {}),
     ...(Array.isArray(obj.hiddenCards)
-      ? { hiddenCards: obj.hiddenCards.map(migrateCardFace) }
+      ? { hiddenCards: obj.hiddenCards.map(migrateFaceV8toV9) }
       : {}),
     ...(obj.back === undefined || obj.back === null
       ? {}
-      : { back: migrateCardFace(obj.back) }),
+      : { back: migrateFaceV8toV9(obj.back) }),
+  }
+}
+
+/** v9 → v10：系列里的每张卡 / 隐藏卡 / 卡背都把调色板并入渐变。 */
+function migrateV9toV10(obj: Record<string, unknown>): Record<string, unknown> {
+  return {
+    ...obj,
+    ...(Array.isArray(obj.cards)
+      ? { cards: obj.cards.map(mergeFacePaletteGradient) }
+      : {}),
+    ...(Array.isArray(obj.hiddenCards)
+      ? { hiddenCards: obj.hiddenCards.map(mergeFacePaletteGradient) }
+      : {}),
+    ...(obj.back === undefined || obj.back === null
+      ? {}
+      : { back: mergeFacePaletteGradient(obj.back) }),
   }
 }
 
@@ -212,7 +315,8 @@ export function migrate(raw: unknown): unknown {
   if (version === CURRENT_SCHEMA_VERSION) return raw
 
   const v8 = version < 8 ? migrateV7toV8(raw) : raw
-  return { ...migrateV8toV9(v8), schemaVersion: CURRENT_SCHEMA_VERSION }
+  const v9 = version < 9 ? migrateV8toV9(v8) : v8
+  return { ...migrateV9toV10(v9), schemaVersion: CURRENT_SCHEMA_VERSION }
 }
 
 /** 解析并校验一个系列：先 `migrate` 过版本守卫，再交给 `PackSchema`。 */

@@ -16,12 +16,12 @@ describe("createDefaultBackFace", () => {
   it("不引用任何图片：默认卡背不依赖系列内的素材", () => {
   })
 
-  it("自带一层底纹（调色板 + 渐变）与一层文字", () => {
+  it("自带一层底纹（一条渐变）与一层文字", () => {
     const face = createDefaultBackFace()
     expect(face.layers).toHaveLength(2)
     const [holo, text] = face.layers
     expect(holo.kind).toBe("normal")
-    expect(holo.effects.map((e) => e.kind)).toEqual(["palette", "gradient"])
+    expect(holo.effects.map((e) => e.kind)).toEqual(["gradient"])
     expect(text.kind).toBe("text")
     expect(text.text?.content).toBe("PRISMWRIGHT")
   })

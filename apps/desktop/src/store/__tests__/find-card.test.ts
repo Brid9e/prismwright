@@ -55,7 +55,7 @@ function card(id: string): Card {
 /** 手写一个最小可用的系列；两份卡片列表由调用方分别注入。 */
 function pack(cards: Card[], hiddenCards: Card[]): Pack {
   return {
-    schemaVersion: 9,
+    schemaVersion: 10,
     editorVersion: "v1",
     id: "pack-1",
     name: "P",

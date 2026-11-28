@@ -10,7 +10,6 @@ import {
   GradientParamsSchema,
   HoloGridParamsSchema,
   MaskPresetParamsSchema,
-  PaletteParamsSchema,
   evenlySpacedStops,
 } from "../schema"
 
@@ -46,33 +45,33 @@ describe("LayerSchema", () => {
   })
 })
 
-describe("PaletteParamsSchema 的色标解析与归一化", () => {
+describe("GradientParamsSchema 的色标解析与归一化", () => {
   it("默认 colors 为空数组", () => {
-    expect(PaletteParamsSchema.parse({}).colors).toEqual([])
+    expect(GradientParamsSchema.parse({}).colors).toEqual([])
   })
 
   it("接受 3 位 hex 颜色，并展开为单个色标", () => {
-    expect(PaletteParamsSchema.parse({ colors: ["#fff"] }).colors).toEqual([
+    expect(GradientParamsSchema.parse({ colors: ["#fff"] }).colors).toEqual([
       { color: "#fff", at: 0.5 },
     ])
   })
 
   it("拒绝非法 hex 颜色", () => {
-    expect(() => PaletteParamsSchema.parse({ colors: ["red"] })).toThrow()
+    expect(() => GradientParamsSchema.parse({ colors: ["red"] })).toThrow()
   })
 
   it("接受恰好 8 个色标", () => {
     const colors = Array.from({ length: 8 }, () => "#ffffff")
-    expect(PaletteParamsSchema.parse({ colors }).colors).toHaveLength(8)
+    expect(GradientParamsSchema.parse({ colors }).colors).toHaveLength(8)
   })
 
   it("拒绝超过 8 个色标", () => {
     const colors = Array.from({ length: 9 }, () => "#ffffff")
-    expect(() => PaletteParamsSchema.parse({ colors })).toThrow()
+    expect(() => GradientParamsSchema.parse({ colors })).toThrow()
   })
 
   it("旧格式（裸字符串数组）按下标等距展开：位置 0, 1/(N-1), …, 1", () => {
-    expect(PaletteParamsSchema.parse({ colors: ["#111111", "#222222", "#333333"] }).colors).toEqual(
+    expect(GradientParamsSchema.parse({ colors: ["#111111", "#222222", "#333333"] }).colors).toEqual(
       [
         { color: "#111111", at: 0 },
         { color: "#222222", at: 0.5 },
@@ -83,13 +82,13 @@ describe("PaletteParamsSchema 的色标解析与归一化", () => {
 
   it("新格式原样通过，且不是同一份对象引用", () => {
     const stops = [{ color: "#111111", at: 0.25 }]
-    const parsed = PaletteParamsSchema.parse({ colors: stops }).colors
+    const parsed = GradientParamsSchema.parse({ colors: stops }).colors
     expect(parsed).toEqual([{ color: "#111111", at: 0.25 }])
     expect(parsed[0]).not.toBe(stops[0])
   })
 
   it("未排序的位置在解析期排序", () => {
-    const parsed = PaletteParamsSchema.parse({
+    const parsed = GradientParamsSchema.parse({
       colors: [
         { color: "#111111", at: 0.9 },
         { color: "#222222", at: 0.1 },
@@ -101,7 +100,7 @@ describe("PaletteParamsSchema 的色标解析与归一化", () => {
   it("混格式：字符串按它在数组里的下标展开，其余原样，最后统一排序", () => {
     // 下标 0 / 1，n=2 → at = 0 / 1；再按 at 升序排 → [#111111@0, #222222@0.9]
     expect(
-      PaletteParamsSchema.parse({ colors: ["#111111", { color: "#222222", at: 0.9 }] }).colors,
+      GradientParamsSchema.parse({ colors: ["#111111", { color: "#222222", at: 0.9 }] }).colors,
     ).toEqual([
       { color: "#111111", at: 0 },
       { color: "#222222", at: 0.9 },
@@ -109,7 +108,7 @@ describe("PaletteParamsSchema 的色标解析与归一化", () => {
   })
 
   it("位置重合是允许的（表达硬边）", () => {
-    const parsed = PaletteParamsSchema.parse({
+    const parsed = GradientParamsSchema.parse({
       colors: [
         { color: "#111111", at: 0.5 },
         { color: "#222222", at: 0.5 },
@@ -119,27 +118,27 @@ describe("PaletteParamsSchema 的色标解析与归一化", () => {
   })
 
   it("拒绝越界的 at", () => {
-    expect(() => PaletteParamsSchema.parse({ colors: [{ color: "#111111", at: 1.5 }] })).toThrow()
-    expect(() => PaletteParamsSchema.parse({ colors: [{ color: "#111111", at: -0.1 }] })).toThrow()
+    expect(() => GradientParamsSchema.parse({ colors: [{ color: "#111111", at: 1.5 }] })).toThrow()
+    expect(() => GradientParamsSchema.parse({ colors: [{ color: "#111111", at: -0.1 }] })).toThrow()
   })
 
   it("拒绝缺 at 或色值非法的对象形式", () => {
-    expect(() => PaletteParamsSchema.parse({ colors: [{ color: "#111111" }] })).toThrow()
-    expect(() => PaletteParamsSchema.parse({ colors: [{ color: "red", at: 0 }] })).toThrow()
+    expect(() => GradientParamsSchema.parse({ colors: [{ color: "#111111" }] })).toThrow()
+    expect(() => GradientParamsSchema.parse({ colors: [{ color: "red", at: 0 }] })).toThrow()
   })
 
   it("对象形式的第 9 个色标同样被拒", () => {
     const colors = Array.from({ length: 9 }, (_, i) => ({ color: "#ffffff", at: i / 8 }))
-    expect(() => PaletteParamsSchema.parse({ colors })).toThrow()
+    expect(() => GradientParamsSchema.parse({ colors })).toThrow()
   })
 
-  it("整个系列：palette 效果里的裸字符串色标（旧格式）仍能解析", () => {
+  it("整个系列：渐变效果里的裸字符串色标（旧格式）仍能解析", () => {
     const layer = {
       ...validLayer,
-      effects: [{ kind: "palette" as const, id: "e1", params: { colors: ["#ff00ff", "#00ffff"] } }],
+      effects: [{ kind: "gradient" as const, id: "e1", params: { colors: ["#ff00ff", "#00ffff"] } }],
     }
     const pack = PackSchema.parse({
-      schemaVersion: 9,
+      schemaVersion: 10,
       id: "p1",
       name: "旧包",
       createdAt: "2026-10-10T00:00:00.000Z",
@@ -147,7 +146,7 @@ describe("PaletteParamsSchema 的色标解析与归一化", () => {
       cards: [{ id: "c1", num: 1, name: "旧卡", layers: [layer] }],
     })
     expect(pack.cards[0].layers[0].effects[0]).toMatchObject({
-      kind: "palette",
+      kind: "gradient",
       params: {
         colors: [
           { color: "#ff00ff", at: 0 },
@@ -254,8 +253,17 @@ describe("GlossParamsSchema / MoireParamsSchema / GradientParamsSchema", () => {
     expect(MoireParamsSchema.parse({ mode: "rays" }).mode).toBe("rays")
   })
 
-  it("gradient 缺省时补默认（平行斜坡、count 31、angle 38.4、相位取默认）", () => {
+  it("gradient 缺省时补默认（色标 / 合成 + 平行斜坡 + 相位）", () => {
     expect(GradientParamsSchema.parse({})).toEqual({
+      colors: [],
+      composite: "palette",
+      hue: 0.036,
+      sat: 1.3,
+      lift: 0.4,
+      tint: 1,
+      deltaBase: 0.2,
+      deltaContrast: 0.3,
+      deltaBright: 0.1,
       mode: "parallel",
       count: 31,
       angle: 38.4,
@@ -269,15 +277,15 @@ describe("GlossParamsSchema / MoireParamsSchema / GradientParamsSchema", () => {
       transition: 1,
       offsetX: 0,
       offsetY: 0,
-      // 整齐默认 0 = 保留原来的折射 / 噪声扰动，存量画面逐像素不变。
-      straight: 0,
+      // schema v10 起整齐默认 1：新建渐变默认色带笔直等距。
+      straight: 1,
     })
   })
 
   // 整齐：1 = 只留渐变斜坡本身，色带笔直等距。取值域夹在 0–1。
-  it("gradient.straight 缺省 0、接受端点、拒绝越界", () => {
-    expect(GradientParamsSchema.parse({}).straight).toBe(0)
-    expect(GradientParamsSchema.parse({ straight: 1 }).straight).toBe(1)
+  it("gradient.straight 缺省 1、接受端点、拒绝越界", () => {
+    expect(GradientParamsSchema.parse({}).straight).toBe(1)
+    expect(GradientParamsSchema.parse({ straight: 0 }).straight).toBe(0)
     expect(() => GradientParamsSchema.parse({ straight: -0.01 })).toThrow()
     expect(() => GradientParamsSchema.parse({ straight: 1.01 })).toThrow()
   })
@@ -306,7 +314,7 @@ describe("CardSchema", () => {
 
 describe("PackSchema", () => {
   const minimal = {
-    schemaVersion: 9 as const,
+    schemaVersion: 10 as const,
     id: "p1",
     name: "星辰之约",
     createdAt: "2026-10-10T00:00:00.000Z",
@@ -333,8 +341,8 @@ describe("PackSchema", () => {
     expect(() => PackSchema.parse({ ...minimal, name: "" })).toThrow()
   })
 
-  it("要求 schemaVersion 恰为 9", () => {
-    expect(PackSchema.parse(minimal).schemaVersion).toBe(9)
+  it("要求 schemaVersion 恰为 10", () => {
+    expect(PackSchema.parse(minimal).schemaVersion).toBe(10)
     expect(() => PackSchema.parse({ ...minimal, schemaVersion: 3 })).toThrow()
     expect(() => PackSchema.parse({ ...minimal, schemaVersion: 6 })).toThrow()
   })
@@ -556,7 +564,7 @@ describe("MaskPresetParamsSchema", () => {
 
 describe("卡面形状", () => {
   const minimalPack = {
-    schemaVersion: 9 as const,
+    schemaVersion: 10 as const,
     id: "p1",
     name: "星辰之约",
     createdAt: "2026-10-10T00:00:00.000Z",
@@ -591,7 +599,7 @@ describe("卡面形状", () => {
 describe("系列封面", () => {
   it("缺 coverLarge / coverSmall 的老包解析后补空串", () => {
     const pack = PackSchema.parse({
-      schemaVersion: 9,
+      schemaVersion: 10,
       id: "p1",
       name: "老系列",
       createdAt: "2026-01-01T00:00:00.000Z",
@@ -612,7 +620,7 @@ describe("系列封面", () => {
 
 describe("卡包图样式", () => {
   const minimalPack = {
-    schemaVersion: 9 as const,
+    schemaVersion: 10 as const,
     id: "p1",
     name: "星辰之约",
     createdAt: "2026-10-10T00:00:00.000Z",

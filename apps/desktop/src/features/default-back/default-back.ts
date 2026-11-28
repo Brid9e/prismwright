@@ -37,11 +37,6 @@ export function createDefaultBackFace(): CardFace {
   // `params` 在 schema 里是必填对象（各字段有自己的默认值），故走注册表的 defaultParams。
   holo.effects = [
     EffectSchema.parse({
-      kind: "palette",
-      id: newId(),
-      params: EFFECT_REGISTRY.palette.defaultParams(),
-    }),
-    EffectSchema.parse({
       kind: "gradient",
       id: newId(),
       params: EFFECT_REGISTRY.gradient.defaultParams(),

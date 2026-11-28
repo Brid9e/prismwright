@@ -32,7 +32,6 @@ export {
   GRADIENT_MAX,
   GLOSS_MAX,
   MASK_PRESET_MAX,
-  PALETTE_MAX,
 } from "./effects/registry"
 export type {
   EffectDef,

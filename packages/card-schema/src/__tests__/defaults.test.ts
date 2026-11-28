@@ -43,7 +43,7 @@ describe("createCardFace", () => {
 describe("createEmptyPack", () => {
   it("生成合法空系列，版本为 9", () => {
     const pack = createEmptyPack("星辰之约")
-    expect(pack.schemaVersion).toBe(9)
+    expect(pack.schemaVersion).toBe(10)
     expect(pack.editorVersion).toBe("v1")
     expect(pack.name).toBe("星辰之约")
     expect(pack.cards).toEqual([])

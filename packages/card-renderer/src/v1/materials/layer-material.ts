@@ -5,8 +5,8 @@ import { Color, DoubleSide, ShaderMaterial, Vector2, Vector3, Vector4, type Text
 import {
   alphaOf,
   MAX_NEST_DEPTH,
+  resolveHoloGradient,
   resolveImageMask,
-  resolvePalette,
   type Effect,
   type GlossParams,
   type ImageParams,
@@ -138,10 +138,10 @@ function ownMoireCount(effects: readonly Effect[]): number {
 export function createLayerMaterial(p: LayerMaterialParams): ShaderMaterial {
   const u = toUniforms(p.layer)
   // 色标与 uHasHolo 同源：都取本层效果列表（`toUniforms(p.layer)` 也读 `layer.effects`），
-  // 避免二者取自不同列表时「门开着却采样到默认调色板」。
-  const paletteParams = resolvePalette(p.layer.effects)
+  // 避免二者取自不同列表时「门开着却采样到默认色标」。
+  const paletteParams = resolveHoloGradient(p.layer.effects)
   const palette = paletteUniforms(paletteParams?.colors ?? [])
-  // 叠色合成不读色标，效果本身存在就应该开箔（颜色从内容自身来）。
+  // 叠色合成不读色标：tint 模式下 colors 可以为空，仍然出箔（颜色从内容自身来）。
   const paletteComposite = paletteParams?.composite === "tint"
   const blend = resolveBlending(u.blend)
   // 暗部颜色：片元拿卡面原图算亮度，把色相铺进暗部；没有原图时退化为正常叠加。
@@ -292,7 +292,8 @@ export function createLayerMaterial(p: LayerMaterialParams): ShaderMaterial {
       uHoloMix: { value: u.uHoloMix },
       uHoloAlpha: { value: u.uHoloAlpha },
       uOpacity: { value: u.uOpacity },
-      uHasHolo: { value: u.hasHolo || paletteComposite ? 1 : 0 },
+      // `u.hasHolo` 已经在 mapping 里把 tint 计入（见 holoIsActive），这里不再叠一次。
+      uHasHolo: { value: u.hasHolo ? 1 : 0 },
       uPaletteComposite: { value: paletteComposite ? 1 : 0 },
       uPaletteHue: { value: paletteParams?.hue ?? 0.036 },
       uPaletteSat: { value: paletteParams?.sat ?? 1.3 },

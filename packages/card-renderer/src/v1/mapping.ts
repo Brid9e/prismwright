@@ -8,12 +8,12 @@
 import {
   DEFAULT_GRADIENT_PHASE,
   resolveGradient,
+  resolveHoloGradient,
   resolveImageMask,
-  resolvePalette,
+  type GradientParams,
   type Layer,
   type MaskImageParams,
   type MaskMode,
-  type PaletteParams,
   type PatternMode,
 } from "@prismwright/schema"
 
@@ -155,16 +155,16 @@ export function maskIsActive(
 }
 
 /**
- * 已解析的调色板参数是否**生效**：有 palette 且色标非空。
+ * 已解析的渐变参数是否**出全息**：色标非空，或合成方式是叠色（tint 不读色标）。
  *
- * `resolvePalette` 只按 kind / enabled 挑出第一条，不判空 `colors`——「已添加但删空了色标」是合法
- * 中间态（= 不出全息）。`toUniforms` 与单测共用此判定，避免各处各写一遍 `p.colors.length > 0`。
+ * `resolveHoloGradient` 只按 kind / enabled 挑出第一条，不判空 `colors`——「已添加但删空了色标」
+ * 是合法中间态（= 不出全息）。`toUniforms` 与单测共用此判定，避免各处各写一遍。
  *
- * @param p - `resolvePalette` 的返回值（无色板时为 `null`）。
+ * @param p - `resolveHoloGradient` 的返回值（无生效渐变时为 `null`）。
  * @returns 是否应视作「出全息」。
  */
-export function paletteIsActive(p: PaletteParams | null): boolean {
-  return p !== null && p.colors.length > 0
+export function holoIsActive(p: GradientParams | null): boolean {
+  return p !== null && (p.colors.length > 0 || p.composite === "tint")
 }
 
 /**
@@ -210,9 +210,9 @@ export interface LayerUniforms {
   uOffset: [number, number]
   blend: BlendName
   /**
-   * 本层是否出全息箔——由目标是否挂有**生效的 `palette` 效果**决定（空色标 = 不出箔）。
+   * 本层是否出全息箔——由目标是否挂有**生效的 `gradient` 效果**决定（空色标且非 tint = 不出箔）。
    *
-   * 箔的颜色只能来自调色板：没有调色板就不回退默认配色（那等于替用户选了一组颜色）。颜色 /
+   * 箔的颜色只能来自渐变的色标：没有色标就不回退默认配色（那等于替用户选了一组颜色）。颜色 /
    * 相位类效果并不依赖这道门——它们照常作用在本层的图片 / 文字上（见 shaders/layer.ts 的
    * 内容效果链）。
    *
@@ -242,7 +242,7 @@ export function toUniforms(layer: Layer): LayerUniforms {
     uTransition: phase.transition,
     uOffset: [phase.offsetX, phase.offsetY],
     blend: layer.blend,
-    hasHolo: paletteIsActive(resolvePalette(layer.effects)),
+    hasHolo: holoIsActive(resolveHoloGradient(layer.effects)),
   }
 }
 

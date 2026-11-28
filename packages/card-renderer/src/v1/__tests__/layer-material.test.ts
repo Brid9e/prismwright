@@ -45,11 +45,11 @@ function gradient(params: Partial<GradientParams> = {}): Effect {
   return EffectSchema.parse({ kind: "gradient", id: "g", enabled: true, params }) as Effect
 }
 
-/** 造一条 palette 效果。 */
+/** 造一条带色标的渐变效果（原 palette 已并入）。 */
 function palette(colors: string[]): Effect {
   return EffectSchema.parse({
-    kind: "palette",
-    id: "p",
+    kind: "gradient",
+    id: "g",
     enabled: true,
     params: { colors },
   }) as Effect
@@ -863,8 +863,8 @@ describe("createLayerMaterial 暗部颜色", () => {
 describe("createLayerMaterial 调色板合成", () => {
   it("composite=tint 接线到 uPaletteComposite，并强制开箔", () => {
     const effect = EffectSchema.parse({
-      kind: "palette",
-      id: "p",
+      kind: "gradient",
+      id: "g",
       enabled: true,
       params: { colors: ["#111111"], composite: "tint" },
     }) as Effect
@@ -882,8 +882,8 @@ describe("createLayerMaterial 调色板合成", () => {
 describe("createLayerMaterial 叠色参数", () => {
   it("叠色参数接到 uPalette* uniform，默认值不变", () => {
     const effect = EffectSchema.parse({
-      kind: "palette",
-      id: "p",
+      kind: "gradient",
+      id: "g",
       enabled: true,
       params: { colors: ["#111111"], composite: "tint", sat: 1.5 },
     }) as Effect

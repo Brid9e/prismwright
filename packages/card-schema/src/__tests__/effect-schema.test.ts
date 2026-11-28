@@ -23,9 +23,9 @@ describe("EffectSchema", () => {
     expect(ok.params).toMatchObject({ id: "polygon" })
   })
 
-  it("palette 条目的 colors 走解析期归一", () => {
+  it("gradient 条目的 colors 走解析期归一", () => {
     const e = EffectSchema.parse({
-      kind: "palette",
+      kind: "gradient",
       id: "e1",
       params: { colors: ["#111111", "#222222"] },
     })

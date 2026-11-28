@@ -51,7 +51,7 @@ describe("packStore 生命周期", () => {
     await usePackStore.getState().newPack("星辰之约", "/tmp/pack")
     const s = usePackStore.getState()
     expect(s.pack?.name).toBe("星辰之约")
-    expect(s.pack?.schemaVersion).toBe(9)
+    expect(s.pack?.schemaVersion).toBe(10)
     expect(s.pack?.editorVersion).toBe("v1")
     expect(s.rootDir).toBe("/tmp/pack")
     expect(s.saveStatus).toBe("saved")

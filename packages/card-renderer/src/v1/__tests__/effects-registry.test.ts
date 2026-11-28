@@ -17,7 +17,6 @@ import {
   IMAGE_MASK_MAX,
   MASK_ERASE_MAX,
   IMAGE_MAX,
-  PALETTE_MAX,
 } from "../effects/registry"
 import type { FieldDescriptor } from "../effects/registry"
 
@@ -37,16 +36,12 @@ describe("EFFECT_REGISTRY", () => {
     expect(EFFECT_REGISTRY.maskErase.maxPerTarget).toBe(MASK_ERASE_MAX)
   })
 
-  it("palette 的角色为 color", () => {
-    expect(EFFECT_REGISTRY.palette.role).toBe("color")
-  })
-
   it("image 的角色为 content、scope 为 layer（图片只挂在图层上）", () => {
     expect(EFFECT_REGISTRY.image.role).toBe("content")
     expect(EFFECT_REGISTRY.image.scope).toBe("layer")
   })
 
-  it("EFFECT_KINDS 覆盖全部九种（含 image，刻纹已并入网格）", () => {
+  it("EFFECT_KINDS 覆盖全部八种（调色板已并入渐变）", () => {
     expect([...EFFECT_KINDS].sort()).toEqual(
       [
         "gradient",
@@ -57,7 +52,6 @@ describe("EFFECT_REGISTRY", () => {
         "maskErase",
         "maskPreset",
         "moire",
-        "palette",
       ].sort(),
     )
   })
@@ -65,7 +59,6 @@ describe("EFFECT_REGISTRY", () => {
   it("每个 kind 的 scope 与设计一致（scope 决定卡面菜单是否列出）", () => {
     const EXPECTED: Record<string, string> = {
       gradient: "layer",
-      palette: "layer",
       holoGrid: "layer",
       moire: "both",
       gloss: "both",
@@ -80,10 +73,6 @@ describe("EFFECT_REGISTRY", () => {
   it("GRADIENT_MAX 收敛为 1（渐变每层一条）", () => {
     expect(GRADIENT_MAX).toBe(1)
     expect(EFFECT_REGISTRY.gradient.maxPerTarget).toBe(1)
-  })
-
-  it("palette 的槽位上限为 PALETTE_MAX", () => {
-    expect(EFFECT_REGISTRY.palette.maxPerTarget).toBe(PALETTE_MAX)
   })
 
   it("image 的槽位上限为 IMAGE_MAX = 1", () => {
@@ -118,9 +107,18 @@ describe("EFFECT_REGISTRY", () => {
 
   // 字段级 scope 的契约：moire 的卡面浮雕只作用于卡面片元，标 `face` 让图层面板隐去它。
   // 若哪天误删了这个标注，图层面板会重新冒出一个拖了没反应的滑块。
-  it("gradient 的字段含斜坡 4 项与相位全局 7 项（相位项从图层搬入后仍可在面板编辑）", () => {
-    // twistSeed 紧随 twist：种子不是单独一档效果参数，而是 twist 的伴生量（换种子 = 换转法）。
+  it("gradient 的字段先色标 / 合成，再斜坡 4 项、相位全局 7 项与整齐", () => {
+    // 原 palette 字段在最前（用户要求：色标在上，斜坡在下）；twistSeed 紧随 twist。
     expect(EFFECT_REGISTRY.gradient.fields.map((f) => f.key)).toEqual([
+      "composite",
+      "colors",
+      "hue",
+      "sat",
+      "lift",
+      "tint",
+      "deltaBase",
+      "deltaContrast",
+      "deltaBright",
       "mode",
       "count",
       "angle",
@@ -279,7 +277,6 @@ describe("EFFECT_REGISTRY", () => {
       ],
       imageMask: [],
       maskErase: [],
-      palette: [],
       holoGrid: ["families", "angle", "density", "width", "strength", "offsetX", "offsetY"],
       image: [],
     }

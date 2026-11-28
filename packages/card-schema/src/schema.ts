@@ -14,7 +14,7 @@
  * `MaskModeSchema` / `MaskArrangementSchema` / `PatternModeSchema` / `ColorStopSchema` /
  * `LayerSchema` / `CardFaceSchema` / `CardSchema` / `PackSchema`，及效果栈的 `EffectSchema` 与
  * `GradientParamsSchema` / `MoireParamsSchema` / `GlossParamsSchema` /
- * `PaletteParamsSchema` / `MaskPresetParamsSchema` / `MaskImageParamsSchema` / `ImageParamsSchema`，
+ * `HoloGridParamsSchema` / `MaskPresetParamsSchema` / `MaskImageParamsSchema` / `ImageParamsSchema`，
  * 以及文字图层的 `LayerKindSchema` / `TextAlignSchema` / `TextStrokeParamsSchema` /
  * `TextShadowParamsSchema` / `TextParamsSchema`），以及 `evenlySpacedStops`、默认调色板
  * `DEFAULT_PALETTE` / `DEFAULT_STOPS` 与渐变相位默认 `DEFAULT_GRADIENT_PHASE`（渲染器侧共用这些定义）。
@@ -37,7 +37,6 @@ import type {
   MoireParams,
   Pack,
   PackArtStyle,
-  PaletteParams,
   PatternMode,
   TextParams,
   TextShadowParams,
@@ -207,8 +206,64 @@ export const DEFAULT_GRADIENT_PHASE: Pick<
  */
 const TwistSeedSchema = z.number().int().min(0).max(1000000).default(0)
 
-/** 渐变参数 schema：全息色带的空间映射（原「渐变空间」）+ 图层全局的相位设置。 */
+/** 单个色标：颜色 + 相位域位置。 */
+export const ColorStopSchema = z.object({
+  color: z.string().regex(HEX_COLOR),
+  at: z.number().min(0).max(1),
+})
+
+/**
+ * 色标在 `total` 个色标里的等距位置。
+ *
+ * 与 CSS 渐变不给百分比时的默认一致：首尾落在 0 与 1，中间的均分 `[0, 1]`，即
+ * `0, 1/(N-1), …, 1`。中间色标左右两侧的过渡带因此等长，这是「看上去最均匀」的排法。
+ *
+ * `total === 1` 时位置没有视觉意义（整条相位都是它），取中点让游标落在色带中央。
+ */
+function evenAt(index: number, total: number): number {
+  return total <= 1 ? 0.5 : index / (total - 1)
+}
+
+/**
+ * 色标数组的元素：既接受旧格式（裸 hex 字符串，0.1.0 及以前写出的 `pack.json` 里就是它），
+ * 也接受新格式（带 `at` 的对象）。
+ *
+ * 用 union 而不是 `z.preprocess`：preprocess 会把该字段的**输入类型**放宽成 `unknown`，
+ * 而 union 让输入保持 `(string | ColorStop)[]`，并天然接受「部分迁移」的混合数组。
+ */
+const ColorStopInputSchema = z.union([z.string().regex(HEX_COLOR), ColorStopSchema])
+
+/**
+ * 解析期归一化：旧格式的字符串按它在数组中的下标等距展开，然后按 `at` 升序**稳定**排序。
+ *
+ * 排序放在这里而不是渲染期，是因为位置的单调不减是着色器的前置条件（累积混合依赖它）——
+ * 在数据边界上一次做掉，渲染器就不必每帧防御。`Array.prototype.sort` 在 V8 上稳定，
+ * `at` 相同者保持原有顺序。
+ */
+function normalizeStops(raw: readonly (string | ColorStop)[]): ColorStop[] {
+  const stops = raw.map((item, index): ColorStop =>
+    typeof item === "string" ? { color: item, at: evenAt(index, raw.length) } : { ...item },
+  )
+  return stops.sort((a, b) => a.at - b.at)
+}
+
+/** 渐变参数 schema：色标 / 合成 + 全息色带的空间映射 + 图层全局的相位设置。 */
 export const GradientParamsSchema = z.object({
+  // 原 PaletteParams（schema v10 并入）：色标 / 合成方式 / 叠色参数。
+  colors: z.array(ColorStopInputSchema).max(8).default([]).transform(normalizeStops),
+  composite: z
+    .enum(["palette", "tint", "balatro"])
+    .default("palette")
+    // 旧数据里的 balatro 落到 tint：数据里不再保留来源名。
+    .transform((v) => (v === "balatro" ? "tint" : v)),
+  hue: z.number().min(0).max(0.2).default(0.036),
+  sat: z.number().min(0).max(2).default(1.3),
+  lift: z.number().min(0).max(1).default(0.4),
+  tint: z.number().min(0).max(1).default(1),
+  deltaBase: z.number().min(0).max(1).default(0.2),
+  deltaContrast: z.number().min(0).max(1).default(0.3),
+  deltaBright: z.number().min(0).max(1).default(0.1),
+
   mode: PatternModeSchema.default("parallel"),
   count: z.number().int().min(1).max(64).default(31),
   angle: z.number().min(0).max(360).default(38.4),
@@ -234,8 +289,8 @@ export const GradientParamsSchema = z.object({
   offsetX: z.number().min(-3).max(3).default(DEFAULT_GRADIENT_PHASE.offsetX),
   offsetY: z.number().min(-3).max(3).default(DEFAULT_GRADIENT_PHASE.offsetY),
   // 整齐：1 = 只留渐变斜坡本身，色带笔直等距；0 = 保留方向项 / 固定正弦 / 逐像素噪声位移
-  // 这些扰动（改版前的观感）。缺省 0 = 存量画面逐像素不变。新增字段带默认值，不必升 schemaVersion。
-  straight: z.number().min(0).max(1).default(0),
+  // 这些扰动（改版前的观感）。schema v10 起默认 1：新建渐变默认整齐；旧数据里落盘的 0 不被改写。
+  straight: z.number().min(0).max(1).default(1),
 })
 
 
@@ -422,24 +477,6 @@ export const ImageParamsSchema = z.object({
  */
 export const MAX_NEST_DEPTH = 4
 
-/** 单个色标：颜色 + 相位域位置。 */
-export const ColorStopSchema = z.object({
-  color: z.string().regex(HEX_COLOR),
-  at: z.number().min(0).max(1),
-})
-
-/**
- * 色标在 `total` 个色标里的等距位置。
- *
- * 与 CSS 渐变不给百分比时的默认一致：首尾落在 0 与 1，中间的均分 `[0, 1]`，即
- * `0, 1/(N-1), …, 1`。中间色标左右两侧的过渡带因此等长，这是「看上去最均匀」的排法。
- *
- * `total === 1` 时位置没有视觉意义（整条相位都是它），取中点让游标落在色带中央。
- */
-function evenAt(index: number, total: number): number {
-  return total <= 1 ? 0.5 : index / (total - 1)
-}
-
 /**
  * 把颜色数组按下标等距展开为色标。
  *
@@ -460,50 +497,6 @@ export const DEFAULT_PALETTE: readonly string[] = ["#FFD700", "#0099FF", "#B266F
 
 /** 默认色标：{@link DEFAULT_PALETTE} 的等距展开。 */
 export const DEFAULT_STOPS: readonly ColorStop[] = evenlySpacedStops(DEFAULT_PALETTE)
-
-/**
- * 色标数组的元素：既接受旧格式（裸 hex 字符串，0.1.0 及以前写出的 `pack.json` 里就是它），
- * 也接受新格式（带 `at` 的对象）。
- *
- * 用 union 而不是 `z.preprocess`：preprocess 会把该字段的**输入类型**放宽成 `unknown`，
- * 而 union 让输入保持 `(string | ColorStop)[]`，并天然接受「部分迁移」的混合数组。
- */
-const ColorStopInputSchema = z.union([z.string().regex(HEX_COLOR), ColorStopSchema])
-
-/**
- * 解析期归一化：旧格式的字符串按它在数组中的下标等距展开，然后按 `at` 升序**稳定**排序。
- *
- * 排序放在这里而不是渲染期，是因为位置的单调不减是着色器的前置条件（累积混合依赖它）——
- * 在数据边界上一次做掉，渲染器就不必每帧防御。`Array.prototype.sort` 在 V8 上稳定，
- * `at` 相同者保持原有顺序。
- */
-function normalizeStops(raw: readonly (string | ColorStop)[]): ColorStop[] {
-  const stops = raw.map((item, index): ColorStop =>
-    typeof item === "string" ? { color: item, at: evenAt(index, raw.length) } : { ...item },
-  )
-  return stops.sort((a, b) => a.at - b.at)
-}
-
-/**
- * 调色板参数 schema。`colors` 的旧格式（裸 hex 字符串）仍按解析期归一（见 {@link normalizeStops}）。
- */
-export const PaletteParamsSchema = z.object({
-  colors: z.array(ColorStopInputSchema).max(8).default([]).transform(normalizeStops),
-  // 合成方式：palette = 色带；tint = 叠色（HSL delta lerp + 蓝偏，不读 colors）。
-  composite: z
-    .enum(["palette", "tint", "balatro"])
-    .default("palette")
-    // 旧数据里的 balatro 落到 tint：数据里不再保留来源名。
-    .transform((v) => (v === "balatro" ? "tint" : v)),
-  // 叠色合成的可调项：默认值即 holo.fs 的常量。
-  hue: z.number().min(0).max(0.2).default(0.036),
-  sat: z.number().min(0).max(2).default(1.3),
-  lift: z.number().min(0).max(1).default(0.4),
-  tint: z.number().min(0).max(1).default(1),
-  deltaBase: z.number().min(0).max(1).default(0.2),
-  deltaContrast: z.number().min(0).max(1).default(0.3),
-  deltaBright: z.number().min(0).max(1).default(0.1),
-})
 
 /** 独立网格效果（holoGrid）：交叉网纹的密度 + 色相加量强度。 */
 export const HoloGridParamsSchema = z.object({
@@ -585,12 +578,6 @@ export const EffectSchema = z.discriminatedUnion("kind", [
     id: z.string().min(1),
     enabled: z.boolean().default(true),
     params: GlossParamsSchema,
-  }),
-  z.object({
-    kind: z.literal("palette"),
-    id: z.string().min(1),
-    enabled: z.boolean().default(true),
-    params: PaletteParamsSchema,
   }),
   z.object({
     kind: z.literal("holoGrid"),
@@ -704,7 +691,7 @@ export const AlbumLayoutSchema = z.object({
 
 /** 系列校验 schema，即 `pack.json` 的顶层结构。 */
 export const PackSchema = z.object({
-  schemaVersion: z.literal(9),
+  schemaVersion: z.literal(10),
   // 创建该系列时所用的编辑器版本（编辑器 + 渲染器成套，如 "v1"）。与 `schemaVersion`
   // 是两回事：后者是**数据结构**版本，前者是**工具**版本。旧系列缺此字段时按 "v1" 解析
   // （additive default，故不必升 schemaVersion）。
@@ -773,8 +760,6 @@ const _assertMoireParams: MoireParams = {} as z.infer<typeof MoireParamsSchema>
 const _assertMoireParamsBack: z.infer<typeof MoireParamsSchema> = {} as MoireParams
 const _assertGlossParams: GlossParams = {} as z.infer<typeof GlossParamsSchema>
 const _assertGlossParamsBack: z.infer<typeof GlossParamsSchema> = {} as GlossParams
-const _assertPaletteParams: PaletteParams = {} as z.infer<typeof PaletteParamsSchema>
-const _assertPaletteParamsBack: z.infer<typeof PaletteParamsSchema> = {} as PaletteParams
 const _assertHoloGridParams: HoloGridParams = {} as z.infer<typeof HoloGridParamsSchema>
 const _assertHoloGridParamsBack: z.infer<typeof HoloGridParamsSchema> = {} as HoloGridParams
 const _assertMaskPresetParams: MaskPresetParams = {} as z.infer<typeof MaskPresetParamsSchema>
@@ -829,8 +814,6 @@ void [
   _assertMoireParamsBack,
   _assertGlossParams,
   _assertGlossParamsBack,
-  _assertPaletteParams,
-  _assertPaletteParamsBack,
   _assertHoloGridParams,
   _assertHoloGridParamsBack,
   _assertMaskPresetParams,

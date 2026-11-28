@@ -1,20 +1,19 @@
 import { describe, it, expect } from "vitest"
 import {
   EffectSchema,
-  PaletteParamsSchema,
+  GradientParamsSchema,
   DEFAULT_GRADIENT_PHASE,
   type Layer,
   type Effect,
   type GradientParams,
   type MaskImageParams,
-  type PaletteParams,
 } from "@prismwright/schema"
 import {
   toUniforms,
   maskWeight,
   colorKeyWeight,
   maskIsActive,
-  paletteIsActive,
+  holoIsActive,
   DISTORTION_MAX,
   DISTORTION_SCALE,
   ancestorClipWeight,
@@ -51,9 +50,9 @@ function gradient(params: Partial<GradientParams> = {}, enabled = true): Effect 
   return EffectSchema.parse({ kind: "gradient", id: "g", enabled, params }) as Effect
 }
 
-/** 造一条 palette 效果。 */
+/** 造一条带色标的渐变效果（原 palette 已并入）。 */
 function palette(colors: string[], enabled = true): Effect {
-  return EffectSchema.parse({ kind: "palette", id: "p", enabled, params: { colors } }) as Effect
+  return EffectSchema.parse({ kind: "gradient", id: "g", enabled, params: { colors } }) as Effect
 }
 
 /**
@@ -254,21 +253,26 @@ describe("mapping", () => {
   })
 })
 
-describe("paletteIsActive", () => {
+describe("holoIsActive", () => {
   it("null → false（无 palette 效果）", () => {
-    expect(paletteIsActive(null)).toBe(false)
+    expect(holoIsActive(null)).toBe(false)
   })
 
   it("色标为空 → false（已添加但删空了色标，属合法中间态）", () => {
-    const empty: PaletteParams = PaletteParamsSchema.parse({ colors: [] })
-    expect(paletteIsActive(empty)).toBe(false)
+    const empty: GradientParams = GradientParamsSchema.parse({ colors: [] })
+    expect(holoIsActive(empty)).toBe(false)
   })
 
   it("色标非空 → true", () => {
-    const nonEmpty: PaletteParams = PaletteParamsSchema.parse({
+    const nonEmpty: GradientParams = GradientParamsSchema.parse({
       colors: [{ color: "#111111", at: 0 }],
     })
-    expect(paletteIsActive(nonEmpty)).toBe(true)
+    expect(holoIsActive(nonEmpty)).toBe(true)
+  })
+
+  it("叠色合成即使色标为空也出全息", () => {
+    const tint: GradientParams = GradientParamsSchema.parse({ colors: [], composite: "tint" })
+    expect(holoIsActive(tint)).toBe(true)
   })
 })
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { CURRENT_SCHEMA_VERSION, migrate, parsePack } from "../migrate"
+import { CURRENT_SCHEMA_VERSION, migrate, migrateCardFace, parsePack } from "../migrate"
 
 const base = {
   id: "p1",
@@ -12,16 +12,16 @@ const base = {
 const card = (id: string, aspect: number) => ({ id, num: 0, name: "", aspect })
 
 describe("migrate 版本守卫", () => {
-  it("CURRENT_SCHEMA_VERSION 为 9", () => {
-    expect(CURRENT_SCHEMA_VERSION).toBe(9)
+  it("CURRENT_SCHEMA_VERSION 为 10", () => {
+    expect(CURRENT_SCHEMA_VERSION).toBe(10)
   })
 
   it("高于当前版本 → 抛错", () => {
-    expect(() => migrate({ ...base, schemaVersion: 10 })).toThrow(/版本过新/)
+    expect(() => migrate({ ...base, schemaVersion: 11 })).toThrow(/版本过新/)
   })
 
   it("当前版本 → 原样返回同一引用", () => {
-    const obj = { ...base, schemaVersion: 9 }
+    const obj = { ...base, schemaVersion: 10 }
     expect(migrate(obj)).toBe(obj)
   })
 
@@ -39,14 +39,14 @@ describe("v7 → v8：比例从每张卡收成系列一个", () => {
       cards: [card("c1", 0.5), card("c2", 0.5), card("c3", 2)],
     }) as Record<string, unknown> & { cards: Record<string, unknown>[] }
 
-    expect(migrated.schemaVersion).toBe(9)
+    expect(migrated.schemaVersion).toBe(10)
     expect(migrated.aspect).toBe(0.5)
     for (const c of migrated.cards) expect(c).not.toHaveProperty("aspect")
   })
 
   it("缺 schemaVersion 的老数据也按同一规则上抬", () => {
     const migrated = migrate({ ...base, cards: [card("c1", 0.75)] }) as Record<string, unknown>
-    expect(migrated.schemaVersion).toBe(9)
+    expect(migrated.schemaVersion).toBe(10)
     expect(migrated.aspect).toBe(0.75)
   })
 
@@ -172,13 +172,127 @@ describe("v8 → v9：卡面降级为纯图层", () => {
   })
 })
 
-describe("parsePack", () => {
-  it("接受 v9 系列", () => {
-    expect(parsePack({ ...base, schemaVersion: 9 }).schemaVersion).toBe(9)
+describe("v9 → v10：调色板并入渐变", () => {
+  const g = (id: string, params: Record<string, unknown> = {}, enabled = true) => ({
+    kind: "gradient",
+    id,
+    enabled,
+    params,
+  })
+  const p = (id: string, params: Record<string, unknown> = {}, enabled = true) => ({
+    kind: "palette",
+    id,
+    enabled,
+    params,
+  })
+  const layer = (effects: unknown[]) => ({ id: "l1", name: "", effects, children: [] })
+  const pack = (cards: unknown[], extra: Record<string, unknown> = {}) => ({
+    ...base,
+    schemaVersion: 9,
+    cards,
+    ...extra,
+  })
+  const card = (layers: unknown[]) => ({ id: "c1", num: 0, name: "", layers })
+
+  it("两条都有 → 合成一条，id 取渐变、位置取靠前、enabled 取调色板", () => {
+    const migrated = migrate(
+      pack([
+        card([
+          layer([
+            p("p", { colors: ["#111111"], hue: 0.1 }, false),
+            g("g", { distortionStrength: 7, count: 12 }),
+          ]),
+        ]),
+      ]),
+    ) as any
+    const effects = migrated.cards[0].layers[0].effects
+    expect(effects).toHaveLength(1)
+    expect(effects[0].kind).toBe("gradient")
+    expect(effects[0].id).toBe("g")
+    expect(effects[0].enabled).toBe(false)
+    expect(effects[0].params).toMatchObject({
+      colors: [{ color: "#111111", at: 0.5 }],
+      hue: 0.1,
+      distortionStrength: 7,
+      count: 12,
+      straight: 1,
+    })
   })
 
-  it("拒绝 v10 系列（抛出）", () => {
-    expect(() => parsePack({ ...base, schemaVersion: 10 })).toThrow(/版本过新/)
+  it("仅调色板 → 补默认渐变参数，整齐 = 1", () => {
+    const migrated = migrate(
+      pack([card([layer([p("p", { colors: ["#111111"], composite: "tint" })])])]),
+    ) as any
+    const effects = migrated.cards[0].layers[0].effects
+    expect(effects).toHaveLength(1)
+    expect(effects[0]).toMatchObject({
+      kind: "gradient",
+      id: "p",
+      params: { colors: [{ color: "#111111", at: 0.5 }], composite: "tint", straight: 1 },
+    })
+  })
+
+  it("仅渐变 → 保持空色标（迁移前不出全息，迁移后也不出）", () => {
+    const migrated = migrate(pack([card([layer([g("g", { distortionStrength: 9 })])])])) as any
+    const effects = migrated.cards[0].layers[0].effects
+    expect(effects).toHaveLength(1)
+    expect(effects[0]).toMatchObject({
+      kind: "gradient",
+      id: "g",
+      params: { colors: [], distortionStrength: 9, straight: 1 },
+    })
+  })
+
+  it("递归处理子树、隐藏卡与卡背，并丢弃多余的调色板 / 渐变", () => {
+    const effects = [p("p1"), p("p2"), g("g1"), g("g2")]
+    const migrated = migrate(
+      pack(
+        [card([layer([])])],
+        {
+          hiddenCards: [card([layer(effects)])],
+          back: {
+            id: "back",
+            layers: [
+              {
+                id: "child",
+                name: "",
+                effects,
+                children: [{ id: "grand", name: "", effects, children: [] }],
+              },
+            ],
+          },
+        },
+      ),
+    ) as any
+    const hidden = migrated.hiddenCards[0].layers[0].effects
+    expect(hidden).toHaveLength(1)
+    expect(hidden[0].id).toBe("g1")
+    const backLayer = migrated.back.layers[0]
+    expect(backLayer.effects).toHaveLength(1)
+    expect(backLayer.children[0].effects).toHaveLength(1)
+  })
+
+  it("单卡导入入口迁移两次结果相同（幂等）", () => {
+    const face = {
+      id: "c1",
+      num: 0,
+      name: "",
+      layers: [layer([p("p", { colors: ["#111111"] }), g("g", { count: 12 })])],
+    }
+    const once = migrateCardFace(face) as any
+    const twice = migrateCardFace(once) as any
+    expect(twice).toEqual(once)
+    expect(once.layers[0].effects).toHaveLength(1)
+  })
+})
+
+describe("parsePack", () => {
+  it("接受 v10 系列", () => {
+    expect(parsePack({ ...base, schemaVersion: 10 }).schemaVersion).toBe(10)
+  })
+
+  it("拒绝 v11 系列（抛出）", () => {
+    expect(() => parsePack({ ...base, schemaVersion: 11 })).toThrow(/版本过新/)
   })
 
   it("v8 系列的 front 解析成最底层 image 图层", () => {

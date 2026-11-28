@@ -84,13 +84,21 @@ describe("EffectStack 空分组", () => {
 })
 
 describe("EffectFields 滑块复位", () => {
+  /** 默认参数下实际可见的滑块数量：叠色联动参数在 palette 合成下会被 visibleWhen 隐藏。 */
+  function visibleSliderCount(params: Record<string, unknown>): number {
+    return EFFECT_REGISTRY.gradient.fields.filter(
+      (f) =>
+        f.type === "slider" &&
+        (f.visibleWhen === undefined || f.visibleWhen(params)),
+    ).length
+  }
+
   it("每个注册表滑块都有复位图标，参数为默认值时全部置灰", () => {
     const effect = fx("gradient", "g")
     const html = renderFields(effect)
-    const sliderCount = EFFECT_REGISTRY.gradient.fields.filter((f) => f.type === "slider").length
     const buttons = resetButtons(html)
 
-    expect(buttons).toHaveLength(sliderCount)
+    expect(buttons).toHaveLength(visibleSliderCount(effect.params as Record<string, unknown>))
     // 参数都等于注册表默认值时，每个复位按钮都该禁用；有任何一个可点即说明默认值没对上。
     expect(buttons.every((b) => b.includes('disabled=""'))).toBe(true)
   })
@@ -104,9 +112,7 @@ describe("EffectFields 滑块复位", () => {
     )
     const enabled = buttons.filter((b) => !b.includes('disabled=""'))
 
-    expect(buttons).toHaveLength(
-      EFFECT_REGISTRY.gradient.fields.filter((f) => f.type === "slider").length,
-    )
+    expect(buttons).toHaveLength(visibleSliderCount(changed as Record<string, unknown>))
     expect(enabled).toHaveLength(1)
   })
 })

@@ -1,39 +1,38 @@
 import { describe, it, expect } from "vitest"
-import { PaletteParamsSchema, GradientParamsSchema, DEFAULT_GRADIENT_PHASE } from "../schema.js"
+import { GradientParamsSchema, DEFAULT_GRADIENT_PHASE } from "../schema.js"
 import { EffectSchema, LayerSchema, PackSchema } from "../schema.js"
 
-describe("PaletteParamsSchema", () => {
+describe("GradientParamsSchema 的色标与合成参数", () => {
   it("默认 colors 为空数组（= 本目标不出全息）", () => {
-    expect(PaletteParamsSchema.parse({})).toEqual({
-      colors: [],
-      composite: "palette",
-      hue: 0.036,
-      sat: 1.3,
-      lift: 0.4,
-      tint: 1,
-      deltaBase: 0.2,
-      deltaContrast: 0.3,
-      deltaBright: 0.1,
-    })
+    const parsed = GradientParamsSchema.parse({})
+    expect(parsed.colors).toEqual([])
+    expect(parsed.composite).toBe("palette")
+    expect(parsed.hue).toBe(0.036)
+    expect(parsed.sat).toBe(1.3)
+    expect(parsed.lift).toBe(0.4)
+    expect(parsed.tint).toBe(1)
+    expect(parsed.deltaBase).toBe(0.2)
+    expect(parsed.deltaContrast).toBe(0.3)
+    expect(parsed.deltaBright).toBe(0.1)
   })
 
   it("旧的 composite=balatro 落到 tint", () => {
-    expect(PaletteParamsSchema.parse({ composite: "balatro" }).composite).toBe("tint")
+    expect(GradientParamsSchema.parse({ composite: "balatro" }).composite).toBe("tint")
   })
 
   it("旧格式（裸 hex 字符串数组）按下标等距展开并按 at 升序", () => {
-    expect(PaletteParamsSchema.parse({ colors: ["#111111", "#222222", "#333333"] }).colors).toEqual(
-      [
-        { color: "#111111", at: 0 },
-        { color: "#222222", at: 0.5 },
-        { color: "#333333", at: 1 },
-      ],
-    )
+    expect(
+      GradientParamsSchema.parse({ colors: ["#111111", "#222222", "#333333"] }).colors,
+    ).toEqual([
+      { color: "#111111", at: 0 },
+      { color: "#222222", at: 0.5 },
+      { color: "#333333", at: 1 },
+    ])
   })
 
   it("第 9 个色标被拒", () => {
     const colors = Array.from({ length: 9 }, (_, i) => ({ color: "#ffffff", at: i / 8 }))
-    expect(() => PaletteParamsSchema.parse({ colors })).toThrow()
+    expect(() => GradientParamsSchema.parse({ colors })).toThrow()
   })
 })
 
@@ -61,29 +60,24 @@ describe("GradientParamsSchema 的 7 个相位参数", () => {
   it("取值域：distortionStrength 0–1000、phaseSpeed 0–5、tiltGain 0–3、noiseStrength 0–1、transition 0–3、偏移 ±3", () => {
     expect(() => GradientParamsSchema.parse({ distortionStrength: 1001 })).toThrow()
     expect(() => GradientParamsSchema.parse({ phaseSpeed: 6 })).toThrow()
-    // 0 = 倾斜完全不改图案，1 = 现状，>1 = 夸张。默认 1 必须逐位等于改版前。
     expect(GradientParamsSchema.parse({ tiltGain: 0 }).tiltGain).toBe(0)
     expect(GradientParamsSchema.parse({ tiltGain: 3 }).tiltGain).toBe(3)
     expect(() => GradientParamsSchema.parse({ tiltGain: 3.5 })).toThrow()
     expect(() => GradientParamsSchema.parse({ tiltGain: -0.1 })).toThrow()
     expect(() => GradientParamsSchema.parse({ noiseStrength: 1.1 })).toThrow()
     expect(() => GradientParamsSchema.parse({ transition: 3.1 })).toThrow()
-    // 上限抬到 3 后，1 以上仍然合法——「让过渡带跨出本段」正是要调的区间。
     expect(GradientParamsSchema.parse({ transition: 2 }).transition).toBe(2)
-    // 偏移放宽到 ±3：图案是准周期的（色板以 cos 循环），默认 density 下约 0.9 UV 走完一圈色板，
-    // 故 ±1 只够一圈、搬不动「整幅图案」的构图；±3 才够把光环 / 射线的中心推到卡外。
     expect(GradientParamsSchema.parse({ offsetX: 3 }).offsetX).toBe(3)
     expect(GradientParamsSchema.parse({ offsetY: -3 }).offsetY).toBe(-3)
     expect(() => GradientParamsSchema.parse({ offsetX: 3.5 })).toThrow()
   })
 })
 
-describe("EffectSchema 的 palette 支", () => {
-  it("解析合法 palette 条目并补 enabled 默认 true", () => {
-    const e = EffectSchema.parse({ kind: "palette", id: "p1", params: { colors: ["#fff"] } })
-    expect(e.kind).toBe("palette")
-    expect(e.enabled).toBe(true)
-    expect(e.params).toMatchObject({ colors: [{ color: "#fff", at: 0.5 }] })
+describe("EffectSchema 不再接受 palette", () => {
+  it("palette 条目被当作未知 kind 拒绝", () => {
+    expect(() =>
+      EffectSchema.parse({ kind: "palette", id: "p1", params: { colors: ["#fff"] } }),
+    ).toThrow()
   })
 })
 
@@ -111,14 +105,14 @@ describe("Layer 退役字段", () => {
     expect("offsetY" in layer).toBe(false)
   })
 
-  it("PackSchema 的 schemaVersion 字面量为 9", () => {
+  it("PackSchema 的 schemaVersion 字面量为 10", () => {
     const base = {
       id: "p1",
       name: "包",
       createdAt: "2026-10-10T00:00:00.000Z",
       updatedAt: "2026-10-10T00:00:00.000Z",
     }
-    expect(PackSchema.parse({ ...base, schemaVersion: 9 }).schemaVersion).toBe(9)
-    expect(() => PackSchema.parse({ ...base, schemaVersion: 6 })).toThrow()
+    expect(PackSchema.parse({ ...base, schemaVersion: 10 }).schemaVersion).toBe(10)
+    expect(() => PackSchema.parse({ ...base, schemaVersion: 9 })).toThrow()
   })
 })

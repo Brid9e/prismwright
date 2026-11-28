@@ -7,7 +7,7 @@
  * 对外暴露七组符号：
  * - 类型：`Rarity` / `BlendMode` / `MaskMode` / `MaskArrangement` / `PatternMode` / `ColorStop` / `Layer` /
  *   `CardFace` / `Card` / `Pack`，以及效果栈的 `EffectRole` / `EffectKind` / `EffectBase` / `Effect` /
- *   `EffectParams` / `GradientParams` / `MoireParams` / `GlossParams` / `PaletteParams` /
+ *   `EffectParams` / `GradientParams` / `MoireParams` / `GlossParams` /
  *   `MaskPresetParams` / `MaskImageParams` / `ImageParams`，以及文字图层的 `LayerKind` / `TextAlign` /
  *   `TextStrokeParams` / `TextShadowParams` / `TextParams`；
  * - 校验：`HEX_COLOR` 及二十四个 zod schema（含效果栈与文字图层）；
@@ -17,7 +17,8 @@
  * - 默认值工厂：`newId` / `createLayer` / `createTextLayer` / `createCard` / `createCardFace` / `createEmptyPack`；
  * - 迁移：`CURRENT_SCHEMA_VERSION` / `migrate` / `parsePack`；
  * - 图层树工具：`flattenLayers` / `findLayerById` / `detachLayer` 等（见 `tree.ts`）；
- * - 效果查询：`resolveImageMask` / `resolveEraseMask` / `resolveImage` / `resolveGradient` / `resolvePalette`（见 `effects.ts`）。
+ * - 效果查询：`resolveImageMask` / `resolveEraseMask` / `resolveImage` / `resolveGradient` /
+ *   `resolveHoloGradient`（见 `effects.ts`）。
  * - 资源收集：`collectFaceAssets` / `collectCardAssets` / `collectPackAssets` / `collectCoverAssets`（见 `assets.ts`，桌面端与小程序共用同一份判定）。
  */
 export type {
@@ -40,7 +41,6 @@ export type {
   GradientParams,
   MoireParams,
   GlossParams,
-  PaletteParams,
   HoloGridParams,
   MaskPresetParams,
   MaskImageParams,
@@ -93,7 +93,6 @@ export {
   GradientParamsSchema,
   MoireParamsSchema,
   GlossParamsSchema,
-  PaletteParamsSchema,
   HoloGridParamsSchema,
   MaskPresetParamsSchema,
   MaskImageParamsSchema,
@@ -136,5 +135,5 @@ export {
   resolveEraseMask,
   resolveImage,
   resolveGradient,
-  resolvePalette,
+  resolveHoloGradient,
 } from "./effects.js"

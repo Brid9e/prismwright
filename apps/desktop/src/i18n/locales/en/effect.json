@@ -14,6 +14,17 @@
   "reset": "Reset to default",
   "gradient": {
     "label": "Gradient",
+    "colors": "Gradient",
+    "composite": "Composite",
+    "compositePalette": "Bands",
+    "compositeTint": "Shadow tint",
+    "hue": "Hue shift",
+    "sat": "Saturation",
+    "lift": "Lift",
+    "tint": "Blue tint",
+    "deltaBase": "Mix strength",
+    "deltaContrast": "Contrast boost",
+    "deltaBright": "Brightness boost",
     "mode": "Mode",
     "count": "Count",
     "angle": "Angle",
@@ -27,20 +38,6 @@
     "offsetX": "Gradient offset X",
     "offsetY": "Gradient offset Y",
     "straight": "Straight"
-  },
-  "palette": {
-    "label": "Palette",
-    "colors": "Gradient",
-    "composite": "Composite",
-    "compositePalette": "Palette (bands)",
-    "compositeTint": "Shadow tint",
-    "hue": "Hue shift",
-    "sat": "Saturation",
-    "lift": "Lift",
-    "tint": "Blue tint",
-    "deltaBase": "Mix strength",
-    "deltaContrast": "Contrast boost",
-    "deltaBright": "Brightness boost"
   },
   "holoGrid": {
     "label": "Grid",

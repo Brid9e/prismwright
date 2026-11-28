@@ -8,7 +8,8 @@
  * 对外暴露：`Rarity` / `BlendMode` / `MaskMode` / `MaskArrangement` / `PatternMode` 五个字面量联合，`ColorStop` /
  * `Layer` / `CardFace` / `Card` / `Pack` 五个数据接口，以及效果栈的 `EffectRole` / `EffectKind` /
  * `EffectBase` / `Effect` / `EffectParams` 与八种效果参数接口（`GradientParams` /
- * `MoireParams` / `GlossParams` / `PaletteParams` / `MaskPresetParams` / `MaskImageParams` / `ImageParams`）。
+ * `MoireParams` / `GlossParams` / `HoloGridParams` / `MaskPresetParams` / `MaskImageParams` /
+ * `MaskEraseParams` / `ImageParams`）。
  * 所有符号统一由 `index.ts` 再导出。
  */
 
@@ -112,8 +113,38 @@ export interface EffectBase {
   enabled: boolean
 }
 
-/** 渐变参数：全息色带的空间映射（原「渐变空间」）+ 图层全局的相位设置。 */
+/**
+ * 渐变参数：全息色带的空间映射（原「渐变空间」）+ 图层全局的相位设置 + 色标与合成。
+ *
+ * `palette` 效果已并入本效果（schema v10）：`colors` / `composite` / 叠色参数原样迁入，
+ * 一条渐变同时决定「这层出不出全息」「用什么颜色」与「斜坡怎么长」。
+ */
 export interface GradientParams {
+  // ── 色标与合成（原 PaletteParams）──
+  /** 色标（最多 8 个），`at` 为相位域位置。默认 `[]` = 本层不出全息。 */
+  colors: ColorStop[]
+  /**
+   * 合成方式：
+   * - `palette`：色带合成，全息色来自 `colors`；
+   * - `tint`：叠色合成，取内容自身的 HSL 并做 delta lerp（不读 `colors`）。
+   * 默认 `palette`。
+   */
+  composite: PaletteComposite
+  /** 叠色合成：色相随相位的偏移倍率（默认 0.036）。 */
+  hue: number
+  /** 叠色合成：饱和度倍数（默认 1.3）。 */
+  sat: number
+  /** 叠色合成：向白提亮的比例（默认 0.4）。 */
+  lift: number
+  /** 叠色合成：蓝偏强度（默认 1）。 */
+  tint: number
+  /** 叠色合成：混入底色的基础 delta（默认 0.2）。 */
+  deltaBase: number
+  /** 叠色合成：内容对比度对 delta 的加成（默认 0.3）。 */
+  deltaContrast: number
+  /** 叠色合成：内容亮度对 delta 的加成（默认 0.1）。 */
+  deltaBright: number
+
   // ── 主斜坡（受 enabled 门控）──
   /** 空间模式（见 {@link PatternMode}）。默认 `"parallel"`。 */
   mode: PatternMode
@@ -479,33 +510,6 @@ export interface MaskEraseParams {
  */
 export type PaletteComposite = "palette" | "tint"
 
-export interface PaletteParams {
-  /** 色标（最多 8 个），`at` 为相位域位置，驱动 `spectrum()` 调色板混色。默认 `[]`。 */
-  colors: ColorStop[]
-  /**
-   * 合成方式：
-   * - `palette`：现有色带合成，全息色来自 `colors`；
-   * - `tint`：叠色合成，取内容自身的 HSL、加色相偏移与网纹，再按内容对比度做 delta lerp
-   *   （不读 `colors`；亮度由 HSL 提亮 + 蓝偏得到，不会整卡发白）。
-   * 默认 `palette`。
-   */
-  composite: PaletteComposite
-  /** 叠色合成：色相随相位的偏移倍率（默认 0.036）。 */
-  hue: number
-  /** 叠色合成：饱和度倍数（默认 1.3）。 */
-  sat: number
-  /** 叠色合成：向白提亮的比例（0 = 不提亮，默认 0.4）。 */
-  lift: number
-  /** 叠色合成：蓝偏强度（0 = 不偏色，1 = 通道权重 0.9/0.8/1.2，默认 1）。 */
-  tint: number
-  /** 叠色合成：混入底色的基础 delta（默认 0.2）。 */
-  deltaBase: number
-  /** 叠色合成：内容对比度对 delta 的加成（默认 0.3）。 */
-  deltaContrast: number
-  /** 叠色合成：内容亮度对 delta 的加成（默认 0.1）。 */
-  deltaBright: number
-}
-
 /** 独立网格效果（holoGrid）参数：交叉网纹的密度与色相加量强度。 */
 export interface HoloGridParams {
   /** 线族数（1–8），等角分布在 180° 上。默认 3（继承自原刻纹）。 */
@@ -534,7 +538,6 @@ export type Effect =
   | (EffectBase & { kind: "gradient"; params: GradientParams })
   | (EffectBase & { kind: "moire"; params: MoireParams })
   | (EffectBase & { kind: "gloss"; params: GlossParams })
-  | (EffectBase & { kind: "palette"; params: PaletteParams })
   | (EffectBase & { kind: "holoGrid"; params: HoloGridParams })
   | (EffectBase & { kind: "maskPreset"; params: MaskPresetParams })
   | (EffectBase & { kind: "imageMask"; params: MaskImageParams })
@@ -788,7 +791,7 @@ export interface PackArtStyle {
  */
 export interface Pack {
   /** 数据格式版本，当前恒为字面量 `8`。 */
-  schemaVersion: 9
+  schemaVersion: 10
   /**
    * 创建该系列时所用的编辑器版本（编辑器 + 渲染器成套，如 `"v1"`）。
    *

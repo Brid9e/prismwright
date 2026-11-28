@@ -4,8 +4,8 @@
  * 着色器里 `uColors` 与 `uStops` 都固定为长度 {@link MAX_PALETTE} 的数组——补齐/截断都在
  * 这里完成，把「任意数量、任意位置的色标」收敛成着色器能吃的定长数组。
  *
- * 空色板：v2 起色标由 `palette` 效果承载（`PaletteParams.colors`），其为空表示「本层不出
- * 全息箔」（纯蒙版），由材质的 `uHasHolo` 门控——箔的颜色只能来自调色板，此处不回退默认配色
+ * 空色板：v10 起色标由 `gradient` 效果承载（`GradientParams.colors`），其为空表示「本层不出
+ * 全息箔」（纯蒙版），由材质的 `uHasHolo` 门控——箔的颜色只能来自色标，此处不回退默认配色
  * （那等于替用户选了一组颜色）。但着色器的定长数组仍须填满非空值，故空输入回退到默认调色板
  * **只当占位**：`uHasHolo = 0` 时这些值不会被采样。颜色类效果不依赖这道门——它们照常作用在
  * 本层的图片 / 文字上（见 shaders/layer.ts 的内容效果链）。默认调色板的规范定义在
@@ -39,9 +39,9 @@ export function padPalette(colors: readonly string[]): string[] {
  * 解析出「定长颜色 + 定长透明度 + 定长位置」，供材质设置
  * `uColors` / `uColorAlphas` / `uStops`。
  *
- * 命名与 `@prismwright/schema` 的 `resolvePalette(effects)` 区分：后者从效果列表挑出
- * `palette` 效果的参数，本函数则把色标数组折成着色器能吃的定长 uniform。二者常在同一处
- * 配合使用（`paletteUniforms(resolvePalette(effects)?.colors ?? [])`），故取 `*Uniforms` 之名。
+ * 命名与 `@prismwright/schema` 的 `resolveHoloGradient(effects)` 区分：后者从效果列表挑出
+ * 生效的 `gradient` 参数，本函数则把色标数组折成着色器能吃的定长 uniform。二者常在同一处
+ * 配合使用（`paletteUniforms(resolveHoloGradient(effects)?.colors ?? [])`），故取 `*Uniforms` 之名。
  *
  * 位置也用末项重复补齐：补出来的段 `span` 为 0，着色器里被 `1e-5` 下限兜住，
  * `m` 落在该段时混的是同一个颜色，等于没混。透明度跟颜色一起补齐。

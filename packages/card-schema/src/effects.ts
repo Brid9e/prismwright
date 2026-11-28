@@ -11,7 +11,6 @@ import type {
   ImageParams,
   MaskEraseParams,
   MaskImageParams,
-  PaletteParams,
 } from "./types.js"
 
 /**
@@ -73,15 +72,15 @@ export function resolveGradient(effects: readonly Effect[]): GradientParams | nu
 }
 
 /**
- * 取目标效果列表里**生效的**调色板参数。
+ * 取目标效果列表里**生效的**渐变参数（色标 / 合成方式 / 斜坡）。
  *
- * 返回第一条 `enabled` 的 `palette` 的 params；没有则返回 `null`（该目标不出全息）。
- * 只返回参数、不判空 `colors`——「已添加但删空了色标」是合法中间态（= 不出全息），
- * 由调用方按需判 `colors.length > 0`（见渲染器的 `paletteIsActive`）。
+ * 与 {@link resolveGradient} 的差别只在 `enabled`：相位全局项关掉开关也要读，
+ * 而「这层出不出全息」必须听开关。只返回参数、不判空 `colors`——「已添加但删空了色标」
+ * 是合法中间态（= 不出全息），由调用方按需判（见渲染器的 `holoIsActive`）。
  */
-export function resolvePalette(effects: readonly Effect[]): PaletteParams | null {
+export function resolveHoloGradient(effects: readonly Effect[]): GradientParams | null {
   for (const e of effects) {
-    if (e.kind === "palette" && e.enabled) return e.params
+    if (e.kind === "gradient" && e.enabled) return e.params
   }
   return null
 }

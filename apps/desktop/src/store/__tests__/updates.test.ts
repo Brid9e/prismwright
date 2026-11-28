@@ -95,14 +95,14 @@ describe("packStore 参数与属性更新", () => {
     expect(usePackStore.getState().pack!.cards[0].baseColor).toBe("#123456")
   })
 
-  it("不把调用方的数组与色标对象存进 state（updateEffect 的 palette 路径）", async () => {
+  it("不把调用方的数组与色标对象存进 state（updateEffect 的渐变色标路径）", async () => {
     const { ref, layerId } = await setup()
-    // 先给图层挂一条 palette 效果，拿到它的 id——色标要落到这条效果的 params.colors 上。
-    usePackStore.getState().addEffect(ref, { scope: "layer", layerId }, "palette")
+    // 先给图层挂一条渐变效果，拿到它的 id——色标要落到这条效果的 params.colors 上。
+    usePackStore.getState().addEffect(ref, { scope: "layer", layerId }, "gradient")
     const effectId = findLayerById(
       usePackStore.getState().pack!.cards[0].layers,
       layerId,
-    )!.effects.find((e) => e.kind === "palette")!.id
+    )!.effects.find((e) => e.kind === "gradient")!.id
 
     // 调用方原地改自己持有的数组与元素：不应影响 state（否则会绕过 commit 静默改数据）。
     const colors = [stop("#111111", 0)]
@@ -113,7 +113,7 @@ describe("packStore 参数与属性更新", () => {
       usePackStore.getState().pack!.cards[0].layers,
       layerId,
     )!.effects.find((e) => e.id === effectId)!
-    if (effect.kind !== "palette") throw new Error("期望 palette 效果")
+    if (effect.kind !== "gradient") throw new Error("期望渐变效果")
     expect(effect.params.colors).toEqual([stop("#111111", 0)])
   })
 

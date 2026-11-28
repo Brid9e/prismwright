@@ -16,7 +16,7 @@
  */
 import type { ColorStop } from "@prismwright/schema"
 
-/** 色标数量上限。必须与 `@prismwright/schema` 中 `PaletteParams.colors` 的校验上限保持一致。 */
+/** 色标数量上限。必须与 `@prismwright/schema` 中 `GradientParams.colors` 的校验上限保持一致。 */
 export const MAX_COLOR_STOPS = 8
 
 /**

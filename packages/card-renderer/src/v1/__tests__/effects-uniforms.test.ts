@@ -131,9 +131,10 @@ describe("toEffectUniforms", () => {
   })
 
   // 整齐缺省 0 = 保留原来的扰动。它是全局标量（渐变最多一条），取第一槽位。
-  it("gradient.straight 打进标量 uGradientStraight，缺省补 0", () => {
-    expect(toEffectUniforms([effect("gradient", { straight: 1 })], []).uGradientStraight).toBe(1)
-    expect(toEffectUniforms([effect("gradient", {})], []).uGradientStraight).toBe(0)
+  it("gradient.straight 打进标量 uGradientStraight，缺省补 1", () => {
+    expect(toEffectUniforms([effect("gradient", { straight: 0 })], []).uGradientStraight).toBe(0)
+    expect(toEffectUniforms([effect("gradient", {})], []).uGradientStraight).toBe(1)
+    // 没有渐变条目时槽位保持 0（着色器里的默认只在这条效果缺省时由 schema 补齐）。
     expect(toEffectUniforms([], []).uGradientStraight).toBe(0)
   })
 
